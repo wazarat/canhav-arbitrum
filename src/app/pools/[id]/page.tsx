@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
+import { usePrivy } from "@privy-io/react-auth";
 import { useAccount } from "wagmi";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +27,7 @@ export default function PoolDetailPage({
 }) {
   const { id } = use(params);
   const poolId = Number(id);
+  const { authenticated } = usePrivy();
   const { address } = useAccount();
   const { data: pool, isLoading, refetch } = usePool(poolId);
   const { data: commitment, refetch: refetchCommitment } = useCommitment(
@@ -159,15 +161,25 @@ export default function PoolDetailPage({
 
         {/* Right: commit form */}
         <div className="space-y-4">
-          <MintFaucet />
+          {authenticated && <MintFaucet />}
 
-          {pool.status === 0 && (
+          {authenticated && pool.status === 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Commit Funds</CardTitle>
               </CardHeader>
               <CardContent>
                 <CommitForm pool={pool} onSuccess={handleSuccess} />
+              </CardContent>
+            </Card>
+          )}
+
+          {!authenticated && pool.status === 0 && (
+            <Card>
+              <CardContent className="py-6 text-center space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Sign in to commit funds to this pool.
+                </p>
               </CardContent>
             </Card>
           )}

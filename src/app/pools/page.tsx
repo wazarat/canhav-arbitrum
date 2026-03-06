@@ -1,11 +1,13 @@
 "use client";
 
+import { usePrivy } from "@privy-io/react-auth";
 import { PoolCard } from "@/components/pool-card";
 import { PoolCardSkeleton } from "@/components/pool-card-skeleton";
 import { MintFaucet } from "@/components/mint-faucet";
 import { usePoolCount, usePools } from "@/lib/hooks";
 
 export default function PoolsPage() {
+  const { authenticated } = usePrivy();
   const { data: count } = usePoolCount();
   const poolCount = count ? Number(count) : 0;
   const { pools, isLoading } = usePools(poolCount);
@@ -19,7 +21,7 @@ export default function PoolsPage() {
         </p>
       </div>
 
-      <MintFaucet />
+      {authenticated && <MintFaucet />}
 
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
