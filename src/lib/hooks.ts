@@ -123,3 +123,18 @@ export function useUsdcAllowance(
     query: { enabled: !!owner },
   });
 }
+
+export function useOwner() {
+  return useReadContract({
+    ...purchasePoolConfig,
+    functionName: "owner",
+  });
+}
+
+export function useBuyerCount(poolId: number) {
+  return useReadContract({
+    ...purchasePoolConfig,
+    functionName: "getBuyerCount",
+    args: [BigInt(poolId)],
+  });
+}

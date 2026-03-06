@@ -6,7 +6,7 @@ export const config = createConfig({
   chains: [arbitrumSepolia],
   connectors: [injected()],
   transports: {
-    [arbitrumSepolia.id]: http(),
+    [arbitrumSepolia.id]: http(process.env.NEXT_PUBLIC_ALCHEMY_URL),
   },
 });
 

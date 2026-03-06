@@ -6,6 +6,7 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,8 +54,12 @@ function CommitmentRow({
       },
       {
         onSuccess: () => {
+          toast.success("Refund claimed successfully!");
           refetch();
           onRefundSuccess();
+        },
+        onError: (err) => {
+          toast.error(err.message.split("\n")[0] || "Refund claim failed");
         },
       },
     );

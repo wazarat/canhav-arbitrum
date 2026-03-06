@@ -12,7 +12,7 @@ import { CommitForm } from "@/components/commit-form";
 import { MintFaucet } from "@/components/mint-faucet";
 import { PoolProgress } from "@/components/pool-progress";
 import { Countdown } from "@/components/countdown";
-import { usePool, useCommitment } from "@/lib/hooks";
+import { usePool, useCommitment, useBuyerCount } from "@/lib/hooks";
 import {
   POOL_STATUS_LABELS,
   POOL_STATUS_COLORS,
@@ -32,6 +32,7 @@ export default function PoolDetailPage({
     poolId,
     address,
   );
+  const { data: buyerCount } = useBuyerCount(poolId);
 
   if (isLoading) {
     return (
@@ -122,6 +123,11 @@ export default function PoolDetailPage({
                 <span>
                   {formatUsdc(pool.pricePerUnit * pool.moq)} mUSDC
                 </span>
+              </div>
+              <Separator />
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Buyers</span>
+                <span>{buyerCount !== undefined ? buyerCount.toString() : "—"}</span>
               </div>
             </CardContent>
           </Card>

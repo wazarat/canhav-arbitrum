@@ -5,6 +5,7 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { mockUsdcConfig } from "@/lib/contracts";
 import { useUsdcBalance } from "@/lib/hooks";
@@ -32,7 +33,15 @@ export function MintFaucet() {
         functionName: "mint",
         args: [MINT_AMOUNT],
       },
-      { onSuccess: () => refetch() },
+      {
+        onSuccess: () => {
+          toast.success("Minted 10,000 mUSDC!");
+          refetch();
+        },
+        onError: (err) => {
+          toast.error(err.message.split("\n")[0] || "Mint failed");
+        },
+      },
     );
   }
 

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,20 +38,27 @@ export function CommitForm({
     PURCHASE_POOL_ADDRESS,
   );
 
-  const needsApproval = allowance !== undefined && cost > (allowance as bigint);
+  const needsApproval = allowance !== undefined && cost > 0n && cost > (allowance as bigint);
 
   const {
     writeContract: approve,
     isPending: isApproving,
     data: approveTx,
+    reset: resetApprove,
   } = useWriteContract();
 
-  const { isLoading: isApproveConfirming } = useWaitForTransactionReceipt({
-    hash: approveTx,
-    query: {
-      enabled: !!approveTx,
-    },
-  });
+  const { isLoading: isApproveConfirming, isSuccess: isApproveConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: approveTx,
+      query: { enabled: !!approveTx },
+    });
+
+  useEffect(() => {
+    if (isApproveConfirmed) {
+      refetchAllowance();
+      resetApprove();
+    }
+  }, [isApproveConfirmed, refetchAllowance, resetApprove]);
 
   const {
     writeContract: commit,
@@ -60,9 +68,7 @@ export function CommitForm({
 
   const { isLoading: isCommitConfirming } = useWaitForTransactionReceipt({
     hash: commitTx,
-    query: {
-      enabled: !!commitTx,
-    },
+    query: { enabled: !!commitTx },
   });
 
   function handleApprove() {
@@ -74,7 +80,10 @@ export function CommitForm({
       },
       {
         onSuccess: () => {
-          refetchAllowance();
+          toast.success("Approval confirmed — click Commit to finalize");
+        },
+        onError: (err) => {
+          toast.error(err.message.split("\n")[0] || "Approval failed");
         },
       },
     );
@@ -89,8 +98,12 @@ export function CommitForm({
       },
       {
         onSuccess: () => {
+          toast.success(`Committed ${parsedUnits.toString()} units!`);
           setUnits("");
           onSuccess();
+        },
+        onError: (err) => {
+          toast.error(err.message.split("\n")[0] || "Commit failed");
         },
       },
     );
@@ -106,6 +119,7 @@ export function CommitForm({
 
   const isWorking =
     isApproving || isApproveConfirming || isCommitting || isCommitConfirming;
+  const step = parsedUnits > 0n && needsApproval ? 1 : 2;
 
   return (
     <div className="space-y-4">
@@ -131,15 +145,47 @@ export function CommitForm({
         )}
       </div>
 
+      {parsedUnits > 0n && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span
+            className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+              step === 1
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted-foreground/20 text-muted-foreground"
+            }`}
+          >
+            1
+          </span>
+          <span className={step === 1 ? "text-foreground font-medium" : ""}>
+            Approve
+          </span>
+          <span className="mx-1">&rarr;</span>
+          <span
+            className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+              step === 2
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted-foreground/20 text-muted-foreground"
+            }`}
+          >
+            2
+          </span>
+          <span className={step === 2 ? "text-foreground font-medium" : ""}>
+            Commit
+          </span>
+        </div>
+      )}
+
       {parsedUnits > 0n && needsApproval ? (
         <Button
           onClick={handleApprove}
           disabled={isWorking}
           className="w-full"
         >
-          {isApproving || isApproveConfirming
-            ? "Approving..."
-            : `Approve ${formatUsdc(cost)} mUSDC`}
+          {isApproving
+            ? "Waiting for wallet..."
+            : isApproveConfirming
+              ? "Confirming approval..."
+              : `Approve ${formatUsdc(cost)} mUSDC`}
         </Button>
       ) : (
         <Button
@@ -147,9 +193,11 @@ export function CommitForm({
           disabled={parsedUnits === 0n || isWorking}
           className="w-full"
         >
-          {isCommitting || isCommitConfirming
-            ? "Committing..."
-            : "Commit to Pool"}
+          {isCommitting
+            ? "Waiting for wallet..."
+            : isCommitConfirming
+              ? "Confirming commit..."
+              : "Commit to Pool"}
         </Button>
       )}
     </div>
