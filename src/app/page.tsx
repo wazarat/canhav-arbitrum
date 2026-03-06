@@ -1,65 +1,119 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { PoolCard } from "@/components/pool-card";
+import { usePoolCount, usePools } from "@/lib/hooks";
+import { cn } from "@/lib/utils";
+
+export default function HomePage() {
+  const { data: count } = usePoolCount();
+  const poolCount = count ? Number(count) : 0;
+  const { pools, isLoading } = usePools(poolCount);
+
+  const activePools = pools.filter((p) => p.status === 0);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="space-y-16">
+      {/* Hero */}
+      <section className="flex flex-col items-center gap-6 pt-12 text-center">
+        <h1 className="font-mono text-4xl font-bold tracking-tight sm:text-5xl">
+          Group Purchase Pool
+        </h1>
+        <p className="max-w-xl text-lg text-muted-foreground">
+          Small businesses pool funds together to meet supplier minimum order
+          quantities. Commit stablecoins to a pool &mdash; when the MOQ is hit,
+          the order executes. If it isn&apos;t met by the deadline, get a full refund.
+        </p>
+        <div className="flex gap-3">
+          <Link href="/pools" className={cn(buttonVariants({ size: "lg" }))}>
+            Browse Pools
+          </Link>
+          <Link
+            href="/my-commitments"
+            className={cn(buttonVariants({ size: "lg", variant: "outline" }))}
+          >
+            My Commitments
+          </Link>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono">
+          <span>Arbitrum Sepolia</span>
+          <span>&middot;</span>
+          <span>ERC-20 Escrow</span>
+          <span>&middot;</span>
+          <span>Trustless MOQ</span>
+        </div>
+      </section>
+
+      {/* Active pools preview */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Active Pools</h2>
+          <Link
+            href="/pools"
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+          >
+            View all &rarr;
+          </Link>
+        </div>
+
+        {isLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-48 animate-pulse rounded-lg border bg-muted"
+              />
+            ))}
+          </div>
+        ) : activePools.length === 0 ? (
+          <p className="text-muted-foreground">
+            No active pools right now. Check back soon or deploy the contracts and
+            seed pools.
           </p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {activePools.slice(0, 6).map((pool) => (
+              <PoolCard key={pool.id} pool={pool} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* How it works */}
+      <section className="space-y-6">
+        <h2 className="text-2xl font-bold text-center">How It Works</h2>
+        <div className="grid gap-6 sm:grid-cols-3">
+          {[
+            {
+              step: "1",
+              title: "Browse & Choose",
+              desc: "Find a product pool that your business needs. See the current progress toward the supplier MOQ.",
+            },
+            {
+              step: "2",
+              title: "Commit Funds",
+              desc: "Approve and deposit mUSDC for your desired quantity. Your tokens are held in escrow on-chain.",
+            },
+            {
+              step: "3",
+              title: "Order or Refund",
+              desc: "When the pool hits the MOQ, the order is locked in. If the deadline passes unfulfilled, claim a full refund.",
+            },
+          ].map((item) => (
+            <div
+              key={item.step}
+              className="rounded-lg border p-6 text-center space-y-2"
+            >
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
+                {item.step}
+              </div>
+              <h3 className="font-semibold">{item.title}</h3>
+              <p className="text-sm text-muted-foreground">{item.desc}</p>
+            </div>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </section>
     </div>
   );
 }
