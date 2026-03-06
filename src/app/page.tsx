@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
 import { PoolCard } from "@/components/pool-card";
 import { PoolCardSkeleton } from "@/components/pool-card-skeleton";
@@ -18,9 +19,14 @@ export default function HomePage() {
     <div className="space-y-16">
       {/* Hero */}
       <section className="flex flex-col items-center gap-6 pt-12 text-center">
-        <h1 className="font-mono text-4xl font-bold tracking-tight sm:text-5xl">
-          Group Purchase Pool
-        </h1>
+        <Image
+          src="/canhav-logo.svg"
+          alt="CanHav Group Pool"
+          width={400}
+          height={100}
+          priority
+          className="h-20 w-auto sm:h-24"
+        />
         <p className="max-w-xl text-lg text-muted-foreground">
           Small businesses pool funds together to meet supplier minimum order
           quantities. Commit stablecoins to a pool &mdash; when the MOQ is hit,

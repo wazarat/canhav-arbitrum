@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
@@ -58,11 +59,15 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <Link
-            href="/"
-            className="font-mono text-lg font-bold tracking-tight"
-          >
-            GroupBuy
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/canhav-logo.svg"
+              alt="CanHav Group Pool"
+              width={140}
+              height={36}
+              priority
+              className="h-8 w-auto"
+            />
           </Link>
           <nav className="hidden sm:flex items-center gap-4 text-sm">
             <NavLinks isOwner={isOwner} />

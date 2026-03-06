@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Group Purchase Pool",
+  title: "CanHav Group Pool",
   description:
-    "Pool funds with other businesses to meet supplier MOQs on Arbitrum Sepolia",
+    "Pool funds with other businesses to meet supplier MOQs on Arbitrum",
 };
 
 export default function RootLayout({
