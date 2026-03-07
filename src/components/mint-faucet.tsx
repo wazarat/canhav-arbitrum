@@ -17,10 +17,6 @@ export function MintFaucet() {
   const { address, isConnected } = useAccount();
   const { data: balance, refetch } = useUsdcBalance(address);
 
-  // #region agent log
-  fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'mint-faucet.tsx:render',message:'MintFaucet render state',data:{address,isConnected,balance:balance?.toString(),mockUsdcAddr:mockUsdcConfig.address},timestamp:Date.now(),hypothesisId:'H-B,H-E'})}).catch(()=>{});
-  // #endregion
-
   const { writeContract, isPending, data: txHash } = useWriteContract();
 
   const { isLoading: isConfirming } = useWaitForTransactionReceipt({
@@ -31,9 +27,6 @@ export function MintFaucet() {
   });
 
   function handleMint() {
-    // #region agent log
-    fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'mint-faucet.tsx:handleMint',message:'handleMint called',data:{address,contractAddr:mockUsdcConfig.address,mintAmount:MINT_AMOUNT.toString()},timestamp:Date.now(),hypothesisId:'H-C'})}).catch(()=>{});
-    // #endregion
     writeContract(
       {
         ...mockUsdcConfig,
@@ -46,9 +39,6 @@ export function MintFaucet() {
           refetch();
         },
         onError: (err) => {
-          // #region agent log
-          fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'mint-faucet.tsx:handleMint:error',message:'Mint error',data:{errorMsg:err.message,errorName:err.name},timestamp:Date.now(),hypothesisId:'H-C'})}).catch(()=>{});
-          // #endregion
           toast.error(err.message.split("\n")[0] || "Mint failed");
         },
       },
