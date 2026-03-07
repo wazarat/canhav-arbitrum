@@ -120,8 +120,10 @@ function TieredCommitContent({
     ? getActiveTier(pricing, projectedTotal)
     : activeTier;
 
-  const effectivePrice = usdToUsdc(projectedTier.priceUsd);
-  const cost = parsedUnits * effectivePrice;
+  const displayPrice = usdToUsdc(projectedTier.priceUsd);
+  const displayCost = parsedUnits * displayPrice;
+
+  const onChainCost = parsedUnits * pool.pricePerUnit;
 
   const { data: balance } = useUsdcBalance(address);
   const { data: allowance, refetch: refetchAllowance } = useUsdcAllowance(
@@ -129,7 +131,8 @@ function TieredCommitContent({
     PURCHASE_POOL_ADDRESS,
   );
 
-  const needsApproval = allowance !== undefined && cost > 0n && cost > (allowance as bigint);
+  const allowanceLoaded = allowance !== undefined;
+  const needsApproval = onChainCost > 0n && (!allowanceLoaded || onChainCost > (allowance as bigint));
 
   const {
     writeContract: approve,
@@ -177,7 +180,7 @@ function TieredCommitContent({
       {
         ...mockUsdcConfig,
         functionName: "approve",
-        args: [PURCHASE_POOL_ADDRESS, cost],
+        args: [PURCHASE_POOL_ADDRESS, onChainCost],
       },
       {
         onSuccess: () =>
@@ -333,7 +336,7 @@ function TieredCommitContent({
               <Separator />
               <div className="flex justify-between font-semibold">
                 <span>Total cost</span>
-                <span>{formatUsdc(cost)} mUSDC</span>
+                <span>{formatUsdc(onChainCost)} mUSDC</span>
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Pool total after commit</span>
@@ -398,19 +401,21 @@ function TieredCommitContent({
                 ? "Waiting for wallet..."
                 : isApproveConfirming
                   ? "Confirming approval..."
-                  : `Approve ${formatUsdc(cost)} mUSDC`}
+                  : `Approve ${formatUsdc(onChainCost)} mUSDC`}
             </Button>
           ) : (
             <Button
               onClick={handleCommit}
-              disabled={parsedUnits === 0n || isWorking || !address}
+              disabled={parsedUnits === 0n || isWorking || !address || !allowanceLoaded}
               className="w-full"
             >
-              {isCommitting
-                ? "Waiting for wallet..."
-                : isCommitConfirming
-                  ? "Confirming commit..."
-                  : "Commit to Pool"}
+              {!allowanceLoaded && parsedUnits > 0n
+                ? "Loading..."
+                : isCommitting
+                  ? "Waiting for wallet..."
+                  : isCommitConfirming
+                    ? "Confirming commit..."
+                    : "Commit to Pool"}
             </Button>
           )}
         </div>
@@ -461,7 +466,8 @@ function FallbackCommitModal({
     PURCHASE_POOL_ADDRESS,
   );
 
-  const needsApproval = allowance !== undefined && cost > 0n && cost > (allowance as bigint);
+  const allowanceLoaded = allowance !== undefined;
+  const needsApproval = cost > 0n && (!allowanceLoaded || cost > (allowance as bigint));
 
   const {
     writeContract: approve,
@@ -625,14 +631,16 @@ function FallbackCommitModal({
           ) : (
             <Button
               onClick={handleCommit}
-              disabled={parsedUnits === 0n || isWorking || !address}
+              disabled={parsedUnits === 0n || isWorking || !address || !allowanceLoaded}
               className="w-full"
             >
-              {isCommitting
-                ? "Waiting for wallet..."
-                : isCommitConfirming
-                  ? "Confirming commit..."
-                  : "Commit to Pool"}
+              {!allowanceLoaded && parsedUnits > 0n
+                ? "Loading..."
+                : isCommitting
+                  ? "Waiting for wallet..."
+                  : isCommitConfirming
+                    ? "Confirming commit..."
+                    : "Commit to Pool"}
             </Button>
           )}
         </div>

@@ -39,7 +39,8 @@ export function CommitForm({
     PURCHASE_POOL_ADDRESS,
   );
 
-  const needsApproval = allowance !== undefined && cost > 0n && cost > (allowance as bigint);
+  const allowanceLoaded = allowance !== undefined;
+  const needsApproval = cost > 0n && (!allowanceLoaded || cost > (allowance as bigint));
 
   const {
     writeContract: approve,
@@ -191,14 +192,16 @@ export function CommitForm({
       ) : (
         <Button
           onClick={handleCommit}
-          disabled={parsedUnits === 0n || isWorking}
+          disabled={parsedUnits === 0n || isWorking || !allowanceLoaded}
           className="w-full"
         >
-          {isCommitting
-            ? "Waiting for wallet..."
-            : isCommitConfirming
-              ? "Confirming commit..."
-              : "Commit to Pool"}
+          {!allowanceLoaded && parsedUnits > 0n
+            ? "Loading..."
+            : isCommitting
+              ? "Waiting for wallet..."
+              : isCommitConfirming
+                ? "Confirming commit..."
+                : "Commit to Pool"}
         </Button>
       )}
     </div>
