@@ -5,6 +5,7 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import { parseGwei } from "viem";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { mockUsdcConfig } from "@/lib/contracts";
@@ -14,7 +15,7 @@ import { formatUsdc } from "@/lib/constants";
 const MINT_AMOUNT = 10_000n * 10n ** 6n; // 10,000 mUSDC
 
 export function MintFaucet() {
-  const { address, isConnected, chain, connector } = useAccount();
+  const { address, isConnected } = useAccount();
 
   const { data: balance, refetch } = useUsdcBalance(address);
 
@@ -28,14 +29,13 @@ export function MintFaucet() {
   });
 
   function handleMint() {
-    // #region agent log
-    fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'mint-faucet.tsx:handleMint',message:'handleMint called',data:{address,chainId:chain?.id,chainName:chain?.name,connectorName:connector?.name,contractAddr:mockUsdcConfig.address,contractChainId:mockUsdcConfig.chainId},timestamp:Date.now(),hypothesisId:'H-F'})}).catch(()=>{});
-    // #endregion
     writeContract(
       {
         ...mockUsdcConfig,
         functionName: "mint",
         args: [MINT_AMOUNT],
+        maxFeePerGas: parseGwei("0.5"),
+        maxPriorityFeePerGas: parseGwei("0.01"),
       },
       {
         onSuccess: () => {
@@ -43,10 +43,7 @@ export function MintFaucet() {
           refetch();
         },
         onError: (err) => {
-          // #region agent log
-          fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'mint-faucet.tsx:handleMint:error',message:'Mint error full',data:{errorMsg:err.message,errorName:err.name,errorCause:String(err.cause)},timestamp:Date.now(),hypothesisId:'H-F'})}).catch(()=>{});
-          // #endregion
-          toast.error(err.message.slice(0, 300) || "Mint failed");
+          toast.error(err.message.split("\n")[0] || "Mint failed");
         },
       },
     );
