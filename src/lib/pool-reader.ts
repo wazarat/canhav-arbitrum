@@ -33,10 +33,17 @@ function toPoolData(id: number, d: GetPoolResult): PoolData {
   };
 }
 
+const hasValidConfig =
+  PURCHASE_POOL_ADDRESS.length > 4 &&
+  !!process.env.NEXT_PUBLIC_ALCHEMY_URL;
+
 export function usePublicPoolCount() {
   return useQuery({
     queryKey: ["poolCount"],
     queryFn: async () => {
+      if (!hasValidConfig) {
+        throw new Error("Missing NEXT_PUBLIC_PURCHASE_POOL_ADDRESS or NEXT_PUBLIC_ALCHEMY_URL");
+      }
       const result = await publicClient.readContract({
         address: PURCHASE_POOL_ADDRESS,
         abi: purchasePoolAbi,
@@ -45,6 +52,7 @@ export function usePublicPoolCount() {
       return Number(result);
     },
     staleTime: 30_000,
+    retry: 2,
   });
 }
 
