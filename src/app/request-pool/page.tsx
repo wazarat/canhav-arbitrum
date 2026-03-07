@@ -20,18 +20,32 @@ export default function RequestPoolPage() {
   const [contact, setContact] = useState("");
   const [notes, setNotes] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!product.trim() || !quantity.trim() || !contact.trim()) {
       toast.error("Please fill in all required fields");
       return;
     }
     setSending(true);
-    setTimeout(() => {
-      setSending(false);
-      setSubmitted(true);
-      toast.success("Pool request submitted!");
-    }, 600);
+    try {
+      await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "request-pool",
+          product: product.trim(),
+          quantity: quantity.trim(),
+          priceRange: priceRange.trim(),
+          contact: contact.trim(),
+          notes: notes.trim(),
+        }),
+      });
+    } catch {
+      // still show success even if storage fails
+    }
+    setSending(false);
+    setSubmitted(true);
+    toast.success("Pool request submitted!");
   }
 
   if (submitted) {

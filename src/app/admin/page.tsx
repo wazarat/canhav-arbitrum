@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   useAccount,
   useWriteContract,
@@ -218,6 +218,161 @@ function WithdrawRow({
   );
 }
 
+interface Submission {
+  type: string;
+  submittedAt: string;
+  [key: string]: unknown;
+}
+
+function SubmissionsPanel() {
+  const [secret, setSecret] = useState("");
+  const [authenticated, setAuthenticated] = useState(false);
+  const [interests, setInterests] = useState<Submission[]>([]);
+  const [requests, setRequests] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState<"interests" | "requests">("interests");
+
+  const fetchData = useCallback(async (s: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/submissions?secret=${encodeURIComponent(s)}&type=all`);
+      if (!res.ok) {
+        toast.error("Unauthorized or storage not configured");
+        setAuthenticated(false);
+        setLoading(false);
+        return;
+      }
+      const data = await res.json();
+      setInterests(data["register-interest"] ?? []);
+      setRequests(data["request-pool"] ?? []);
+      setAuthenticated(true);
+    } catch {
+      toast.error("Failed to load submissions");
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (authenticated) {
+      fetchData(secret);
+    }
+  // only refetch when tab changes and already authenticated
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
+  if (!authenticated) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>User Submissions</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Enter the admin API secret to view Register Interest and Pool Request submissions.
+          </p>
+          <div className="flex gap-2">
+            <Input
+              type="password"
+              placeholder="ADMIN_API_SECRET"
+              value={secret}
+              onChange={(e) => setSecret(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && fetchData(secret)}
+            />
+            <Button onClick={() => fetchData(secret)} disabled={!secret || loading}>
+              {loading ? "Loading..." : "Load"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const items = tab === "interests" ? interests : requests;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>User Submissions</CardTitle>
+          <Button variant="outline" size="sm" onClick={() => fetchData(secret)}>
+            Refresh
+          </Button>
+        </div>
+        <div className="flex gap-2 pt-2">
+          <button
+            onClick={() => setTab("interests")}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              tab === "interests"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Register Interest ({interests.length})
+          </button>
+          <button
+            onClick={() => setTab("requests")}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              tab === "requests"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Pool Requests ({requests.length})
+          </button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-16 animate-pulse rounded-lg border bg-muted" />
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">
+            No {tab === "interests" ? "interest registrations" : "pool requests"} yet.
+          </p>
+        ) : (
+          <div className="space-y-3 max-h-[500px] overflow-y-auto">
+            {items.map((item, i) => (
+              <div key={i} className="rounded-lg border p-3 text-sm space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">
+                    {(item.productName as string) || (item.product as string) || "—"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {item.submittedAt ? new Date(item.submittedAt).toLocaleString() : ""}
+                  </span>
+                </div>
+                {tab === "interests" ? (
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-muted-foreground">
+                    <span>Name: {(item.name as string) || "—"}</span>
+                    <span>Email: {(item.email as string) || "—"}</span>
+                    <span>Units: {(item.units as string) || "—"}</span>
+                    <span>Frequency: {(item.frequency as string) || "—"}</span>
+                    {item.comments ? (
+                      <span className="col-span-2">Comments: {String(item.comments)}</span>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-muted-foreground">
+                    <span>Quantity: {String(item.quantity ?? "—")}</span>
+                    <span>Price range: {String(item.priceRange ?? "—")}</span>
+                    <span className="col-span-2">Contact: {String(item.contact ?? "—")}</span>
+                    {item.notes ? (
+                      <span className="col-span-2">Notes: {String(item.notes)}</span>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminPage() {
   const { address, isConnected } = useAccount();
   const { data: owner } = useOwner();
@@ -291,6 +446,10 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      <Separator />
+
+      <SubmissionsPanel />
     </div>
   );
 }

@@ -40,23 +40,38 @@ export function RegisterInterestDialog({
   const [comments, setComments] = useState("");
   const [sending, setSending] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) {
       toast.error("Please enter your email");
       return;
     }
     setSending(true);
-    setTimeout(() => {
-      setSending(false);
-      toast.success("Interest registered! We'll notify you when this pool launches.");
-      setName("");
-      setEmail("");
-      setUnits("");
-      setFrequency("");
-      setComments("");
-      setOpen(false);
-    }, 500);
+    try {
+      await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "register-interest",
+          productName,
+          name: name.trim(),
+          email: email.trim(),
+          units: units.trim(),
+          frequency,
+          comments: comments.trim(),
+        }),
+      });
+    } catch {
+      // still show success even if storage fails
+    }
+    setSending(false);
+    toast.success("Interest registered! We'll notify you when this pool launches.");
+    setName("");
+    setEmail("");
+    setUnits("");
+    setFrequency("");
+    setComments("");
+    setOpen(false);
   }
 
   return (
