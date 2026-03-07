@@ -18,6 +18,7 @@ import {
   POOL_STATUS_LABELS,
   POOL_STATUS_COLORS,
   SECTOR_ICONS,
+  ACTIVE_POOL_IDS,
   formatUsdc,
   getSector,
   getTieredPricing,
@@ -58,6 +59,29 @@ export default function PoolDetailPage({
           className={cn(buttonVariants({ variant: "outline" }))}
         >
           Back to pools
+        </Link>
+      </div>
+    );
+  }
+
+  if (!ACTIVE_POOL_IDS.has(poolId)) {
+    return (
+      <div className="py-20 text-center space-y-4">
+        <h1 className="text-2xl font-bold">{pool.productName}</h1>
+        <Badge
+          variant="outline"
+          className="text-sm bg-muted text-muted-foreground border-muted-foreground/30"
+        >
+          Coming Soon
+        </Badge>
+        <p className="text-muted-foreground">
+          This pool is not yet available for commitments. Check back soon!
+        </p>
+        <Link
+          href="/pools"
+          className={cn(buttonVariants({ variant: "outline" }))}
+        >
+          &larr; Back to pools
         </Link>
       </div>
     );

@@ -32,6 +32,13 @@ function NavLinks({
       >
         My Commitments
       </Link>
+      <Link
+        href="/request-pool"
+        onClick={onClick}
+        className="text-muted-foreground hover:text-foreground transition-colors"
+      >
+        Request a Pool
+      </Link>
       {isOwner && (
         <Link
           href="/admin"

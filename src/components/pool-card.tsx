@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { POOL_STATUS_LABELS, POOL_STATUS_COLORS, SECTOR_ICONS, formatUsdc, getSector, getTieredPricing } from "@/lib/constants";
+import { POOL_STATUS_LABELS, POOL_STATUS_COLORS, SECTOR_ICONS, ACTIVE_POOL_IDS, formatUsdc, getSector, getTieredPricing } from "@/lib/constants";
 import type { PoolData } from "@/lib/hooks";
 import { Countdown } from "@/components/countdown";
 
@@ -23,49 +23,67 @@ export function PoolCard({ pool }: { pool: PoolData }) {
   const pct = target > 0n ? Number((pool.totalUnits * 100n) / target) : 0;
 
   const sector = getSector(pool.productName);
+  const isActive = ACTIVE_POOL_IDS.has(pool.id);
 
-  return (
-    <Link href={`/pools/${pool.id}`}>
-      <Card className="transition-shadow hover:shadow-lg hover:border-primary/40 h-full">
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-base leading-tight">
-              {pool.productName}
-            </CardTitle>
+  const card = (
+    <Card className={`h-full transition-shadow ${isActive ? "hover:shadow-lg hover:border-primary/40" : "opacity-60 cursor-default"}`}>
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="text-base leading-tight">
+            {pool.productName}
+          </CardTitle>
+          {isActive ? (
             <Badge
               variant="outline"
               className={`shrink-0 text-xs ${POOL_STATUS_COLORS[pool.status] ?? ""}`}
             >
               {POOL_STATUS_LABELS[pool.status] ?? "Unknown"}
             </Badge>
-          </div>
-          {sector && (
-            <span className="text-xs text-muted-foreground">
-              {SECTOR_ICONS[sector]} {sector}
-            </span>
+          ) : (
+            <Badge
+              variant="outline"
+              className="shrink-0 text-xs bg-muted text-muted-foreground border-muted-foreground/30"
+            >
+              Coming Soon
+            </Badge>
           )}
-        </CardHeader>
-        <CardContent className="space-y-3 pb-2">
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>{formatUsdc(pool.pricePerUnit)} mUSDC / unit</span>
+        </div>
+        {sector && (
+          <span className="text-xs text-muted-foreground">
+            {SECTOR_ICONS[sector]} {sector}
+          </span>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-3 pb-2">
+        <div className="flex justify-between text-sm text-muted-foreground">
+          <span>{formatUsdc(pool.pricePerUnit)} mUSDC / unit</span>
+          <span>
+            MOQ: {target.toString()} units
+          </span>
+        </div>
+        <div className="space-y-1">
+          <div className="flex justify-between text-xs">
             <span>
-              MOQ: {target.toString()} units
+              {pool.totalUnits.toString()} / {target.toString()} units
             </span>
+            <span>{Math.min(pct, 100)}%</span>
           </div>
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span>
-                {pool.totalUnits.toString()} / {target.toString()} units
-              </span>
-              <span>{Math.min(pct, 100)}%</span>
-            </div>
-            <Progress value={Math.min(pct, 100)} className="h-2" />
-          </div>
-        </CardContent>
-        <CardFooter className="pt-0 text-xs text-muted-foreground">
+          <Progress value={Math.min(pct, 100)} className="h-2" />
+        </div>
+      </CardContent>
+      <CardFooter className="pt-0 text-xs text-muted-foreground">
+        {isActive ? (
           <Countdown deadline={pool.deadline} />
-        </CardFooter>
-      </Card>
-    </Link>
+        ) : (
+          <span>Pool not yet available</span>
+        )}
+      </CardFooter>
+    </Card>
   );
+
+  if (isActive) {
+    return <Link href={`/pools/${pool.id}`}>{card}</Link>;
+  }
+
+  return card;
 }

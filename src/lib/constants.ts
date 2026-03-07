@@ -172,6 +172,8 @@ export function formatUsdc(amount: bigint): string {
   return fracStr ? `${whole}.${fracStr}` : whole.toString();
 }
 
+export const ACTIVE_POOL_IDS = new Set([9]);
+
 export function parseUsdc(amount: string): bigint {
   const [whole, frac = ""] = amount.split(".");
   const paddedFrac = frac.padEnd(USDC_DECIMALS, "0").slice(0, USDC_DECIMALS);
