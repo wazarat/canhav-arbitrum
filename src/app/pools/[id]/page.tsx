@@ -17,7 +17,9 @@ import { usePool, useCommitment, useBuyerCount } from "@/lib/hooks";
 import {
   POOL_STATUS_LABELS,
   POOL_STATUS_COLORS,
+  SECTOR_ICONS,
   formatUsdc,
+  getSector,
 } from "@/lib/constants";
 
 export default function PoolDetailPage({
@@ -75,7 +77,17 @@ export default function PoolDetailPage({
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-3xl font-bold">{pool.productName}</h1>
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold">{pool.productName}</h1>
+          {(() => {
+            const sector = getSector(pool.productName);
+            return sector ? (
+              <span className="text-sm text-muted-foreground">
+                {SECTOR_ICONS[sector]} {sector}
+              </span>
+            ) : null;
+          })()}
+        </div>
         <Badge
           variant="outline"
           className={`text-sm ${POOL_STATUS_COLORS[pool.status] ?? ""}`}

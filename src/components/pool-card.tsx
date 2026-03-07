@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { POOL_STATUS_LABELS, POOL_STATUS_COLORS, formatUsdc } from "@/lib/constants";
+import { POOL_STATUS_LABELS, POOL_STATUS_COLORS, SECTOR_ICONS, formatUsdc, getSector } from "@/lib/constants";
 import type { PoolData } from "@/lib/hooks";
 import { Countdown } from "@/components/countdown";
 
@@ -19,6 +19,8 @@ export function PoolCard({ pool }: { pool: PoolData }) {
     pool.moq > 0n
       ? Number((pool.totalUnits * 100n) / pool.moq)
       : 0;
+
+  const sector = getSector(pool.productName);
 
   return (
     <Link href={`/pools/${pool.id}`}>
@@ -35,6 +37,11 @@ export function PoolCard({ pool }: { pool: PoolData }) {
               {POOL_STATUS_LABELS[pool.status] ?? "Unknown"}
             </Badge>
           </div>
+          {sector && (
+            <span className="text-xs text-muted-foreground">
+              {SECTOR_ICONS[sector]} {sector}
+            </span>
+          )}
         </CardHeader>
         <CardContent className="space-y-3 pb-2">
           <div className="flex justify-between text-sm text-muted-foreground">
