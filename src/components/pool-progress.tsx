@@ -1,19 +1,24 @@
 "use client";
 
 import { Progress } from "@/components/ui/progress";
-import { formatUsdc } from "@/lib/constants";
+import { formatUsdc, getTieredPricing } from "@/lib/constants";
 import type { PoolData } from "@/lib/hooks";
 
 export function PoolProgress({ pool }: { pool: PoolData }) {
-  const pct =
-    pool.moq > 0n ? Number((pool.totalUnits * 100n) / pool.moq) : 0;
+  const pricing = getTieredPricing(pool.productName);
+  const bulkThreshold = pricing
+    ? BigInt(pricing.tiers.find((t) => t.mandatory)?.minUnits ?? Number(pool.moq))
+    : pool.moq;
+
+  const target = bulkThreshold > pool.moq ? bulkThreshold : pool.moq;
+  const pct = target > 0n ? Number((pool.totalUnits * 100n) / target) : 0;
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between text-sm">
         <span className="text-muted-foreground">Progress</span>
         <span className="font-medium">
-          {pool.totalUnits.toString()} / {pool.moq.toString()} units ({Math.min(pct, 100)}%)
+          {pool.totalUnits.toString()} / {target.toString()} units ({Math.min(pct, 100)}%)
         </span>
       </div>
       <Progress value={Math.min(pct, 100)} className="h-3" />

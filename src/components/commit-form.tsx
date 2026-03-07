@@ -6,6 +6,7 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import { parseGwei } from "viem";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,11 @@ import {
 import { useUsdcBalance, useUsdcAllowance } from "@/lib/hooks";
 import { formatUsdc } from "@/lib/constants";
 import type { PoolData } from "@/lib/hooks";
+
+const GAS_OVERRIDES = {
+  maxFeePerGas: parseGwei("0.1"),
+  maxPriorityFeePerGas: parseGwei("0.001"),
+} as const;
 
 export function CommitForm({
   pool,
@@ -79,6 +85,7 @@ export function CommitForm({
         ...mockUsdcConfig,
         functionName: "approve",
         args: [PURCHASE_POOL_ADDRESS, cost],
+        ...GAS_OVERRIDES,
       },
       {
         onSuccess: () => {
@@ -97,6 +104,7 @@ export function CommitForm({
         ...purchasePoolConfig,
         functionName: "commit",
         args: [BigInt(pool.id), parsedUnits],
+        ...GAS_OVERRIDES,
       },
       {
         onSuccess: () => {

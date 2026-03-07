@@ -5,13 +5,18 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import { parseGwei } from "viem";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { mockUsdcConfig } from "@/lib/contracts";
 import { useUsdcBalance } from "@/lib/hooks";
 import { formatUsdc } from "@/lib/constants";
 
-const MINT_AMOUNT = 10_000n * 10n ** 6n; // 10,000 mUSDC
+const MINT_AMOUNT = 10_000n * 10n ** 6n;
+const GAS_OVERRIDES = {
+  maxFeePerGas: parseGwei("0.1"),
+  maxPriorityFeePerGas: parseGwei("0.001"),
+} as const;
 
 export function MintFaucet() {
   const { address, isConnected } = useAccount();
@@ -33,6 +38,7 @@ export function MintFaucet() {
         ...mockUsdcConfig,
         functionName: "mint",
         args: [MINT_AMOUNT],
+        ...GAS_OVERRIDES,
       },
       {
         onSuccess: () => {

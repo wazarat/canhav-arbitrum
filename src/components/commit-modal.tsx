@@ -6,6 +6,7 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import { parseGwei } from "viem";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,11 @@ import {
   type PriceTier,
   USDC_DECIMALS,
 } from "@/lib/constants";
+
+const GAS_OVERRIDES = {
+  maxFeePerGas: parseGwei("0.1"),
+  maxPriorityFeePerGas: parseGwei("0.001"),
+} as const;
 
 function usdToUsdc(usd: number): bigint {
   return BigInt(Math.round(usd * 10 ** USDC_DECIMALS));
@@ -188,6 +194,7 @@ function TieredCommitContent({
         ...mockUsdcConfig,
         functionName: "approve",
         args: [PURCHASE_POOL_ADDRESS, onChainCost],
+        ...GAS_OVERRIDES,
       },
       {
         onSuccess: () =>
@@ -204,6 +211,7 @@ function TieredCommitContent({
         ...purchasePoolConfig,
         functionName: "commit",
         args: [BigInt(pool.id), parsedUnits],
+        ...GAS_OVERRIDES,
       },
       {
         onSuccess: () => {
@@ -514,6 +522,7 @@ function FallbackCommitModal({
         ...mockUsdcConfig,
         functionName: "approve",
         args: [PURCHASE_POOL_ADDRESS, cost],
+        ...GAS_OVERRIDES,
       },
       {
         onSuccess: () =>
@@ -530,6 +539,7 @@ function FallbackCommitModal({
         ...purchasePoolConfig,
         functionName: "commit",
         args: [BigInt(pool.id), parsedUnits],
+        ...GAS_OVERRIDES,
       },
       {
         onSuccess: () => {

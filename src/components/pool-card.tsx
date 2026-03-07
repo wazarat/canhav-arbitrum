@@ -10,15 +10,17 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { POOL_STATUS_LABELS, POOL_STATUS_COLORS, SECTOR_ICONS, formatUsdc, getSector } from "@/lib/constants";
+import { POOL_STATUS_LABELS, POOL_STATUS_COLORS, SECTOR_ICONS, formatUsdc, getSector, getTieredPricing } from "@/lib/constants";
 import type { PoolData } from "@/lib/hooks";
 import { Countdown } from "@/components/countdown";
 
 export function PoolCard({ pool }: { pool: PoolData }) {
-  const pct =
-    pool.moq > 0n
-      ? Number((pool.totalUnits * 100n) / pool.moq)
-      : 0;
+  const pricing = getTieredPricing(pool.productName);
+  const bulkThreshold = pricing
+    ? BigInt(pricing.tiers.find((t) => t.mandatory)?.minUnits ?? Number(pool.moq))
+    : pool.moq;
+  const target = bulkThreshold > pool.moq ? bulkThreshold : pool.moq;
+  const pct = target > 0n ? Number((pool.totalUnits * 100n) / target) : 0;
 
   const sector = getSector(pool.productName);
 
@@ -47,13 +49,13 @@ export function PoolCard({ pool }: { pool: PoolData }) {
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>{formatUsdc(pool.pricePerUnit)} mUSDC / unit</span>
             <span>
-              MOQ: {pool.moq.toString()} units
+              MOQ: {target.toString()} units
             </span>
           </div>
           <div className="space-y-1">
             <div className="flex justify-between text-xs">
               <span>
-                {pool.totalUnits.toString()} / {pool.moq.toString()} units
+                {pool.totalUnits.toString()} / {target.toString()} units
               </span>
               <span>{Math.min(pct, 100)}%</span>
             </div>
