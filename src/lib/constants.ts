@@ -173,15 +173,89 @@ export function formatUsdc(amount: bigint): string {
 }
 
 export const ACTIVE_POOL_IDS = new Set([9]);
+export const CLOSED_POOL_IDS = new Set([0, 2, 3, 4, 5, 6]);
+
+export interface ClosedPoolMeta {
+  source: string;
+  region: string;
+  closureReason: string;
+  rating: number;
+  totalBuyers: number;
+  totalUnitsCommitted: number;
+  closedDate: string;
+}
+
+export const CLOSED_POOL_META: Record<number, ClosedPoolMeta> = {
+  0: {
+    source: "Fazenda Santa Inês, Minas Gerais",
+    region: "Brazil",
+    closureReason: "Pool successfully fulfilled — order shipped to all 12 participants.",
+    rating: 4.5,
+    totalBuyers: 12,
+    totalUnitsCommitted: 65,
+    closedDate: "2026-02-20",
+  },
+  2: {
+    source: "King Arthur Milling Co.",
+    region: "United States",
+    closureReason: "MOQ not met within deadline — all deposits refunded to participants.",
+    rating: 3.0,
+    totalBuyers: 5,
+    totalUnitsCommitted: 90,
+    closedDate: "2026-02-15",
+  },
+  3: {
+    source: "Oleificio Ferrara, Puglia",
+    region: "Italy",
+    closureReason: "Pool successfully fulfilled — premium extra-virgin olive oil delivered.",
+    rating: 5.0,
+    totalBuyers: 18,
+    totalUnitsCommitted: 120,
+    closedDate: "2026-02-28",
+  },
+  4: {
+    source: "Kohinoor Foods Ltd.",
+    region: "India",
+    closureReason: "Supplier unable to fulfill at agreed price due to export restrictions. Deposits refunded.",
+    rating: 2.5,
+    totalBuyers: 8,
+    totalUnitsCommitted: 180,
+    closedDate: "2026-01-30",
+  },
+  5: {
+    source: "Dart Container Corporation",
+    region: "United States",
+    closureReason: "Pool successfully fulfilled — 600 cases delivered across 22 businesses.",
+    rating: 4.0,
+    totalBuyers: 22,
+    totalUnitsCommitted: 600,
+    closedDate: "2026-02-10",
+  },
+  6: {
+    source: "World Centric, Petaluma CA",
+    region: "United States",
+    closureReason: "MOQ not reached — pool expired. Deposits refunded to all 3 participants.",
+    rating: 3.5,
+    totalBuyers: 3,
+    totalUnitsCommitted: 150,
+    closedDate: "2026-02-05",
+  },
+};
+
+export function getClosedPoolMeta(poolId: number): ClosedPoolMeta | null {
+  return CLOSED_POOL_META[poolId] ?? null;
+}
 
 export type PoolUIStatus = "Active" | "Evaluating" | "Closed";
 
 export const POOL_UI_STATUSES: PoolUIStatus[] = ["Active", "Evaluating", "Closed"];
 
 export function getPoolUIStatus(poolId: number, onChainStatus: number): PoolUIStatus {
-  if (!ACTIVE_POOL_IDS.has(poolId)) return "Evaluating";
-  if (onChainStatus >= 1) return "Closed";
-  return "Active";
+  if (ACTIVE_POOL_IDS.has(poolId)) {
+    return onChainStatus >= 1 ? "Closed" : "Active";
+  }
+  if (CLOSED_POOL_IDS.has(poolId)) return "Closed";
+  return "Evaluating";
 }
 
 export function parseUsdc(amount: string): bigint {

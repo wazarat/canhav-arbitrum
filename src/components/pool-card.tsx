@@ -11,18 +11,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  POOL_STATUS_LABELS,
   POOL_STATUS_COLORS,
   SECTOR_ICONS,
-  ACTIVE_POOL_IDS,
   formatUsdc,
   getSector,
   getTieredPricing,
   getPoolUIStatus,
+  getClosedPoolMeta,
 } from "@/lib/constants";
 import type { PoolData } from "@/lib/hooks";
 import { Countdown } from "@/components/countdown";
 import { RegisterInterestDialog } from "@/components/register-interest-dialog";
+import { StarRating } from "@/components/star-rating";
 
 export function PoolCard({ pool }: { pool: PoolData }) {
   const pricing = getTieredPricing(pool.productName);
@@ -33,8 +33,9 @@ export function PoolCard({ pool }: { pool: PoolData }) {
   const pct = target > 0n ? Number((pool.totalUnits * 100n) / target) : 0;
 
   const sector = getSector(pool.productName);
-  const isActive = ACTIVE_POOL_IDS.has(pool.id);
   const uiStatus = getPoolUIStatus(pool.id, pool.status);
+  const closedMeta = getClosedPoolMeta(pool.id);
+  const isClickable = uiStatus === "Active" || uiStatus === "Closed";
 
   const statusBadge = (() => {
     switch (uiStatus) {
@@ -44,7 +45,7 @@ export function PoolCard({ pool }: { pool: PoolData }) {
             variant="outline"
             className={`shrink-0 text-xs ${POOL_STATUS_COLORS[pool.status] ?? ""}`}
           >
-            {POOL_STATUS_LABELS[pool.status] ?? "Unknown"}
+            Open
           </Badge>
         );
       case "Evaluating":
@@ -60,16 +61,20 @@ export function PoolCard({ pool }: { pool: PoolData }) {
         return (
           <Badge
             variant="outline"
-            className={`shrink-0 text-xs ${POOL_STATUS_COLORS[pool.status] ?? ""}`}
+            className="shrink-0 text-xs bg-gray-500/20 text-gray-400 border-gray-500/30"
           >
-            {POOL_STATUS_LABELS[pool.status] ?? "Closed"}
+            Closed
           </Badge>
         );
     }
   })();
 
   const card = (
-    <Card className={`h-full transition-shadow ${isActive && uiStatus === "Active" ? "hover:shadow-lg hover:border-primary/40" : "opacity-70 cursor-default"}`}>
+    <Card className={`h-full transition-shadow ${
+      isClickable
+        ? "hover:shadow-lg hover:border-primary/40 cursor-pointer"
+        : "opacity-70 cursor-default"
+    }`}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base leading-tight">
@@ -99,18 +104,36 @@ export function PoolCard({ pool }: { pool: PoolData }) {
           </div>
           <Progress value={Math.min(pct, 100)} className="h-2" />
         </div>
+        {closedMeta && (
+          <div className="flex items-center justify-between">
+            <StarRating rating={closedMeta.rating} size="sm" />
+            <span className="text-xs text-muted-foreground">
+              {closedMeta.totalBuyers} buyers
+            </span>
+          </div>
+        )}
       </CardContent>
       <CardFooter className="pt-0 text-xs text-muted-foreground flex flex-col items-stretch gap-2">
-        {isActive && uiStatus === "Active" ? (
+        {uiStatus === "Active" ? (
           <Countdown deadline={pool.deadline} />
-        ) : (
+        ) : uiStatus === "Evaluating" ? (
           <RegisterInterestDialog productName={pool.productName} />
+        ) : (
+          <div className="flex items-center justify-between">
+            <span>Closed {closedMeta?.closedDate ?? ""}</span>
+            <RegisterInterestDialog
+              productName={pool.productName}
+              buttonSize="sm"
+              buttonClassName="text-xs"
+              buttonLabel="Re-open Interest"
+            />
+          </div>
         )}
       </CardFooter>
     </Card>
   );
 
-  if (isActive && uiStatus === "Active") {
+  if (isClickable) {
     return <Link href={`/pools/${pool.id}`}>{card}</Link>;
   }
 

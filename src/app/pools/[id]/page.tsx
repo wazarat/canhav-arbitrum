@@ -14,17 +14,19 @@ import { MintFaucet } from "@/components/mint-faucet";
 import { RegisterInterestDialog } from "@/components/register-interest-dialog";
 import { PoolProgress } from "@/components/pool-progress";
 import { Countdown } from "@/components/countdown";
+import { StarRating } from "@/components/star-rating";
 import { usePool, useCommitment, useBuyerCount } from "@/lib/hooks";
 import {
   POOL_STATUS_LABELS,
   POOL_STATUS_COLORS,
   SECTOR_ICONS,
-  ACTIVE_POOL_IDS,
   formatUsdc,
   getSector,
   getTieredPricing,
   getActiveTier,
   getDiscountPct,
+  getPoolUIStatus,
+  getClosedPoolMeta,
 } from "@/lib/constants";
 
 export default function PoolDetailPage({
@@ -65,7 +67,10 @@ export default function PoolDetailPage({
     );
   }
 
-  if (!ACTIVE_POOL_IDS.has(poolId)) {
+  const uiStatus = getPoolUIStatus(poolId, pool.status);
+  const closedMeta = getClosedPoolMeta(poolId);
+
+  if (uiStatus === "Evaluating") {
     return (
       <div className="py-20 text-center space-y-4">
         <h1 className="text-2xl font-bold">{pool.productName}</h1>
@@ -92,6 +97,139 @@ export default function PoolDetailPage({
             buttonSize="default"
             buttonClassName=""
           />
+        </div>
+      </div>
+    );
+  }
+
+  if (uiStatus === "Closed" && closedMeta) {
+    const sector = getSector(pool.productName);
+    return (
+      <div className="space-y-6">
+        <div>
+          <Link
+            href="/pools"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            &larr; Back to pools
+          </Link>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold">{pool.productName}</h1>
+            {sector && (
+              <span className="text-sm text-muted-foreground">
+                {SECTOR_ICONS[sector]} {sector}
+              </span>
+            )}
+          </div>
+          <Badge
+            variant="outline"
+            className="text-sm bg-gray-500/20 text-gray-400 border-gray-500/30"
+          >
+            Closed
+          </Badge>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Rating */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Pool Rating</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <StarRating rating={closedMeta.rating} size="lg" />
+                <p className="text-sm text-muted-foreground">
+                  Based on feedback from {closedMeta.totalBuyers} participants
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Sourcing */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Sourcing Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Supplier / Source</span>
+                  <span className="font-medium text-right">{closedMeta.source}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Region</span>
+                  <span>{closedMeta.region}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Price per unit</span>
+                  <span>{formatUsdc(pool.pricePerUnit)} mUSDC</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">MOQ</span>
+                  <span>{pool.moq.toString()} units</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Pool History */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Pool History</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total buyers</span>
+                  <span>{closedMeta.totalBuyers}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Units committed</span>
+                  <span>{closedMeta.totalUnitsCommitted}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Closed date</span>
+                  <span>{closedMeta.closedDate}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Closure Reason */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Closure Reason</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm">{closedMeta.closureReason}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right sidebar */}
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Interested in this product?</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  This pool has closed, but you can register interest to
+                  help us re-open it with a new batch.
+                </p>
+                <RegisterInterestDialog
+                  productName={pool.productName}
+                  buttonVariant="default"
+                  buttonSize="default"
+                  buttonClassName="w-full"
+                  buttonLabel="Register Interest"
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     );
