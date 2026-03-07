@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import {
   useAccount,
-  useChainId,
   useSwitchChain,
   useWriteContract,
   useWaitForTransactionReceipt,
@@ -30,9 +29,7 @@ export function CommitForm({
   onSuccess: () => void;
 }) {
   const { address } = useAccount();
-  const chainId = useChainId();
-  const { switchChain, isPending: isSwitching } = useSwitchChain();
-  const isWrongChain = !!address && chainId !== arbitrumSepolia.id;
+  const { switchChainAsync } = useSwitchChain();
 
   const [units, setUnits] = useState("");
 
@@ -78,7 +75,18 @@ export function CommitForm({
     query: { enabled: !!commitTx },
   });
 
-  function handleApprove() {
+  async function ensureChain() {
+    try {
+      await switchChainAsync({ chainId: arbitrumSepolia.id });
+      return true;
+    } catch {
+      toast.error("Please switch your wallet to Arbitrum Sepolia");
+      return false;
+    }
+  }
+
+  async function handleApprove() {
+    if (!(await ensureChain())) return;
     approve(
       {
         ...mockUsdcConfig,
@@ -96,7 +104,8 @@ export function CommitForm({
     );
   }
 
-  function handleCommit() {
+  async function handleCommit() {
+    if (!(await ensureChain())) return;
     commit(
       {
         ...purchasePoolConfig,
@@ -182,16 +191,7 @@ export function CommitForm({
         </div>
       )}
 
-      {isWrongChain ? (
-        <Button
-          variant="destructive"
-          className="w-full"
-          onClick={() => switchChain({ chainId: arbitrumSepolia.id })}
-          disabled={isSwitching}
-        >
-          {isSwitching ? "Switching..." : "Switch to Arbitrum Sepolia"}
-        </Button>
-      ) : parsedUnits > 0n && needsApproval ? (
+      {parsedUnits > 0n && needsApproval ? (
         <Button
           onClick={handleApprove}
           disabled={isWorking}
