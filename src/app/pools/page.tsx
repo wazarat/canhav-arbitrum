@@ -7,10 +7,12 @@ import { MintFaucet } from "@/components/mint-faucet";
 import { usePoolCount, usePools } from "@/lib/hooks";
 
 export default function PoolsPage() {
-  const { authenticated } = usePrivy();
-  const { data: count } = usePoolCount();
+  const { ready, authenticated } = usePrivy();
+  const { data: count, isLoading: countLoading } = usePoolCount();
   const poolCount = count ? Number(count) : 0;
-  const { pools, isLoading } = usePools(poolCount);
+  const { pools, isLoading: poolsLoading } = usePools(poolCount);
+
+  const loading = !ready || countLoading || poolsLoading;
 
   return (
     <div className="space-y-6">
@@ -23,7 +25,7 @@ export default function PoolsPage() {
 
       {authenticated && <MintFaucet />}
 
-      {isLoading ? (
+      {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <PoolCardSkeleton key={i} />
