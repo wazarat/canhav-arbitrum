@@ -2,9 +2,12 @@
 
 import {
   useAccount,
+  useChainId,
+  useSwitchChain,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import { arbitrumSepolia } from "viem/chains";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { mockUsdcConfig } from "@/lib/contracts";
@@ -15,6 +18,10 @@ const MINT_AMOUNT = 10_000n * 10n ** 6n; // 10,000 mUSDC
 
 export function MintFaucet() {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChain, isPending: isSwitching } = useSwitchChain();
+  const isWrongChain = isConnected && chainId !== arbitrumSepolia.id;
+
   const { data: balance, refetch } = useUsdcBalance(address);
 
   const { writeContract, isPending, data: txHash } = useWriteContract();
@@ -57,14 +64,25 @@ export function MintFaucet() {
           </p>
         )}
       </div>
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={handleMint}
-        disabled={isPending || isConfirming}
-      >
-        {isPending || isConfirming ? "Minting..." : "Mint 10,000 mUSDC"}
-      </Button>
+      {isWrongChain ? (
+        <Button
+          size="sm"
+          variant="destructive"
+          onClick={() => switchChain({ chainId: arbitrumSepolia.id })}
+          disabled={isSwitching}
+        >
+          {isSwitching ? "Switching..." : "Switch to Arbitrum Sepolia"}
+        </Button>
+      ) : (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleMint}
+          disabled={isPending || isConfirming}
+        >
+          {isPending || isConfirming ? "Minting..." : "Mint 10,000 mUSDC"}
+        </Button>
+      )}
     </div>
   );
 }

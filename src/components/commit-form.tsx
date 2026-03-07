@@ -3,9 +3,12 @@
 import { useState, useEffect } from "react";
 import {
   useAccount,
+  useChainId,
+  useSwitchChain,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import { arbitrumSepolia } from "viem/chains";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +30,10 @@ export function CommitForm({
   onSuccess: () => void;
 }) {
   const { address } = useAccount();
+  const chainId = useChainId();
+  const { switchChain, isPending: isSwitching } = useSwitchChain();
+  const isWrongChain = !!address && chainId !== arbitrumSepolia.id;
+
   const [units, setUnits] = useState("");
 
   const parsedUnits = BigInt(Math.max(0, Math.floor(Number(units) || 0)));
@@ -175,7 +182,16 @@ export function CommitForm({
         </div>
       )}
 
-      {parsedUnits > 0n && needsApproval ? (
+      {isWrongChain ? (
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={() => switchChain({ chainId: arbitrumSepolia.id })}
+          disabled={isSwitching}
+        >
+          {isSwitching ? "Switching..." : "Switch to Arbitrum Sepolia"}
+        </Button>
+      ) : parsedUnits > 0n && needsApproval ? (
         <Button
           onClick={handleApprove}
           disabled={isWorking}
