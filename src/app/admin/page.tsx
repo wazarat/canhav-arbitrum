@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { fetchSubmissions, type SubmissionRecord } from "./actions";
 import {
   purchasePoolConfig,
   MOCK_USDC_ADDRESS,
@@ -218,74 +219,27 @@ function WithdrawRow({
   );
 }
 
-interface Submission {
-  type: string;
-  submittedAt: string;
-  [key: string]: unknown;
-}
-
 function SubmissionsPanel() {
-  const [secret, setSecret] = useState("");
-  const [authenticated, setAuthenticated] = useState(false);
-  const [interests, setInterests] = useState<Submission[]>([]);
-  const [requests, setRequests] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [interests, setInterests] = useState<SubmissionRecord[]>([]);
+  const [requests, setRequests] = useState<SubmissionRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"interests" | "requests">("interests");
 
-  const fetchData = useCallback(async (s: string) => {
+  const loadData = useCallback(async () => {
     setLoading(true);
-    try {
-      const res = await fetch(`/api/submissions?secret=${encodeURIComponent(s)}&type=all`);
-      if (!res.ok) {
-        toast.error("Unauthorized or storage not configured");
-        setAuthenticated(false);
-        setLoading(false);
-        return;
-      }
-      const data = await res.json();
-      setInterests(data["register-interest"] ?? []);
-      setRequests(data["request-pool"] ?? []);
-      setAuthenticated(true);
-    } catch {
-      toast.error("Failed to load submissions");
+    const result = await fetchSubmissions();
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      setInterests(result.interests);
+      setRequests(result.requests);
     }
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    if (authenticated) {
-      fetchData(secret);
-    }
-  // only refetch when tab changes and already authenticated
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
-
-  if (!authenticated) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>User Submissions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            Enter the admin API secret to view Register Interest and Pool Request submissions.
-          </p>
-          <div className="flex gap-2">
-            <Input
-              type="password"
-              placeholder="ADMIN_API_SECRET"
-              value={secret}
-              onChange={(e) => setSecret(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && fetchData(secret)}
-            />
-            <Button onClick={() => fetchData(secret)} disabled={!secret || loading}>
-              {loading ? "Loading..." : "Load"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+    loadData();
+  }, [loadData]);
 
   const items = tab === "interests" ? interests : requests;
 
@@ -294,7 +248,7 @@ function SubmissionsPanel() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>User Submissions</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => fetchData(secret)}>
+          <Button variant="outline" size="sm" onClick={loadData}>
             Refresh
           </Button>
         </div>
@@ -338,7 +292,7 @@ function SubmissionsPanel() {
               <div key={i} className="rounded-lg border p-3 text-sm space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">
-                    {(item.productName as string) || (item.product as string) || "—"}
+                    {String(item.productName ?? item.product ?? "—")}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {item.submittedAt ? new Date(item.submittedAt).toLocaleString() : ""}
@@ -346,10 +300,10 @@ function SubmissionsPanel() {
                 </div>
                 {tab === "interests" ? (
                   <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-muted-foreground">
-                    <span>Name: {(item.name as string) || "—"}</span>
-                    <span>Email: {(item.email as string) || "—"}</span>
-                    <span>Units: {(item.units as string) || "—"}</span>
-                    <span>Frequency: {(item.frequency as string) || "—"}</span>
+                    <span>Name: {String(item.name ?? "—")}</span>
+                    <span>Email: {String(item.email ?? "—")}</span>
+                    <span>Units: {String(item.units ?? "—")}</span>
+                    <span>Frequency: {String(item.frequency ?? "—")}</span>
                     {item.comments ? (
                       <span className="col-span-2">Comments: {String(item.comments)}</span>
                     ) : null}
