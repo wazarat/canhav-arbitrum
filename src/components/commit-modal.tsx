@@ -41,6 +41,15 @@ function usdToUsdc(usd: number): bigint {
   return BigInt(Math.round(usd * 10 ** USDC_DECIMALS));
 }
 
+function extractRevertReason(err: Error): string {
+  const msg = err.message || "Transaction failed";
+  const revertMatch = msg.match(/reason:\s*(.+?)(?:\n|$)/);
+  if (revertMatch) return revertMatch[1].trim();
+  const shortMatch = msg.match(/reverted with the following reason:\s*(.+?)(?:\n|$)/);
+  if (shortMatch) return shortMatch[1].trim();
+  return msg.split("\n")[0] || "Transaction failed";
+}
+
 function TierRow({
   tier,
   basePriceUsd,
@@ -120,9 +129,6 @@ function TieredCommitContent({
     ? getActiveTier(pricing, projectedTotal)
     : activeTier;
 
-  const displayPrice = usdToUsdc(projectedTier.priceUsd);
-  const displayCost = parsedUnits * displayPrice;
-
   const onChainCost = parsedUnits * pool.pricePerUnit;
 
   const { data: balance } = useUsdcBalance(address);
@@ -133,10 +139,6 @@ function TieredCommitContent({
 
   const allowanceLoaded = allowance !== undefined;
   const needsApproval = onChainCost > 0n && (!allowanceLoaded || onChainCost > (allowance as bigint));
-
-  // #region agent log
-  if (parsedUnits > 0n) { fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'commit-modal.tsx:render',message:'approval state on render',data:{allowanceRaw:allowance?.toString(),allowanceLoaded,onChainCost:onChainCost.toString(),needsApproval,parsedUnits:parsedUnits.toString()},timestamp:Date.now()})}).catch(()=>{}); }
-  // #endregion
 
   const {
     writeContract: approve,
@@ -151,19 +153,9 @@ function TieredCommitContent({
       query: { enabled: !!approveTx },
     });
 
-  // #region agent log
-  useEffect(() => { fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'commit-modal.tsx:receipt-effect',message:'receipt hook state',data:{approveTx,isApproveConfirming,isApproveConfirmed},timestamp:Date.now()})}).catch(()=>{}); }, [approveTx, isApproveConfirming, isApproveConfirmed]);
-  // #endregion
-
   useEffect(() => {
     if (isApproveConfirmed) {
-      // #region agent log
-      fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'commit-modal.tsx:confirmed-effect',message:'approval confirmed, calling refetch+reset',data:{isApproveConfirmed},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-      refetchAllowance().then((res) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'commit-modal.tsx:refetch-done',message:'refetchAllowance resolved',data:{newAllowance:res?.data?.toString(),status:res?.status},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
+      refetchAllowance().then(() => {
         resetApprove();
       });
     }
@@ -191,9 +183,6 @@ function TieredCommitContent({
   }, [poolCloseDate, pricing.shipmentDaysAfterClose]);
 
   function handleApprove() {
-    // #region agent log
-    fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'commit-modal.tsx:handleApprove',message:'approve called',data:{onChainCost:onChainCost.toString(),spender:PURCHASE_POOL_ADDRESS},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     approve(
       {
         ...mockUsdcConfig,
@@ -201,14 +190,10 @@ function TieredCommitContent({
         args: [PURCHASE_POOL_ADDRESS, onChainCost],
       },
       {
-        onSuccess: (hash) => {
-          // #region agent log
-          fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'commit-modal.tsx:approve-onSuccess',message:'writeContract onSuccess',data:{hash},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
-          toast.success("Approval confirmed — click Commit to finalize");
-        },
+        onSuccess: () =>
+          toast.success("Approval confirmed — click Commit to finalize"),
         onError: (err) =>
-          toast.error(err.message.split("\n")[0] || "Approval failed"),
+          toast.error(extractRevertReason(err)),
       },
     );
   }
@@ -228,7 +213,7 @@ function TieredCommitContent({
           onSuccess();
         },
         onError: (err) =>
-          toast.error(err.message.split("\n")[0] || "Commit failed"),
+          toast.error(extractRevertReason(err)),
       },
     );
   }
@@ -506,8 +491,9 @@ function FallbackCommitModal({
 
   useEffect(() => {
     if (isApproveConfirmed) {
-      refetchAllowance();
-      resetApprove();
+      refetchAllowance().then(() => {
+        resetApprove();
+      });
     }
   }, [isApproveConfirmed, refetchAllowance, resetApprove]);
 
@@ -533,7 +519,7 @@ function FallbackCommitModal({
         onSuccess: () =>
           toast.success("Approval confirmed — click Commit to finalize"),
         onError: (err) =>
-          toast.error(err.message.split("\n")[0] || "Approval failed"),
+          toast.error(extractRevertReason(err)),
       },
     );
   }
@@ -553,7 +539,7 @@ function FallbackCommitModal({
           onSuccess();
         },
         onError: (err) =>
-          toast.error(err.message.split("\n")[0] || "Commit failed"),
+          toast.error(extractRevertReason(err)),
       },
     );
   }
