@@ -2,20 +2,19 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePrivy } from "@privy-io/react-auth";
 import { buttonVariants } from "@/components/ui/button";
 import { PoolCard } from "@/components/pool-card";
 import { PoolCardSkeleton } from "@/components/pool-card-skeleton";
-import { usePoolCount, usePools } from "@/lib/hooks";
+import { usePublicPoolCount, usePublicPools } from "@/lib/pool-reader";
 import { cn } from "@/lib/utils";
 
 export default function HomePage() {
-  const { ready } = usePrivy();
-  const { data: count, isLoading: countLoading } = usePoolCount();
-  const poolCount = count ? Number(count) : 0;
-  const { pools, isLoading: poolsLoading } = usePools(poolCount);
+  const { data: poolCount = 0, isLoading: countLoading } =
+    usePublicPoolCount();
+  const { data: pools = [], isLoading: poolsLoading } =
+    usePublicPools(poolCount);
 
-  const loading = !ready || countLoading || poolsLoading;
+  const loading = countLoading || poolsLoading;
   const activePools = pools.filter((p) => p.status === 0);
 
   return (

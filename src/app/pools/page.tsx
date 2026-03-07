@@ -4,15 +4,16 @@ import { usePrivy } from "@privy-io/react-auth";
 import { PoolCard } from "@/components/pool-card";
 import { PoolCardSkeleton } from "@/components/pool-card-skeleton";
 import { MintFaucet } from "@/components/mint-faucet";
-import { usePoolCount, usePools } from "@/lib/hooks";
+import { usePublicPoolCount, usePublicPools } from "@/lib/pool-reader";
 
 export default function PoolsPage() {
-  const { ready, authenticated } = usePrivy();
-  const { data: count, isLoading: countLoading } = usePoolCount();
-  const poolCount = count ? Number(count) : 0;
-  const { pools, isLoading: poolsLoading } = usePools(poolCount);
+  const { authenticated } = usePrivy();
+  const { data: poolCount = 0, isLoading: countLoading } =
+    usePublicPoolCount();
+  const { data: pools = [], isLoading: poolsLoading } =
+    usePublicPools(poolCount);
 
-  const loading = !ready || countLoading || poolsLoading;
+  const loading = countLoading || poolsLoading;
 
   return (
     <div className="space-y-6">
