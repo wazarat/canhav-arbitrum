@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { CommitForm } from "@/components/commit-form";
+import { CommitModal } from "@/components/commit-modal";
 import { MintFaucet } from "@/components/mint-faucet";
 import { PoolProgress } from "@/components/pool-progress";
 import { Countdown } from "@/components/countdown";
@@ -20,6 +20,9 @@ import {
   SECTOR_ICONS,
   formatUsdc,
   getSector,
+  getTieredPricing,
+  getActiveTier,
+  getDiscountPct,
 } from "@/lib/constants";
 
 export default function PoolDetailPage({
@@ -65,6 +68,10 @@ export default function PoolDetailPage({
     refetchCommitment();
   };
 
+  const pricing = getTieredPricing(pool.productName);
+  const currentTotal = Number(pool.totalUnits);
+  const activeTier = pricing ? getActiveTier(pricing, currentTotal || 1) : null;
+
   return (
     <div className="space-y-6">
       <div>
@@ -108,23 +115,71 @@ export default function PoolDetailPage({
             </CardContent>
           </Card>
 
+          {/* Tiered pricing visualization */}
+          {pricing && activeTier && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Volume Pricing Tiers</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {pricing.tiers.map((tier) => {
+                  const isActive = activeTier.label === tier.label;
+                  const discount = getDiscountPct(pricing.basePriceUsd, tier.priceUsd);
+                  const rangeLabel =
+                    tier.maxUnits === null
+                      ? `${tier.minUnits}+ units`
+                      : `${tier.minUnits}–${tier.maxUnits} units`;
+
+                  return (
+                    <div
+                      key={tier.label}
+                      className={`relative flex items-center justify-between rounded-lg border p-4 transition-colors ${
+                        isActive
+                          ? "border-primary bg-primary/5"
+                          : "border-border"
+                      }`}
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{tier.label}</span>
+                          {isActive && (
+                            <Badge className="bg-primary/20 text-primary text-xs">
+                              Active
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {rangeLabel}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {tier.mandatory
+                            ? "Fulfillment locked in once this tier is reached"
+                            : "Optional — pool may not execute at this level"}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0 ml-4">
+                        <p className="text-xl font-bold">
+                          ${tier.priceUsd.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">per unit</p>
+                        {discount > 0 && (
+                          <p className="text-sm font-medium text-green-400">
+                            Save {discount}%
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Pool ID</span>
-                <span className="font-mono">{pool.id}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Token</span>
-                <span className="font-mono text-xs">
-                  {pool.token.slice(0, 6)}...{pool.token.slice(-4)}
-                </span>
-              </div>
-              <Separator />
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Deadline</span>
                 <Countdown deadline={pool.deadline} />
@@ -143,6 +198,17 @@ export default function PoolDetailPage({
                 <span className="text-muted-foreground">Buyers</span>
                 <span>{buyerCount !== undefined ? buyerCount.toString() : "—"}</span>
               </div>
+              {pricing && (
+                <>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Current tier</span>
+                    <span className="font-medium">
+                      {activeTier?.label} (${activeTier?.priceUsd.toFixed(2)}/unit)
+                    </span>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -171,17 +237,34 @@ export default function PoolDetailPage({
           )}
         </div>
 
-        {/* Right: commit form */}
+        {/* Right: commit action */}
         <div className="space-y-4">
           {authenticated && <MintFaucet />}
 
           {authenticated && pool.status === 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Commit Funds</CardTitle>
+                <CardTitle>Join This Pool</CardTitle>
               </CardHeader>
-              <CardContent>
-                <CommitForm pool={pool} onSuccess={handleSuccess} />
+              <CardContent className="space-y-3">
+                {pricing && activeTier && (
+                  <div className="rounded-lg bg-muted/50 p-3 text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Current price</span>
+                      <span className="font-semibold">${activeTier.priceUsd.toFixed(2)}/unit</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Pool units</span>
+                      <span>{currentTotal} committed</span>
+                    </div>
+                    {!activeTier.mandatory && (
+                      <p className="text-xs text-amber-400/80 mt-1">
+                        Pool needs {80 - currentTotal > 0 ? 80 - currentTotal : 0} more units to lock in fulfillment.
+                      </p>
+                    )}
+                  </div>
+                )}
+                <CommitModal pool={pool} onSuccess={handleSuccess} />
               </CardContent>
             </Card>
           )}

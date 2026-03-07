@@ -89,6 +89,68 @@ export function getSector(productName: string): Sector | null {
   return null;
 }
 
+export interface PriceTier {
+  label: string;
+  minUnits: number;
+  maxUnits: number | null;
+  priceUsd: number;
+  mandatory: boolean;
+}
+
+export interface TieredPricing {
+  basePriceUsd: number;
+  tiers: PriceTier[];
+  poolDurationDays: number;
+  shipmentDaysAfterClose: number;
+}
+
+export const TIERED_PRICING: Record<string, TieredPricing> = {
+  "ethiopian single-origin coffee beans": {
+    basePriceUsd: 10.80,
+    tiers: [
+      {
+        label: "Starter",
+        minUnits: 1,
+        maxUnits: 79,
+        priceUsd: 10.80,
+        mandatory: false,
+      },
+      {
+        label: "Bulk",
+        minUnits: 80,
+        maxUnits: 399,
+        priceUsd: 8.98,
+        mandatory: true,
+      },
+      {
+        label: "Wholesale",
+        minUnits: 400,
+        maxUnits: null,
+        priceUsd: 8.08,
+        mandatory: true,
+      },
+    ],
+    poolDurationDays: 7,
+    shipmentDaysAfterClose: 10,
+  },
+};
+
+export function getTieredPricing(productName: string): TieredPricing | null {
+  return TIERED_PRICING[productName.toLowerCase()] ?? null;
+}
+
+export function getActiveTier(pricing: TieredPricing, totalUnits: number): PriceTier {
+  for (let i = pricing.tiers.length - 1; i >= 0; i--) {
+    if (totalUnits >= pricing.tiers[i].minUnits) return pricing.tiers[i];
+  }
+  return pricing.tiers[0];
+}
+
+export function getDiscountPct(basePriceUsd: number, tierPriceUsd: number): number {
+  if (basePriceUsd <= 0) return 0;
+  return Math.round(((basePriceUsd - tierPriceUsd) / basePriceUsd) * 10000) / 100;
+}
+
 export const POOL_STATUS_LABELS: Record<number, string> = {
   0: "Open",
   1: "Fulfilled",
