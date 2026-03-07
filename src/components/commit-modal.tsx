@@ -6,7 +6,6 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { parseGwei } from "viem";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -179,8 +178,6 @@ function TieredCommitContent({
         ...mockUsdcConfig,
         functionName: "approve",
         args: [PURCHASE_POOL_ADDRESS, cost],
-        maxFeePerGas: parseGwei("0.5"),
-        maxPriorityFeePerGas: parseGwei("0.01"),
       },
       {
         onSuccess: () =>
@@ -197,8 +194,6 @@ function TieredCommitContent({
         ...purchasePoolConfig,
         functionName: "commit",
         args: [BigInt(pool.id), parsedUnits],
-        maxFeePerGas: parseGwei("0.5"),
-        maxPriorityFeePerGas: parseGwei("0.01"),
       },
       {
         onSuccess: () => {
@@ -505,8 +500,6 @@ function FallbackCommitModal({
         ...mockUsdcConfig,
         functionName: "approve",
         args: [PURCHASE_POOL_ADDRESS, cost],
-        maxFeePerGas: parseGwei("0.5"),
-        maxPriorityFeePerGas: parseGwei("0.01"),
       },
       {
         onSuccess: () =>
@@ -523,8 +516,6 @@ function FallbackCommitModal({
         ...purchasePoolConfig,
         functionName: "commit",
         args: [BigInt(pool.id), parsedUnits],
-        maxFeePerGas: parseGwei("0.5"),
-        maxPriorityFeePerGas: parseGwei("0.01"),
       },
       {
         onSuccess: () => {

@@ -5,7 +5,6 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { parseGwei } from "viem";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { mockUsdcConfig } from "@/lib/contracts";
@@ -34,8 +33,6 @@ export function MintFaucet() {
         ...mockUsdcConfig,
         functionName: "mint",
         args: [MINT_AMOUNT],
-        maxFeePerGas: parseGwei("0.5"),
-        maxPriorityFeePerGas: parseGwei("0.01"),
       },
       {
         onSuccess: () => {
