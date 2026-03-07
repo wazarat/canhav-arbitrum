@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import {
   useAccount,
   useWriteContract,
@@ -13,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { fetchSubmissions, type SubmissionRecord } from "./actions";
 import {
   purchasePoolConfig,
   MOCK_USDC_ADDRESS,
@@ -219,114 +219,6 @@ function WithdrawRow({
   );
 }
 
-function SubmissionsPanel() {
-  const [interests, setInterests] = useState<SubmissionRecord[]>([]);
-  const [requests, setRequests] = useState<SubmissionRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"interests" | "requests">("interests");
-
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    const result = await fetchSubmissions();
-    if (result.error) {
-      toast.error(result.error);
-    } else {
-      setInterests(result.interests);
-      setRequests(result.requests);
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const items = tab === "interests" ? interests : requests;
-
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>User Submissions</CardTitle>
-          <Button variant="outline" size="sm" onClick={loadData}>
-            Refresh
-          </Button>
-        </div>
-        <div className="flex gap-2 pt-2">
-          <button
-            onClick={() => setTab("interests")}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === "interests"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Register Interest ({interests.length})
-          </button>
-          <button
-            onClick={() => setTab("requests")}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === "requests"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Pool Requests ({requests.length})
-          </button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-lg border bg-muted" />
-            ))}
-          </div>
-        ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">
-            No {tab === "interests" ? "interest registrations" : "pool requests"} yet.
-          </p>
-        ) : (
-          <div className="space-y-3 max-h-[500px] overflow-y-auto">
-            {items.map((item, i) => (
-              <div key={i} className="rounded-lg border p-3 text-sm space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">
-                    {String(item.productName ?? item.product ?? "—")}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {item.submittedAt ? new Date(item.submittedAt).toLocaleString() : ""}
-                  </span>
-                </div>
-                {tab === "interests" ? (
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-muted-foreground">
-                    <span>Name: {String(item.name ?? "—")}</span>
-                    <span>Email: {String(item.email ?? "—")}</span>
-                    <span>Units: {String(item.units ?? "—")}</span>
-                    <span>Frequency: {String(item.frequency ?? "—")}</span>
-                    {item.comments ? (
-                      <span className="col-span-2">Comments: {String(item.comments)}</span>
-                    ) : null}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-muted-foreground">
-                    <span>Quantity: {String(item.quantity ?? "—")}</span>
-                    <span>Price range: {String(item.priceRange ?? "—")}</span>
-                    <span className="col-span-2">Contact: {String(item.contact ?? "—")}</span>
-                    {item.notes ? (
-                      <span className="col-span-2">Notes: {String(item.notes)}</span>
-                    ) : null}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 export default function AdminPage() {
   const { address, isConnected } = useAccount();
   const { data: owner } = useOwner();
@@ -374,6 +266,18 @@ export default function AdminPage() {
         </p>
       </div>
 
+      {/* Admin sub-navigation */}
+      <div className="flex gap-2 border-b pb-3">
+        <Button variant="secondary" size="sm">
+          Pool Management
+        </Button>
+        <Link href="/admin/submissions">
+          <Button variant="ghost" size="sm">
+            Submissions
+          </Button>
+        </Link>
+      </div>
+
       <CreatePoolForm onSuccess={refetch} />
 
       <Separator />
@@ -400,10 +304,6 @@ export default function AdminPage() {
           </div>
         )}
       </div>
-
-      <Separator />
-
-      <SubmissionsPanel />
     </div>
   );
 }
