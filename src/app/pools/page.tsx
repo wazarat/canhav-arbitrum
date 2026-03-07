@@ -9,13 +9,23 @@ import { usePublicPoolCount, usePublicPools } from "@/lib/pool-reader";
 import {
   SECTORS,
   SECTOR_ICONS,
+  POOL_UI_STATUSES,
   getSector,
+  getPoolUIStatus,
   type Sector,
+  type PoolUIStatus,
 } from "@/lib/constants";
+
+const STATUS_ICONS: Record<PoolUIStatus, string> = {
+  Active: "🟢",
+  Evaluating: "🟡",
+  Closed: "🔴",
+};
 
 export default function PoolsPage() {
   const { authenticated } = usePrivy();
   const [activeSector, setActiveSector] = useState<Sector | null>(null);
+  const [activeStatus, setActiveStatus] = useState<PoolUIStatus | null>(null);
 
   const {
     data: poolCount = 0,
@@ -37,10 +47,24 @@ export default function PoolsPage() {
     return counts;
   }, [pools]);
 
+  const statusCounts = useMemo(() => {
+    const counts: Record<PoolUIStatus, number> = { Active: 0, Evaluating: 0, Closed: 0 };
+    for (const pool of pools) {
+      counts[getPoolUIStatus(pool.id, pool.status)]++;
+    }
+    return counts;
+  }, [pools]);
+
   const filteredPools = useMemo(() => {
-    if (!activeSector) return pools;
-    return pools.filter((p) => getSector(p.productName) === activeSector);
-  }, [pools, activeSector]);
+    let result = pools;
+    if (activeSector) {
+      result = result.filter((p) => getSector(p.productName) === activeSector);
+    }
+    if (activeStatus) {
+      result = result.filter((p) => getPoolUIStatus(p.id, p.status) === activeStatus);
+    }
+    return result;
+  }, [pools, activeSector, activeStatus]);
 
   return (
     <div className="space-y-6">
@@ -64,34 +88,71 @@ export default function PoolsPage() {
         </div>
       )}
 
-      {/* Sector filter tabs */}
       {!loading && pools.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setActiveSector(null)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              activeSector === null
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-            }`}
-          >
-            All ({pools.length})
-          </button>
-          {SECTORS.map((sector) => (
+        <div className="space-y-3">
+          {/* Status filter */}
+          <div className="flex flex-wrap gap-2">
+            <span className="self-center text-xs font-medium text-muted-foreground uppercase tracking-wide mr-1">
+              Status
+            </span>
             <button
-              key={sector}
-              onClick={() =>
-                setActiveSector(activeSector === sector ? null : sector)
-              }
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                activeSector === sector
+              onClick={() => setActiveStatus(null)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                activeStatus === null
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               }`}
             >
-              {SECTOR_ICONS[sector]} {sector} ({sectorCounts[sector]})
+              All ({pools.length})
             </button>
-          ))}
+            {POOL_UI_STATUSES.map((status) => (
+              <button
+                key={status}
+                onClick={() =>
+                  setActiveStatus(activeStatus === status ? null : status)
+                }
+                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  activeStatus === status
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                }`}
+              >
+                {STATUS_ICONS[status]} {status} ({statusCounts[status]})
+              </button>
+            ))}
+          </div>
+
+          {/* Sector filter */}
+          <div className="flex flex-wrap gap-2">
+            <span className="self-center text-xs font-medium text-muted-foreground uppercase tracking-wide mr-1">
+              Sector
+            </span>
+            <button
+              onClick={() => setActiveSector(null)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                activeSector === null
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+              }`}
+            >
+              All ({pools.length})
+            </button>
+            {SECTORS.map((sector) => (
+              <button
+                key={sector}
+                onClick={() =>
+                  setActiveSector(activeSector === sector ? null : sector)
+                }
+                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  activeSector === sector
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                }`}
+              >
+                {SECTOR_ICONS[sector]} {sector} ({sectorCounts[sector]})
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -107,7 +168,7 @@ export default function PoolsPage() {
         </p>
       ) : filteredPools.length === 0 ? (
         <p className="text-muted-foreground">
-          No pools in this category yet.
+          No pools match the selected filters.
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

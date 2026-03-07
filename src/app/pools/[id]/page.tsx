@@ -11,6 +11,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CommitModal } from "@/components/commit-modal";
 import { MintFaucet } from "@/components/mint-faucet";
+import { RegisterInterestDialog } from "@/components/register-interest-dialog";
 import { PoolProgress } from "@/components/pool-progress";
 import { Countdown } from "@/components/countdown";
 import { usePool, useCommitment, useBuyerCount } from "@/lib/hooks";
@@ -70,19 +71,28 @@ export default function PoolDetailPage({
         <h1 className="text-2xl font-bold">{pool.productName}</h1>
         <Badge
           variant="outline"
-          className="text-sm bg-muted text-muted-foreground border-muted-foreground/30"
+          className="text-sm bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
         >
-          Coming Soon
+          Evaluating
         </Badge>
         <p className="text-muted-foreground">
-          This pool is not yet available for commitments. Check back soon!
+          This pool is being evaluated. Register your interest and
+          we&apos;ll notify you when it launches.
         </p>
-        <Link
-          href="/pools"
-          className={cn(buttonVariants({ variant: "outline" }))}
-        >
-          &larr; Back to pools
-        </Link>
+        <div className="flex justify-center gap-3">
+          <Link
+            href="/pools"
+            className={cn(buttonVariants({ variant: "outline" }))}
+          >
+            &larr; Back to pools
+          </Link>
+          <RegisterInterestDialog
+            productName={pool.productName}
+            buttonVariant="default"
+            buttonSize="default"
+            buttonClassName=""
+          />
+        </div>
       </div>
     );
   }

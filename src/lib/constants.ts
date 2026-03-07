@@ -174,6 +174,16 @@ export function formatUsdc(amount: bigint): string {
 
 export const ACTIVE_POOL_IDS = new Set([9]);
 
+export type PoolUIStatus = "Active" | "Evaluating" | "Closed";
+
+export const POOL_UI_STATUSES: PoolUIStatus[] = ["Active", "Evaluating", "Closed"];
+
+export function getPoolUIStatus(poolId: number, onChainStatus: number): PoolUIStatus {
+  if (!ACTIVE_POOL_IDS.has(poolId)) return "Evaluating";
+  if (onChainStatus >= 1) return "Closed";
+  return "Active";
+}
+
 export function parseUsdc(amount: string): bigint {
   const [whole, frac = ""] = amount.split(".");
   const paddedFrac = frac.padEnd(USDC_DECIMALS, "0").slice(0, USDC_DECIMALS);
