@@ -37,6 +37,12 @@ const hasValidConfig =
   PURCHASE_POOL_ADDRESS.length > 4 &&
   !!process.env.NEXT_PUBLIC_ALCHEMY_URL;
 
+// #region agent log
+if (typeof window !== 'undefined') {
+  fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'pool-reader.ts:init',message:'Pool reader config',data:{PURCHASE_POOL_ADDRESS,hasValidConfig,alchemyUrl:!!process.env.NEXT_PUBLIC_ALCHEMY_URL},timestamp:Date.now(),hypothesisId:'H-D'})}).catch(()=>{});
+}
+// #endregion
+
 export function usePublicPoolCount() {
   return useQuery({
     queryKey: ["poolCount"],
