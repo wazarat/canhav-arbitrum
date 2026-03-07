@@ -2,11 +2,9 @@
 
 import {
   useAccount,
-  useSwitchChain,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { arbitrumSepolia } from "viem/chains";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { mockUsdcConfig } from "@/lib/contracts";
@@ -16,8 +14,7 @@ import { formatUsdc } from "@/lib/constants";
 const MINT_AMOUNT = 10_000n * 10n ** 6n; // 10,000 mUSDC
 
 export function MintFaucet() {
-  const { address, isConnected } = useAccount();
-  const { switchChainAsync } = useSwitchChain();
+  const { address, isConnected, chain, connector } = useAccount();
 
   const { data: balance, refetch } = useUsdcBalance(address);
 
@@ -30,13 +27,10 @@ export function MintFaucet() {
     },
   });
 
-  async function handleMint() {
-    try {
-      await switchChainAsync({ chainId: arbitrumSepolia.id });
-    } catch {
-      toast.error("Please switch your wallet to Arbitrum Sepolia");
-      return;
-    }
+  function handleMint() {
+    // #region agent log
+    fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'mint-faucet.tsx:handleMint',message:'handleMint called',data:{address,chainId:chain?.id,chainName:chain?.name,connectorName:connector?.name,contractAddr:mockUsdcConfig.address,contractChainId:mockUsdcConfig.chainId},timestamp:Date.now(),hypothesisId:'H-F'})}).catch(()=>{});
+    // #endregion
     writeContract(
       {
         ...mockUsdcConfig,
@@ -49,7 +43,10 @@ export function MintFaucet() {
           refetch();
         },
         onError: (err) => {
-          toast.error(err.message.split("\n")[0] || "Mint failed");
+          // #region agent log
+          fetch('http://127.0.0.1:7799/ingest/50c2e058-c8ce-4b75-8371-725b4e95ae7b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c22be9'},body:JSON.stringify({sessionId:'c22be9',location:'mint-faucet.tsx:handleMint:error',message:'Mint error full',data:{errorMsg:err.message,errorName:err.name,errorCause:String(err.cause)},timestamp:Date.now(),hypothesisId:'H-F'})}).catch(()=>{});
+          // #endregion
+          toast.error(err.message.slice(0, 300) || "Mint failed");
         },
       },
     );

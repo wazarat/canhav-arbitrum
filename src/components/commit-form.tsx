@@ -3,11 +3,9 @@
 import { useState, useEffect } from "react";
 import {
   useAccount,
-  useSwitchChain,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { arbitrumSepolia } from "viem/chains";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +27,6 @@ export function CommitForm({
   onSuccess: () => void;
 }) {
   const { address } = useAccount();
-  const { switchChainAsync } = useSwitchChain();
 
   const [units, setUnits] = useState("");
 
@@ -75,18 +72,7 @@ export function CommitForm({
     query: { enabled: !!commitTx },
   });
 
-  async function ensureChain() {
-    try {
-      await switchChainAsync({ chainId: arbitrumSepolia.id });
-      return true;
-    } catch {
-      toast.error("Please switch your wallet to Arbitrum Sepolia");
-      return false;
-    }
-  }
-
-  async function handleApprove() {
-    if (!(await ensureChain())) return;
+  function handleApprove() {
     approve(
       {
         ...mockUsdcConfig,
@@ -104,8 +90,7 @@ export function CommitForm({
     );
   }
 
-  async function handleCommit() {
-    if (!(await ensureChain())) return;
+  function handleCommit() {
     commit(
       {
         ...purchasePoolConfig,
