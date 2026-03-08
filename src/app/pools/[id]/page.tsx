@@ -461,11 +461,15 @@ export default function PoolDetailPage({
                       <span className="text-muted-foreground">Pool units</span>
                       <span>{currentTotal} committed</span>
                     </div>
-                    {!activeTier.mandatory && (
-                      <p className="text-xs text-amber-400/80 mt-1">
-                        Pool needs {80 - currentTotal > 0 ? 80 - currentTotal : 0} more units to lock in fulfillment.
-                      </p>
-                    )}
+                    {!activeTier.mandatory && pricing && (() => {
+                      const bulkMin = pricing.tiers.find((t) => t.mandatory)?.minUnits ?? 0;
+                      const remaining = bulkMin - currentTotal;
+                      return remaining > 0 ? (
+                        <p className="text-xs text-amber-400/80 mt-1">
+                          Pool needs {remaining} more units to lock in fulfillment.
+                        </p>
+                      ) : null;
+                    })()}
                   </div>
                 )}
                 <CommitModal pool={pool} onSuccess={handleSuccess} />
