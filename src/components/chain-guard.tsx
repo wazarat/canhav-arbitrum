@@ -20,7 +20,7 @@ export function ChainGuard({ children }: { children: React.ReactNode }) {
 
   if (isWrongChain) {
     return (
-      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 space-y-2">
+      <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-3">
         <div className="flex items-center gap-2 text-amber-400 text-sm font-medium">
           <AlertTriangle className="h-4 w-4" />
           Wrong Network
@@ -31,9 +31,9 @@ export function ChainGuard({ children }: { children: React.ReactNode }) {
         </p>
         <Button
           size="sm"
-          variant="outline"
           onClick={() => switchChain({ chainId: arbitrumSepolia.id })}
           disabled={isPending}
+          className="gradient-brand border-0 text-white hover:opacity-90 transition-opacity"
         >
           {isPending ? "Switching..." : "Switch to Arbitrum Sepolia"}
         </Button>

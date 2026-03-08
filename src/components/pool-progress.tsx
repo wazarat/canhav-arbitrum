@@ -20,18 +20,27 @@ export function PoolProgress({ pool }: { pool: PoolData }) {
       <div className="flex justify-between text-sm">
         <span className="text-muted-foreground">Progress</span>
         <span className="font-medium">
-          {pool.totalUnits.toString()} / {target.toString()} units ({Math.min(pct, 100)}%)
+          {pool.totalUnits.toString()} / {target.toString()} units
+          <span className="text-primary ml-1">({Math.min(pct, 100)}%)</span>
         </span>
       </div>
-      <Progress value={Math.min(pct, 100)} className="h-3" />
+      <div className="relative">
+        <Progress value={Math.min(pct, 100)} className="h-3 gradient-progress" />
+        {pct > 0 && pct < 100 && (
+          <div
+            className="absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full border-2 border-primary bg-background shadow-md shadow-primary/30"
+            style={{ left: `calc(${Math.min(pct, 100)}% - 8px)` }}
+          />
+        )}
+      </div>
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <span className="text-muted-foreground">Current price/unit</span>
-          <p className="font-medium">{formatUsdc(currentPrice)} mUSDC</p>
+          <span className="text-muted-foreground text-xs">Current price/unit</span>
+          <p className="font-semibold text-primary">{formatUsdc(currentPrice)} mUSDC</p>
         </div>
         <div>
-          <span className="text-muted-foreground">Total deposited</span>
-          <p className="font-medium">{formatUsdc(pool.totalDeposited)} mUSDC</p>
+          <span className="text-muted-foreground text-xs">Total deposited</span>
+          <p className="font-semibold">{formatUsdc(pool.totalDeposited)} mUSDC</p>
         </div>
       </div>
     </div>

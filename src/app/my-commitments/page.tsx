@@ -68,7 +68,8 @@ function CommitmentRow({
   }
 
   return (
-    <Card>
+    <Card className="overflow-hidden transition-all hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5">
+      <div className="h-[2px] w-full bg-gradient-to-r from-primary/60 via-violet-500/60 to-primary/60" />
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <Link
@@ -175,8 +176,14 @@ export default function MyCommitmentsPage() {
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="h-32 animate-pulse rounded-lg border bg-muted"
-            />
+              className="h-32 rounded-xl border border-primary/5 bg-card overflow-hidden"
+            >
+              <div className="h-[2px] w-full shimmer" />
+              <div className="p-6 space-y-3">
+                <div className="h-5 w-48 rounded-md shimmer" />
+                <div className="h-4 w-32 rounded-md shimmer" />
+              </div>
+            </div>
           ))}
         </div>
       ) : pools.length === 0 ? (

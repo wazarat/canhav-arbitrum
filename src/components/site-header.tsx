@@ -2,12 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { ConnectButton } from "@/components/connect-button";
 import { useOwner } from "@/lib/hooks";
+
+const NAV_ITEMS = [
+  { href: "/pools", label: "Pools" },
+  { href: "/my-commitments", label: "My Commitments" },
+  { href: "/request-pool", label: "Request a Pool" },
+] as const;
 
 function NavLinks({
   isOwner,
@@ -16,36 +23,44 @@ function NavLinks({
   isOwner: boolean;
   onClick?: () => void;
 }) {
+  const pathname = usePathname();
+
   return (
     <>
-      <Link
-        href="/pools"
-        onClick={onClick}
-        className="text-muted-foreground hover:text-foreground transition-colors"
-      >
-        Pools
-      </Link>
-      <Link
-        href="/my-commitments"
-        onClick={onClick}
-        className="text-muted-foreground hover:text-foreground transition-colors"
-      >
-        My Commitments
-      </Link>
-      <Link
-        href="/request-pool"
-        onClick={onClick}
-        className="text-muted-foreground hover:text-foreground transition-colors"
-      >
-        Request a Pool
-      </Link>
+      {NAV_ITEMS.map((item) => {
+        const active = pathname === item.href || pathname.startsWith(item.href + "/");
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onClick}
+            className={`relative py-1 font-medium transition-colors ${
+              active
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {item.label}
+            {active && (
+              <span className="absolute -bottom-[19px] left-0 right-0 h-[2px] gradient-brand rounded-full" />
+            )}
+          </Link>
+        );
+      })}
       {isOwner && (
         <Link
           href="/admin"
           onClick={onClick}
-          className="text-muted-foreground hover:text-foreground transition-colors"
+          className={`relative py-1 font-medium transition-colors ${
+            pathname.startsWith("/admin")
+              ? "text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
         >
           Admin
+          {pathname.startsWith("/admin") && (
+            <span className="absolute -bottom-[19px] left-0 right-0 h-[2px] gradient-brand rounded-full" />
+          )}
         </Link>
       )}
     </>
@@ -63,9 +78,9 @@ export function SiteHeader() {
     owner.toString().toLowerCase() === address.toLowerCase();
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <div className="flex items-center gap-6">
+    <header className="sticky top-0 z-50 bg-background/70 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+        <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/canhav-logo.svg"
@@ -76,7 +91,7 @@ export function SiteHeader() {
               className="h-8 w-auto"
             />
           </Link>
-          <nav className="hidden sm:flex items-center gap-4 text-sm">
+          <nav className="hidden sm:flex items-center gap-6 text-sm">
             <NavLinks isOwner={isOwner} />
           </nav>
         </div>
@@ -99,8 +114,10 @@ export function SiteHeader() {
         </div>
       </div>
 
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+
       {mobileOpen && (
-        <nav className="flex flex-col gap-3 border-t px-4 py-4 text-sm sm:hidden">
+        <nav className="flex flex-col gap-3 px-4 py-4 text-sm sm:hidden bg-background/90 backdrop-blur-xl">
           <NavLinks
             isOwner={isOwner}
             onClick={() => setMobileOpen(false)}

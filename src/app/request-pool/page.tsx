@@ -84,7 +84,8 @@ export default function RequestPoolPage() {
         </p>
       </div>
 
-      <Card>
+      <Card className="overflow-hidden border-primary/10">
+        <div className="h-[2px] w-full bg-gradient-to-r from-primary via-violet-500 to-primary" />
         <CardHeader>
           <CardTitle>Pool Details</CardTitle>
         </CardHeader>
@@ -148,7 +149,7 @@ export default function RequestPoolPage() {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={sending}>
+            <Button type="submit" className="w-full gradient-brand border-0 text-white hover:opacity-90 transition-opacity" disabled={sending}>
               {sending ? "Submitting..." : "Submit Request"}
             </Button>
           </form>

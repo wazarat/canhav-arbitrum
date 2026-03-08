@@ -11,7 +11,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  POOL_STATUS_COLORS,
   SECTOR_ICONS,
   formatUsdc,
   getSector,
@@ -38,8 +37,9 @@ export function PoolCard({ pool }: { pool: PoolData }) {
         return (
           <Badge
             variant="outline"
-            className={`shrink-0 text-xs ${POOL_STATUS_COLORS[pool.status] ?? ""}`}
+            className="shrink-0 text-xs bg-emerald-500/15 text-emerald-400 border-emerald-500/25"
           >
+            <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Open
           </Badge>
         );
@@ -47,7 +47,7 @@ export function PoolCard({ pool }: { pool: PoolData }) {
         return (
           <Badge
             variant="outline"
-            className="shrink-0 text-xs bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
+            className="shrink-0 text-xs bg-amber-500/15 text-amber-400 border-amber-500/25"
           >
             Evaluating
           </Badge>
@@ -56,7 +56,7 @@ export function PoolCard({ pool }: { pool: PoolData }) {
         return (
           <Badge
             variant="outline"
-            className="shrink-0 text-xs bg-gray-500/20 text-gray-400 border-gray-500/30"
+            className="shrink-0 text-xs bg-zinc-500/15 text-zinc-400 border-zinc-500/25"
           >
             Closed
           </Badge>
@@ -65,14 +65,21 @@ export function PoolCard({ pool }: { pool: PoolData }) {
   })();
 
   const card = (
-    <Card className={`h-full transition-shadow ${
+    <Card className={`group h-full overflow-hidden transition-all duration-300 ${
       isClickable
-        ? "hover:shadow-lg hover:border-primary/40 cursor-pointer"
-        : "opacity-70 cursor-default"
+        ? "hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 cursor-pointer"
+        : "opacity-60 cursor-default"
     }`}>
+      <div className={`h-[2px] w-full ${
+        uiStatus === "Active"
+          ? "bg-gradient-to-r from-emerald-500 via-primary to-violet-500"
+          : uiStatus === "Evaluating"
+            ? "bg-gradient-to-r from-amber-500/50 via-amber-400/30 to-amber-500/50"
+            : "bg-gradient-to-r from-zinc-600/30 via-zinc-500/20 to-zinc-600/30"
+      }`} />
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base leading-tight">
+          <CardTitle className="text-base leading-tight group-hover:text-primary transition-colors">
             {pool.productName}
           </CardTitle>
           {statusBadge}
@@ -90,14 +97,14 @@ export function PoolCard({ pool }: { pool: PoolData }) {
             MOQ: {target.toString()} units
           </span>
         </div>
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <div className="flex justify-between text-xs">
-            <span>
+            <span className="text-muted-foreground">
               {pool.totalUnits.toString()} / {target.toString()} units
             </span>
-            <span>{Math.min(pct, 100)}%</span>
+            <span className="font-medium text-primary">{Math.min(pct, 100)}%</span>
           </div>
-          <Progress value={Math.min(pct, 100)} className="h-2" />
+          <Progress value={Math.min(pct, 100)} className="h-2 gradient-progress" />
         </div>
         {closedMeta && (
           <div className="flex items-center justify-between">

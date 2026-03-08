@@ -87,10 +87,10 @@ function TierRow({
 
   return (
     <div
-      className={`flex items-center justify-between rounded-lg border px-3 py-2.5 transition-colors ${
+      className={`flex items-center justify-between rounded-xl border px-3 py-2.5 transition-all duration-200 ${
         isActive
-          ? "border-primary bg-primary/10"
-          : "border-border bg-muted/30"
+          ? "border-primary/40 bg-primary/5 shadow-sm shadow-primary/10"
+          : "border-border bg-muted/20 hover:border-primary/20"
       }`}
     >
       <div className="space-y-0.5">
@@ -273,12 +273,12 @@ function TieredCommitContent({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        render={<Button className="w-full" size="lg" />}
+        render={<Button className="w-full gradient-brand border-0 text-white hover:opacity-90 transition-opacity" size="lg" />}
       >
         Commit to Pool
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-primary/15 bg-card/95 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>Commit to {pool.productName}</DialogTitle>
           <DialogDescription>
@@ -420,7 +420,7 @@ function TieredCommitContent({
               <span
                 className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
                   step === 1
-                    ? "bg-primary text-primary-foreground"
+                    ? "gradient-brand text-white"
                     : "bg-muted-foreground/20 text-muted-foreground"
                 }`}
               >
@@ -429,11 +429,11 @@ function TieredCommitContent({
               <span className={step === 1 ? "text-foreground font-medium" : ""}>
                 Approve
               </span>
-              <span className="mx-1">&rarr;</span>
+              <span className="mx-1 text-primary/50">&rarr;</span>
               <span
                 className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
                   step === 2
-                    ? "bg-primary text-primary-foreground"
+                    ? "gradient-brand text-white"
                     : "bg-muted-foreground/20 text-muted-foreground"
                 }`}
               >
@@ -448,7 +448,7 @@ function TieredCommitContent({
           {parsedUnits > 0n &&
             balance !== undefined &&
             onChainCost > (balance as bigint) && (
-              <p className="text-xs text-red-400 font-medium">
+              <p className="text-xs text-red-400 font-medium rounded-lg bg-red-500/10 border border-red-500/20 p-2">
                 Insufficient mUSDC balance. You need{" "}
                 {formatUsdc(onChainCost)} mUSDC but have{" "}
                 {formatUsdc(balance as bigint)}. Use the faucet to mint
@@ -463,7 +463,7 @@ function TieredCommitContent({
                 isWorking ||
                 (balance !== undefined && onChainCost > (balance as bigint))
               }
-              className="w-full"
+              className="w-full gradient-brand border-0 text-white hover:opacity-90 transition-opacity"
             >
               {isApproving
                 ? "Waiting for wallet..."
@@ -481,7 +481,7 @@ function TieredCommitContent({
                 !allowanceLoaded ||
                 (balance !== undefined && onChainCost > (balance as bigint))
               }
-              className="w-full"
+              className="w-full gradient-brand border-0 text-white hover:opacity-90 transition-opacity"
             >
               {!allowanceLoaded && parsedUnits > 0n
                 ? "Loading..."
@@ -636,11 +636,11 @@ function FallbackCommitModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button className="w-full" size="lg" />}>
+      <DialogTrigger render={<Button className="w-full gradient-brand border-0 text-white hover:opacity-90 transition-opacity" size="lg" />}>
         Commit to Pool
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md border-primary/15 bg-card/95 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>Commit to {pool.productName}</DialogTitle>
           <DialogDescription>
@@ -685,7 +685,7 @@ function FallbackCommitModal({
               <span
                 className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
                   step === 1
-                    ? "bg-primary text-primary-foreground"
+                    ? "gradient-brand text-white"
                     : "bg-muted-foreground/20 text-muted-foreground"
                 }`}
               >
@@ -694,11 +694,11 @@ function FallbackCommitModal({
               <span className={step === 1 ? "text-foreground font-medium" : ""}>
                 Approve
               </span>
-              <span className="mx-1">&rarr;</span>
+              <span className="mx-1 text-primary/50">&rarr;</span>
               <span
                 className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
                   step === 2
-                    ? "bg-primary text-primary-foreground"
+                    ? "gradient-brand text-white"
                     : "bg-muted-foreground/20 text-muted-foreground"
                 }`}
               >
@@ -713,7 +713,7 @@ function FallbackCommitModal({
           {parsedUnits > 0n &&
             balance !== undefined &&
             cost > (balance as bigint) && (
-              <p className="text-xs text-red-400 font-medium">
+              <p className="text-xs text-red-400 font-medium rounded-lg bg-red-500/10 border border-red-500/20 p-2">
                 Insufficient mUSDC balance. You need{" "}
                 {formatUsdc(cost)} mUSDC but have{" "}
                 {formatUsdc(balance as bigint)}. Use the faucet to mint
@@ -728,7 +728,7 @@ function FallbackCommitModal({
                 isWorking ||
                 (balance !== undefined && cost > (balance as bigint))
               }
-              className="w-full"
+              className="w-full gradient-brand border-0 text-white hover:opacity-90 transition-opacity"
             >
               {isApproving
                 ? "Waiting for wallet..."
@@ -746,7 +746,7 @@ function FallbackCommitModal({
                 !allowanceLoaded ||
                 (balance !== undefined && cost > (balance as bigint))
               }
-              className="w-full"
+              className="w-full gradient-brand border-0 text-white hover:opacity-90 transition-opacity"
             >
               {!allowanceLoaded && parsedUnits > 0n
                 ? "Loading..."

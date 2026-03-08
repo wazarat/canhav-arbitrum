@@ -98,17 +98,17 @@ function computeStages(pool: PoolData): FulfillmentStage[] {
 
 const STATUS_STYLES = {
   completed: {
-    dot: "bg-green-500",
-    line: "border-green-500",
+    dot: "bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-sm shadow-emerald-500/30",
+    line: "border-emerald-500/50",
     text: "text-foreground",
   },
   active: {
-    dot: "bg-primary animate-pulse",
-    line: "border-border",
+    dot: "gradient-brand animate-pulse shadow-md shadow-primary/30",
+    line: "border-primary/30",
     text: "text-foreground",
   },
   upcoming: {
-    dot: "bg-muted-foreground/30",
+    dot: "bg-muted-foreground/20",
     line: "border-border",
     text: "text-muted-foreground",
   },

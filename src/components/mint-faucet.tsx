@@ -76,20 +76,20 @@ function MintFaucetInner() {
   if (!isConnected) return null;
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
+    <div className="flex items-center gap-3 rounded-xl border border-primary/15 bg-primary/5 p-3">
       <div className="flex-1 text-sm">
         <p className="font-medium">Test Token Faucet</p>
         {balance !== undefined && (
           <p className="text-muted-foreground text-xs">
-            Balance: {formatUsdc(balance as bigint)} mUSDC
+            Balance: <span className="text-primary font-medium">{formatUsdc(balance as bigint)}</span> mUSDC
           </p>
         )}
       </div>
       <Button
         size="sm"
-        variant="outline"
         onClick={handleMint}
         disabled={isPending || isConfirming}
+        className="gradient-brand border-0 text-white hover:opacity-90 transition-opacity"
       >
         {isPending || isConfirming ? "Minting..." : "Mint 10,000 mUSDC"}
       </Button>

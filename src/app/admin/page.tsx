@@ -83,7 +83,8 @@ function CreatePoolForm({ onSuccess }: { onSuccess: () => void }) {
   const isWorking = isPending || isConfirming;
 
   return (
-    <Card>
+    <Card className="overflow-hidden border-primary/10">
+      <div className="h-[2px] w-full bg-gradient-to-r from-primary via-violet-500 to-primary" />
       <CardHeader>
         <CardTitle>Create New Pool</CardTitle>
       </CardHeader>
@@ -139,7 +140,7 @@ function CreatePoolForm({ onSuccess }: { onSuccess: () => void }) {
           Token: mUSDC ({MOCK_USDC_ADDRESS.slice(0, 6)}...{MOCK_USDC_ADDRESS.slice(-4)})
         </div>
 
-        <Button onClick={handleCreate} disabled={isWorking} className="w-full">
+        <Button onClick={handleCreate} disabled={isWorking} className="w-full gradient-brand border-0 text-white hover:opacity-90 transition-opacity">
           {isWorking ? "Creating..." : "Create Pool"}
         </Button>
       </CardContent>

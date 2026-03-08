@@ -81,7 +81,7 @@ export function RegisterInterestDialog({
       >
         {buttonLabel}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-primary/15 bg-card/95 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>Register Interest</DialogTitle>
           <DialogDescription>
@@ -130,10 +130,10 @@ export function RegisterInterestDialog({
                   key={f}
                   type="button"
                   onClick={() => setFrequency(frequency === f ? "" : f)}
-                  className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
+                  className={`rounded-xl border px-3 py-2 text-sm transition-all duration-200 ${
                     frequency === f
-                      ? "border-primary bg-primary/10 text-primary font-medium"
-                      : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                      ? "border-primary/40 bg-primary/10 text-primary font-medium shadow-sm shadow-primary/10"
+                      : "border-border text-muted-foreground hover:border-primary/20 hover:text-foreground"
                   }`}
                 >
                   {f}
@@ -153,7 +153,7 @@ export function RegisterInterestDialog({
               onChange={(e) => setComments(e.target.value)}
             />
           </div>
-          <Button type="submit" className="w-full" disabled={sending}>
+          <Button type="submit" className="w-full gradient-brand border-0 text-white hover:opacity-90 transition-opacity" disabled={sending}>
             {sending ? "Submitting..." : "Notify Me"}
           </Button>
         </form>

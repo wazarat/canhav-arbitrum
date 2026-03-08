@@ -16,10 +16,10 @@ import {
   type PoolUIStatus,
 } from "@/lib/constants";
 
-const STATUS_ICONS: Record<PoolUIStatus, string> = {
-  Active: "🟢",
-  Evaluating: "🟡",
-  Closed: "🔴",
+const STATUS_COLORS: Record<PoolUIStatus, string> = {
+  Active: "bg-emerald-500",
+  Evaluating: "bg-amber-500",
+  Closed: "bg-zinc-500",
 };
 
 export default function PoolsPage() {
@@ -67,10 +67,10 @@ export default function PoolsPage() {
   }, [pools, activeSector, activeStatus]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold">All Pools</h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mt-1">
           Browse open purchase pools and commit to meet supplier MOQs.
         </p>
       </div>
@@ -78,7 +78,7 @@ export default function PoolsPage() {
       {authenticated && <MintFaucet />}
 
       {countError && (
-        <div className="rounded-lg border border-red-800 bg-red-950/50 p-4 text-sm text-red-300">
+        <div className="rounded-xl border border-red-800/50 bg-red-950/30 p-4 text-sm text-red-300">
           <p className="font-semibold">Failed to load pools</p>
           <p className="mt-1 text-red-400/80">
             {countError.message.includes("Missing")
@@ -89,18 +89,18 @@ export default function PoolsPage() {
       )}
 
       {!loading && pools.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {/* Status filter */}
-          <div className="flex flex-wrap gap-2">
-            <span className="self-center text-xs font-medium text-muted-foreground uppercase tracking-wide mr-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mr-1">
               Status
             </span>
             <button
               onClick={() => setActiveStatus(null)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              className={`rounded-full px-4 py-1.5 text-sm font-medium border transition-all duration-200 ${
                 activeStatus === null
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                  ? "gradient-brand text-white border-transparent shadow-md shadow-primary/20"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
               }`}
             >
               All ({pools.length})
@@ -111,28 +111,31 @@ export default function PoolsPage() {
                 onClick={() =>
                   setActiveStatus(activeStatus === status ? null : status)
                 }
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={`rounded-full px-4 py-1.5 text-sm font-medium border transition-all duration-200 ${
                   activeStatus === status
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                    ? "gradient-brand text-white border-transparent shadow-md shadow-primary/20"
+                    : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
                 }`}
               >
-                {STATUS_ICONS[status]} {status} ({statusCounts[status]})
+                <span className={`inline-block h-1.5 w-1.5 rounded-full mr-1.5 ${STATUS_COLORS[status]}`} />
+                {status} ({statusCounts[status]})
               </button>
             ))}
           </div>
 
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
           {/* Sector filter */}
-          <div className="flex flex-wrap gap-2">
-            <span className="self-center text-xs font-medium text-muted-foreground uppercase tracking-wide mr-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mr-1">
               Sector
             </span>
             <button
               onClick={() => setActiveSector(null)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              className={`rounded-full px-4 py-1.5 text-sm font-medium border transition-all duration-200 ${
                 activeSector === null
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                  ? "gradient-brand text-white border-transparent shadow-md shadow-primary/20"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
               }`}
             >
               All ({pools.length})
@@ -143,10 +146,10 @@ export default function PoolsPage() {
                 onClick={() =>
                   setActiveSector(activeSector === sector ? null : sector)
                 }
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={`rounded-full px-4 py-1.5 text-sm font-medium border transition-all duration-200 ${
                   activeSector === sector
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                    ? "gradient-brand text-white border-transparent shadow-md shadow-primary/20"
+                    : "border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
                 }`}
               >
                 {SECTOR_ICONS[sector]} {sector} ({sectorCounts[sector]})
@@ -157,21 +160,25 @@ export default function PoolsPage() {
       )}
 
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <PoolCardSkeleton key={i} />
           ))}
         </div>
       ) : pools.length === 0 && !countError ? (
-        <p className="text-muted-foreground">
-          No pools found. Deploy the contracts and seed pools to get started.
-        </p>
+        <div className="rounded-xl border border-dashed border-primary/20 p-12 text-center">
+          <p className="text-muted-foreground">
+            No pools found. Deploy the contracts and seed pools to get started.
+          </p>
+        </div>
       ) : filteredPools.length === 0 ? (
-        <p className="text-muted-foreground">
-          No pools match the selected filters.
-        </p>
+        <div className="rounded-xl border border-dashed border-primary/20 p-12 text-center">
+          <p className="text-muted-foreground">
+            No pools match the selected filters.
+          </p>
+        </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filteredPools.map((pool) => (
             <PoolCard key={pool.id} pool={pool} />
           ))}

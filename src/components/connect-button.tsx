@@ -19,7 +19,7 @@ export function ConnectButton() {
 
   if (!authenticated) {
     return (
-      <Button size="sm" onClick={login}>
+      <Button size="sm" onClick={login} className="gradient-brand border-0 text-white hover:opacity-90 transition-opacity">
         Sign In
       </Button>
     );
@@ -33,13 +33,13 @@ export function ConnectButton() {
   return (
     <div className="flex items-center gap-2">
       {address && (
-        <span className="hidden sm:inline rounded-md bg-muted px-3 py-1.5 font-mono text-xs">
+        <span className="hidden sm:inline rounded-lg bg-primary/10 border border-primary/20 px-3 py-1.5 font-mono text-xs text-primary">
           {address.slice(0, 6)}...{address.slice(-4)}
         </span>
       )}
 
       {displayEmail && !address && (
-        <span className="hidden sm:inline rounded-md bg-muted px-3 py-1.5 text-xs truncate max-w-[160px]">
+        <span className="hidden sm:inline rounded-lg bg-muted px-3 py-1.5 text-xs truncate max-w-[160px]">
           {displayEmail}
         </span>
       )}
@@ -50,6 +50,7 @@ export function ConnectButton() {
           size="sm"
           onClick={() => linkWallet()}
           title="Link MetaMask or external wallet"
+          className="border-primary/30 hover:border-primary/50 hover:bg-primary/5"
         >
           <Wallet className="h-4 w-4 mr-1.5" />
           <span className="hidden sm:inline">Link Wallet</span>
@@ -57,7 +58,7 @@ export function ConnectButton() {
         </Button>
       )}
 
-      <Button variant="ghost" size="sm" onClick={logout}>
+      <Button variant="ghost" size="sm" onClick={logout} className="text-muted-foreground hover:text-foreground">
         <LogOut className="h-4 w-4 mr-1.5" />
         <span className="hidden sm:inline">Sign Out</span>
       </Button>

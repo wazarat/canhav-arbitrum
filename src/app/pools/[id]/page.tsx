@@ -82,22 +82,22 @@ export default function PoolDetailPage({
 
   if (uiStatus === "Evaluating") {
     return (
-      <div className="py-20 text-center space-y-4">
-        <h1 className="text-2xl font-bold">{pool.productName}</h1>
+      <div className="py-20 text-center space-y-6">
+        <h1 className="text-3xl font-bold">{pool.productName}</h1>
         <Badge
           variant="outline"
-          className="text-sm bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
+          className="text-sm bg-amber-500/15 text-amber-400 border-amber-500/25"
         >
           Evaluating
         </Badge>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground max-w-md mx-auto">
           This pool is being evaluated. Register your interest and
           we&apos;ll notify you when it launches.
         </p>
         <div className="flex justify-center gap-3">
           <Link
             href="/pools"
-            className={cn(buttonVariants({ variant: "outline" }))}
+            className={cn(buttonVariants({ variant: "outline" }), "border-primary/30")}
           >
             &larr; Back to pools
           </Link>
@@ -367,10 +367,10 @@ export default function PoolDetailPage({
                   return (
                     <div
                       key={idx}
-                      className={`relative flex items-center justify-between rounded-lg border p-4 transition-colors ${
+                      className={`relative flex items-center justify-between rounded-xl border p-4 transition-all duration-200 ${
                         isActive
-                          ? "border-primary bg-primary/5"
-                          : "border-border"
+                          ? "border-primary/40 bg-primary/5 shadow-sm shadow-primary/10"
+                          : "border-border hover:border-primary/20"
                       }`}
                     >
                       <div className="space-y-1">
@@ -477,16 +477,17 @@ export default function PoolDetailPage({
           {authenticated && <MintFaucet />}
 
           {authenticated && pool.status === 0 && (
-            <Card>
+            <Card className="overflow-hidden border-primary/20">
+              <div className="h-[2px] w-full bg-gradient-to-r from-primary via-violet-500 to-primary" />
               <CardHeader>
                 <CardTitle>Join This Pool</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {onChainTiers && (
-                  <div className="rounded-lg bg-muted/50 p-3 text-sm space-y-1">
+                  <div className="rounded-lg bg-primary/5 border border-primary/10 p-3 text-sm space-y-1.5">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Current price</span>
-                      <span className="font-semibold">{formatUsdc(currentTierPrice)} mUSDC/unit</span>
+                      <span className="font-semibold text-primary">{formatUsdc(currentTierPrice)} mUSDC/unit</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Pool units</span>
