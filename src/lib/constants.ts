@@ -1,5 +1,8 @@
 export const USDC_DECIMALS = 6;
 
+export const PLATFORM_FEE_BPS = 250; // 2.5 % — must match the deployed contract's feeBps
+export const PLATFORM_FEE_PCT = PLATFORM_FEE_BPS / 100; // 2.5
+
 export type Sector = "Coffee Beans" | "Food Ingredients" | "Beverage Service Supplies" | "Food Packaging";
 
 export const SECTORS: Sector[] = [

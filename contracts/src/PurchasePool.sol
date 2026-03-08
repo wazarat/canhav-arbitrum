@@ -9,8 +9,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @notice Businesses pool ERC-20 commitments toward a supplier MOQ.
 ///         If the MOQ is met the admin can withdraw funds; otherwise
 ///         every buyer can reclaim their deposit after the deadline.
+///         A configurable platform fee (basis points) is deducted on withdrawal.
 contract PurchasePool is Ownable {
     using SafeERC20 for IERC20;
+
+    uint256 public constant MAX_FEE_BPS = 1000; // 10 % hard cap
 
     enum PoolStatus { Open, Fulfilled, Expired, Withdrawn }
 
@@ -32,6 +35,9 @@ contract PurchasePool is Ownable {
     }
 
     uint256 public nextPoolId;
+    uint256 public feeBps;          // platform fee in basis points (e.g. 250 = 2.5 %)
+    address public feeRecipient;    // address that receives the platform fee
+    uint256 public totalFeesCollected; // running total across all pools
 
     mapping(uint256 => Pool) public pools;
     // poolId => buyer => commitment
@@ -62,11 +68,34 @@ contract PurchasePool is Ownable {
         address indexed buyer,
         uint256 amount
     );
-    event FundsWithdrawn(uint256 indexed poolId, uint256 amount);
+    event FundsWithdrawn(uint256 indexed poolId, uint256 amount, uint256 fee);
+    event FeeUpdated(uint256 oldBps, uint256 newBps);
+    event FeeRecipientUpdated(address oldRecipient, address newRecipient);
 
-    constructor() Ownable(msg.sender) {}
+    /// @param _feeBps     Initial platform fee in basis points (250 = 2.5 %)
+    /// @param _feeRecipient Address that receives platform fees
+    constructor(uint256 _feeBps, address _feeRecipient) Ownable(msg.sender) {
+        require(_feeBps <= MAX_FEE_BPS, "Fee exceeds max");
+        require(_feeRecipient != address(0), "Invalid fee recipient");
+        feeBps = _feeBps;
+        feeRecipient = _feeRecipient;
+    }
 
     // ── Admin ───────────────────────────────────────────────────────────
+
+    /// @notice Update the platform fee (capped at MAX_FEE_BPS).
+    function setFeeBps(uint256 _feeBps) external onlyOwner {
+        require(_feeBps <= MAX_FEE_BPS, "Fee exceeds max");
+        emit FeeUpdated(feeBps, _feeBps);
+        feeBps = _feeBps;
+    }
+
+    /// @notice Update the fee recipient address.
+    function setFeeRecipient(address _feeRecipient) external onlyOwner {
+        require(_feeRecipient != address(0), "Invalid fee recipient");
+        emit FeeRecipientUpdated(feeRecipient, _feeRecipient);
+        feeRecipient = _feeRecipient;
+    }
 
     /// @notice Create a new purchase pool.
     function createPool(
@@ -97,6 +126,7 @@ contract PurchasePool is Ownable {
     }
 
     /// @notice Withdraw funds from a fulfilled pool (admin only).
+    ///         A platform fee is deducted and sent to feeRecipient.
     function withdrawFunds(uint256 poolId) external onlyOwner {
         Pool storage pool = pools[poolId];
         _refreshStatus(poolId);
@@ -105,8 +135,16 @@ contract PurchasePool is Ownable {
         uint256 amount = pool.totalDeposited;
         pool.status = PoolStatus.Withdrawn;
 
-        pool.token.safeTransfer(msg.sender, amount);
-        emit FundsWithdrawn(poolId, amount);
+        uint256 fee = (amount * feeBps) / 10_000;
+        uint256 payout = amount - fee;
+
+        if (fee > 0) {
+            pool.token.safeTransfer(feeRecipient, fee);
+            totalFeesCollected += fee;
+        }
+        pool.token.safeTransfer(msg.sender, payout);
+
+        emit FundsWithdrawn(poolId, payout, fee);
     }
 
     // ── Buyer ───────────────────────────────────────────────────────────

@@ -138,3 +138,17 @@ export function useBuyerCount(poolId: number) {
     args: [BigInt(poolId)],
   });
 }
+
+export function useFeeBps() {
+  return useReadContract({
+    ...purchasePoolConfig,
+    functionName: "feeBps",
+  });
+}
+
+export function useTotalFeesCollected() {
+  return useReadContract({
+    ...purchasePoolConfig,
+    functionName: "totalFeesCollected",
+  });
+}

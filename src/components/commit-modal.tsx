@@ -26,7 +26,7 @@ import {
   mockUsdcConfig,
   PURCHASE_POOL_ADDRESS,
 } from "@/lib/contracts";
-import { useUsdcBalance, useUsdcAllowance } from "@/lib/hooks";
+import { useUsdcBalance, useUsdcAllowance, useFeeBps } from "@/lib/hooks";
 import type { PoolData } from "@/lib/hooks";
 import {
   formatUsdc,
@@ -352,6 +352,10 @@ function TieredCommitContent({
               <div className="flex justify-between font-semibold">
                 <span>Total cost</span>
                 <span>{formatUsdc(onChainCost)} mUSDC</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">Platform fee (on fulfillment)</span>
+                <span className="text-muted-foreground">2.5%</span>
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Pool total after commit</span>

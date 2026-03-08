@@ -13,14 +13,16 @@ contract PurchasePoolTest is Test {
     address alice  = makeAddr("alice");
     address bob    = makeAddr("bob");
     address carol  = makeAddr("carol");
+    address treasury = makeAddr("treasury");
 
     uint256 constant PRICE  = 10e6;   // 10 USDC per unit
     uint256 constant MOQ    = 100;    // 100 units minimum
     uint256 constant DEADLINE_OFFSET = 7 days;
+    uint256 constant FEE_BPS = 250;   // 2.5 %
 
     function setUp() public {
         usdc = new MockUSDC();
-        pool = new PurchasePool();
+        pool = new PurchasePool(FEE_BPS, treasury);
 
         usdc.mintTo(alice, 5000e6);
         usdc.mintTo(bob,   5000e6);
@@ -139,7 +141,7 @@ contract PurchasePoolTest is Test {
         assertEq(uint8(status), uint8(PurchasePool.PoolStatus.Fulfilled));
     }
 
-    function test_withdrawAfterFulfill() public {
+    function test_withdrawAfterFulfill_withFee() public {
         uint256 poolId = _createDefaultPool();
 
         vm.startPrank(alice);
@@ -147,11 +149,18 @@ contract PurchasePoolTest is Test {
         pool.commit(poolId, MOQ);
         vm.stopPrank();
 
-        uint256 adminBefore = usdc.balanceOf(admin);
-        pool.withdrawFunds(poolId);
-        uint256 adminAfter = usdc.balanceOf(admin);
+        uint256 totalDeposit = MOQ * PRICE; // 1000e6
+        uint256 expectedFee = (totalDeposit * FEE_BPS) / 10_000; // 25e6
+        uint256 expectedPayout = totalDeposit - expectedFee;      // 975e6
 
-        assertEq(adminAfter - adminBefore, MOQ * PRICE);
+        uint256 adminBefore = usdc.balanceOf(admin);
+        uint256 treasuryBefore = usdc.balanceOf(treasury);
+
+        pool.withdrawFunds(poolId);
+
+        assertEq(usdc.balanceOf(admin) - adminBefore, expectedPayout);
+        assertEq(usdc.balanceOf(treasury) - treasuryBefore, expectedFee);
+        assertEq(pool.totalFeesCollected(), expectedFee);
 
         (, , , , , , , PurchasePool.PoolStatus status) = pool.getPool(poolId);
         assertEq(uint8(status), uint8(PurchasePool.PoolStatus.Withdrawn));
@@ -161,6 +170,68 @@ contract PurchasePoolTest is Test {
         uint256 poolId = _createDefaultPool();
         vm.expectRevert("Pool not fulfilled");
         pool.withdrawFunds(poolId);
+    }
+
+    // ── Fee configuration ───────────────────────────────────────────────
+
+    function test_initialFeeConfig() public view {
+        assertEq(pool.feeBps(), FEE_BPS);
+        assertEq(pool.feeRecipient(), treasury);
+    }
+
+    function test_setFeeBps() public {
+        pool.setFeeBps(500);
+        assertEq(pool.feeBps(), 500);
+    }
+
+    function test_setFeeBps_revertsExceedsMax() public {
+        vm.expectRevert("Fee exceeds max");
+        pool.setFeeBps(1001);
+    }
+
+    function test_setFeeBps_revertsNonOwner() public {
+        vm.prank(alice);
+        vm.expectRevert();
+        pool.setFeeBps(100);
+    }
+
+    function test_setFeeRecipient() public {
+        pool.setFeeRecipient(alice);
+        assertEq(pool.feeRecipient(), alice);
+    }
+
+    function test_setFeeRecipient_revertsZeroAddress() public {
+        vm.expectRevert("Invalid fee recipient");
+        pool.setFeeRecipient(address(0));
+    }
+
+    function test_withdrawWithZeroFee() public {
+        pool.setFeeBps(0);
+
+        uint256 poolId = _createDefaultPool();
+
+        vm.startPrank(alice);
+        usdc.approve(address(pool), MOQ * PRICE);
+        pool.commit(poolId, MOQ);
+        vm.stopPrank();
+
+        uint256 adminBefore = usdc.balanceOf(admin);
+        uint256 treasuryBefore = usdc.balanceOf(treasury);
+
+        pool.withdrawFunds(poolId);
+
+        assertEq(usdc.balanceOf(admin) - adminBefore, MOQ * PRICE);
+        assertEq(usdc.balanceOf(treasury) - treasuryBefore, 0);
+    }
+
+    function test_constructorRevertsExcessiveFee() public {
+        vm.expectRevert("Fee exceeds max");
+        new PurchasePool(1001, treasury);
+    }
+
+    function test_constructorRevertsZeroRecipient() public {
+        vm.expectRevert("Invalid fee recipient");
+        new PurchasePool(250, address(0));
     }
 
     // ── Expiration & refund ─────────────────────────────────────────────
@@ -276,5 +347,44 @@ contract PurchasePoolTest is Test {
         vm.prank(carol);
         vm.expectRevert("Nothing to refund");
         pool.claimRefund(poolId);
+    }
+
+    // ── Fee accumulates across pools ────────────────────────────────────
+
+    function test_feesAccumulateAcrossPools() public {
+        uint256 p1 = _createDefaultPool();
+        uint256 p2 = pool.createPool("Pool 2", PRICE, MOQ, block.timestamp + DEADLINE_OFFSET, address(usdc));
+
+        vm.startPrank(alice);
+        usdc.approve(address(pool), MOQ * PRICE * 2);
+        pool.commit(p1, MOQ);
+        pool.commit(p2, MOQ);
+        vm.stopPrank();
+
+        pool.withdrawFunds(p1);
+        pool.withdrawFunds(p2);
+
+        uint256 feePerPool = (MOQ * PRICE * FEE_BPS) / 10_000;
+        assertEq(pool.totalFeesCollected(), feePerPool * 2);
+        assertEq(usdc.balanceOf(treasury), feePerPool * 2);
+    }
+
+    // ── Refund is fee-free (buyers get 100 % back) ─────────────────────
+
+    function test_refundIsFullAmount() public {
+        uint256 poolId = _createDefaultPool();
+
+        vm.startPrank(alice);
+        usdc.approve(address(pool), 50 * PRICE);
+        pool.commit(poolId, 50);
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + DEADLINE_OFFSET + 1);
+
+        uint256 before = usdc.balanceOf(alice);
+        vm.prank(alice);
+        pool.claimRefund(poolId);
+
+        assertEq(usdc.balanceOf(alice) - before, 50 * PRICE);
     }
 }

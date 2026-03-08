@@ -18,7 +18,7 @@ import {
   purchasePoolConfig,
   MOCK_USDC_ADDRESS,
 } from "@/lib/contracts";
-import { useOwner, usePoolCount, usePools } from "@/lib/hooks";
+import { useOwner, usePoolCount, usePools, useFeeBps, useTotalFeesCollected } from "@/lib/hooks";
 import {
   POOL_STATUS_LABELS,
   POOL_STATUS_COLORS,
@@ -225,6 +225,8 @@ export default function AdminPage() {
   const { data: count } = usePoolCount();
   const poolCount = count ? Number(count) : 0;
   const { pools, isLoading, refetch } = usePools(poolCount);
+  const { data: feeBps } = useFeeBps();
+  const { data: totalFees } = useTotalFeesCollected();
 
   if (!isConnected) {
     return (
@@ -276,6 +278,32 @@ export default function AdminPage() {
             Submissions
           </Button>
         </Link>
+      </div>
+
+      {/* Platform fee stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">
+              {feeBps !== undefined ? `${Number(feeBps) / 100}%` : "—"}
+            </div>
+            <p className="text-xs text-muted-foreground">Platform fee rate</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">
+              {totalFees !== undefined ? `${formatUsdc(totalFees as bigint)} mUSDC` : "—"}
+            </div>
+            <p className="text-xs text-muted-foreground">Total fees collected</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">{pools.length}</div>
+            <p className="text-xs text-muted-foreground">Total pools</p>
+          </CardContent>
+        </Card>
       </div>
 
       <CreatePoolForm onSuccess={refetch} />
