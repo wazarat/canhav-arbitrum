@@ -168,6 +168,56 @@ export const TIERED_PRICING: Record<string, TieredPricing> = {
     poolDurationDays: 5,
     shipmentDaysAfterClose: 7,
   },
+  "all-purpose flour": {
+    basePriceUsd: 3.00,
+    tiers: [
+      { label: "Starter", minUnits: 1, maxUnits: 99, priceUsd: 3.00, mandatory: false },
+      { label: "Bulk", minUnits: 100, maxUnits: 499, priceUsd: 2.55, mandatory: true },
+      { label: "Wholesale", minUnits: 500, maxUnits: null, priceUsd: 2.25, mandatory: true },
+    ],
+    poolDurationDays: 7,
+    shipmentDaysAfterClose: 10,
+  },
+  "olive oil": {
+    basePriceUsd: 7.20,
+    tiers: [
+      { label: "Starter", minUnits: 1, maxUnits: 39, priceUsd: 7.20, mandatory: false },
+      { label: "Bulk", minUnits: 40, maxUnits: 149, priceUsd: 6.12, mandatory: true },
+      { label: "Wholesale", minUnits: 150, maxUnits: null, priceUsd: 5.40, mandatory: true },
+    ],
+    poolDurationDays: 7,
+    shipmentDaysAfterClose: 10,
+  },
+  "hot cups": {
+    basePriceUsd: 1.20,
+    tiers: [
+      { label: "Starter", minUnits: 1, maxUnits: 249, priceUsd: 1.20, mandatory: false },
+      { label: "Bulk", minUnits: 250, maxUnits: 999, priceUsd: 1.00, mandatory: true },
+      { label: "Wholesale", minUnits: 1000, maxUnits: null, priceUsd: 0.90, mandatory: true },
+    ],
+    poolDurationDays: 5,
+    shipmentDaysAfterClose: 7,
+  },
+  "decaf swiss water process coffee beans": {
+    basePriceUsd: 9.60,
+    tiers: [
+      { label: "Starter", minUnits: 1, maxUnits: 49, priceUsd: 9.60, mandatory: false },
+      { label: "Bulk", minUnits: 50, maxUnits: 199, priceUsd: 8.16, mandatory: true },
+      { label: "Wholesale", minUnits: 200, maxUnits: null, priceUsd: 7.20, mandatory: true },
+    ],
+    poolDurationDays: 7,
+    shipmentDaysAfterClose: 12,
+  },
+  "hot paper cups 16oz (1000/case)": {
+    basePriceUsd: 57.00,
+    tiers: [
+      { label: "Starter", minUnits: 1, maxUnits: 19, priceUsd: 57.00, mandatory: false },
+      { label: "Bulk", minUnits: 20, maxUnits: 79, priceUsd: 47.50, mandatory: true },
+      { label: "Wholesale", minUnits: 80, maxUnits: null, priceUsd: 42.75, mandatory: true },
+    ],
+    poolDurationDays: 5,
+    shipmentDaysAfterClose: 7,
+  },
 };
 
 export function getTieredPricing(productName: string): TieredPricing | null {
@@ -337,6 +387,46 @@ export const SUPPLIER_INFO: Record<string, SupplierInfo> = {
     description:
       "A Novamont subsidiary specializing in renewable and compostable foodservice products. Their cutlery is made from plant-based Ingeo biopolymer, not petroleum plastic.",
     certifications: ["BPI Certified", "B Corp", "Green Restaurant Approved"],
+  },
+  "all-purpose flour": {
+    name: "King Arthur Baking Company",
+    region: "Norwich, Vermont, USA",
+    rating: 4.6,
+    description:
+      "America's oldest flour company, milling premium unbleached and unbromated flour since 1790. Employee-owned B Corporation supplying bakeries and restaurants nationwide with consistent protein levels batch to batch.",
+    certifications: ["Non-GMO Project Verified", "B Corp"],
+  },
+  "olive oil": {
+    name: "California Olive Ranch",
+    region: "Artois, California, USA",
+    rating: 4.4,
+    description:
+      "The largest producer of extra virgin olive oil in the United States. Uses a proprietary continuous cold-press process within hours of harvest, ensuring freshness and low acidity for commercial kitchen use.",
+    certifications: ["COOC Certified", "Non-GMO Project Verified"],
+  },
+  "hot cups": {
+    name: "Solo Cup Company",
+    region: "Lake Forest, Illinois, USA",
+    rating: 3.9,
+    description:
+      "One of the world's largest manufacturers of single-use cups and containers for the foodservice industry. Known for reliable supply chain and competitive bulk pricing for high-volume buyers.",
+    certifications: ["SFI Sourcing"],
+  },
+  "decaf swiss water process coffee beans": {
+    name: "Swiss Water Decaffeinated Coffee Inc.",
+    region: "Burnaby, British Columbia, Canada",
+    rating: 4.5,
+    description:
+      "The only decaffeination facility in the world that uses a 100% chemical-free water process. Sources high-quality green beans from cooperatives in Central and South America, removing 99.9% of caffeine while preserving origin flavor.",
+    certifications: ["Organic", "Fair Trade", "SWP Certified"],
+  },
+  "hot paper cups 16oz (1000/case)": {
+    name: "Georgia-Pacific (Dixie)",
+    region: "Atlanta, Georgia, USA",
+    rating: 4.1,
+    description:
+      "A leading manufacturer of disposable cups and foodservice packaging under the Dixie brand. Offers double-wall insulated paper cups for hot beverages, widely used by coffee shops and QSR chains across North America.",
+    certifications: ["FSC Certified", "SFI Sourcing"],
   },
 };
 
