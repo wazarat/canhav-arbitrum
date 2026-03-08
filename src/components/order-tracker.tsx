@@ -20,15 +20,23 @@ function formatDate(date: Date): string {
   });
 }
 
+const DELIVERED_OVERRIDES: Record<number, { shippedDate: string; deliveredDate: string }> = {
+  12: { shippedDate: "Mar 4, 2026", deliveredDate: "Mar 7, 2026" },
+};
+
 function computeStages(pool: PoolData): FulfillmentStage[] {
   const pricing = getTieredPricing(pool.productName);
   const deadlineMs = Number(pool.deadline) * 1000;
-  const deadlineDate = new Date(deadlineMs);
   const shipDays = pricing?.shipmentDaysAfterClose ?? 10;
   const deliveryDays = shipDays + 3;
 
+  const override = DELIVERED_OVERRIDES[pool.id];
+
   const shippedDate = new Date(deadlineMs + shipDays * 86_400_000);
   const deliveredDate = new Date(deadlineMs + deliveryDays * 86_400_000);
+
+  const shippedLabel = override?.shippedDate ?? formatDate(shippedDate);
+  const deliveredLabel = override?.deliveredDate ?? formatDate(deliveredDate);
 
   const moqMet = pool.totalUnits >= pool.moq;
 
@@ -57,17 +65,26 @@ function computeStages(pool: PoolData): FulfillmentStage[] {
     },
     {
       label: "Shipped to Your City",
-      description: `Estimated arrival at local distribution.`,
+      description: `Arrived at local distribution.`,
       status: "upcoming",
-      estimatedDate: formatDate(shippedDate),
+      estimatedDate: shippedLabel,
     },
     {
       label: "Delivered to You",
       description: "Order delivered to your address.",
       status: "upcoming",
-      estimatedDate: formatDate(deliveredDate),
+      estimatedDate: deliveredLabel,
     },
   ];
+
+  if (override) {
+    for (const stage of stages) stage.status = "completed";
+    stages[4].description = "Arrived at local distribution.";
+    stages[4].estimatedDate = shippedLabel;
+    stages[5].description = "Order delivered to your address.";
+    stages[5].estimatedDate = deliveredLabel;
+    return stages;
+  }
 
   const now = Date.now();
 
@@ -211,6 +228,7 @@ export function OrderTracker({ pool }: { pool: PoolData }) {
 }
 
 export function isDelivered(pool: PoolData): boolean {
+  if (DELIVERED_OVERRIDES[pool.id]) return true;
   if (pool.status !== 3) return false;
   const pricing = getTieredPricing(pool.productName);
   const shipDays = pricing?.shipmentDaysAfterClose ?? 10;
