@@ -496,11 +496,32 @@ export default function PoolDetailPage({
                     {(() => {
                       const threshold = Number(pool.moq);
                       const remaining = threshold - currentTotal;
-                      return remaining > 0 ? (
+                      if (remaining <= 0) {
+                        const nextTier = onChainTiers.find(
+                          (t) => t.minUnits > pool.totalUnits && t.pricePerUnit < currentTierPrice
+                        );
+                        return (
+                          <div className="mt-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-2 space-y-1">
+                            <p className="text-xs font-semibold text-emerald-400">
+                              MOQ reached &mdash; fulfillment locked in!
+                            </p>
+                            {nextTier ? (
+                              <p className="text-xs text-emerald-400/80">
+                                Keep committing to reach {nextTier.minUnits.toString()} units for an even better rate of {formatUsdc(nextTier.pricePerUnit)} mUSDC/unit.
+                              </p>
+                            ) : (
+                              <p className="text-xs text-emerald-400/80">
+                                Pool stays open until the deadline. Commit more to increase your order.
+                              </p>
+                            )}
+                          </div>
+                        );
+                      }
+                      return (
                         <p className="text-xs text-amber-400/80 mt-1">
                           Pool needs {remaining} more units to lock in fulfillment.
                         </p>
-                      ) : null;
+                      );
                     })()}
                   </div>
                 )}
@@ -522,12 +543,12 @@ export default function PoolDetailPage({
           {pool.status === 1 && (
             <Card>
               <CardContent className="py-6 text-center space-y-2">
-                <p className="text-lg font-semibold text-blue-400">
-                  MOQ Reached!
+                <p className="text-lg font-semibold text-emerald-400">
+                  Pool Fulfilled
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  This pool has been fulfilled. The admin will withdraw funds to
-                  pay the supplier.
+                  The deadline has passed and the MOQ was met. The group order
+                  is locked in and the admin will withdraw funds to pay the supplier.
                 </p>
               </CardContent>
             </Card>

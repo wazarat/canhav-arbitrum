@@ -30,6 +30,8 @@ function computeStages(pool: PoolData): FulfillmentStage[] {
   const shippedDate = new Date(deadlineMs + shipDays * 86_400_000);
   const deliveredDate = new Date(deadlineMs + deliveryDays * 86_400_000);
 
+  const moqMet = pool.totalUnits >= pool.moq;
+
   const stages: FulfillmentStage[] = [
     {
       label: "Commitments Open",
@@ -37,8 +39,15 @@ function computeStages(pool: PoolData): FulfillmentStage[] {
       status: "upcoming",
     },
     {
-      label: "Order Executed",
-      description: "MOQ reached — the group order has been locked in.",
+      label: "MOQ Reached",
+      description: moqMet
+        ? "Minimum order met — fulfillment is locked in. Keep committing for better rates!"
+        : "Minimum order quantity reached — the group order will be locked in.",
+      status: "upcoming",
+    },
+    {
+      label: "Deadline & Order Executed",
+      description: "Pool closed at deadline — the group order has been finalized.",
       status: "upcoming",
     },
     {
@@ -63,32 +72,38 @@ function computeStages(pool: PoolData): FulfillmentStage[] {
   const now = Date.now();
 
   switch (pool.status) {
-    case 0: // Open
+    case 0: // Open — pool stays open until deadline
       stages[0].status = "active";
+      if (moqMet) {
+        stages[0].description = "Pool is open and accepting further commitments for better tier rates.";
+        stages[1].status = "completed";
+      }
       break;
-    case 1: // Fulfilled
+    case 1: // Fulfilled — deadline passed, MOQ met
       stages[0].status = "completed";
-      stages[1].status = "active";
+      stages[1].status = "completed";
+      stages[2].status = "active";
       break;
     case 3: // Withdrawn
       stages[0].status = "completed";
       stages[1].status = "completed";
       stages[2].status = "completed";
+      stages[3].status = "completed";
       if (now >= shippedDate.getTime()) {
-        stages[3].status = "completed";
+        stages[4].status = "completed";
         if (now >= deliveredDate.getTime()) {
-          stages[4].status = "completed";
+          stages[5].status = "completed";
         } else {
-          stages[4].status = "active";
+          stages[5].status = "active";
         }
       } else {
-        stages[3].status = "active";
+        stages[4].status = "active";
       }
       break;
     case 2: // Expired
       stages[0].status = "completed";
       stages[0].description = "Pool expired — MOQ was not met before the deadline.";
-      stages[1].description = "Order was not executed.";
+      stages[1].description = "Minimum order was not reached.";
       stages.splice(2);
       break;
   }

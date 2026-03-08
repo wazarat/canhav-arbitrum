@@ -97,15 +97,20 @@ export function PoolCard({ pool }: { pool: PoolData }) {
             MOQ: {target.toString()} units
           </span>
         </div>
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs">
-            <span className="text-muted-foreground">
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-foreground/70">
               {pool.totalUnits.toString()} / {target.toString()} units
             </span>
-            <span className="font-medium text-primary">{Math.min(pct, 100)}%</span>
+            <span className="font-bold text-primary">{Math.min(pct, 100)}%</span>
           </div>
-          <Progress value={Math.min(pct, 100)} className="h-2 gradient-progress" />
+          <Progress value={Math.min(pct, 100)} className="gradient-progress" />
         </div>
+        {uiStatus === "Active" && pool.totalUnits >= target && (
+          <p className="text-xs font-medium text-emerald-400">
+            MOQ met &mdash; still accepting commits for better rates
+          </p>
+        )}
         {closedMeta && (
           <div className="flex items-center justify-between">
             <StarRating rating={closedMeta.rating} size="sm" />

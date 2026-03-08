@@ -162,8 +162,13 @@
     background: linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa);
     border-radius: 999px 999px 0 0;
   }
-  .gradient-progress > div {
-    background: linear-gradient(90deg, #6366f1, #8b5cf6) !important;
+  .gradient-progress [data-slot="progress-track"] {
+    height: 10px;
+    background: oklch(0.24 0.015 270);
+  }
+  .gradient-progress [data-slot="progress-indicator"] {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa) !important;
+    box-shadow: 0 0 12px 1px oklch(0.65 0.19 270 / 40%);
   }
   .shimmer {
     background: linear-gradient(

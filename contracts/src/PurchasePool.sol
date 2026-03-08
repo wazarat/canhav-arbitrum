@@ -8,9 +8,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @title PurchasePool — collaborative group-purchasing escrow with on-chain tiered pricing
 /// @notice Businesses pool ERC-20 commitments toward a supplier MOQ.
 ///         Each pool stores an array of price tiers. The active tier is determined
-///         by the pool's current totalUnits. Fulfillment triggers when the first
-///         mandatory tier's minUnits threshold is reached.
-///         A configurable platform fee (basis points) is deducted on withdrawal.
+///         by the pool's current totalUnits. Pools remain open until their deadline
+///         so buyers can keep committing toward higher (cheaper) tiers.
+///         At the deadline the pool resolves to Fulfilled (threshold met) or
+///         Expired (threshold not met). A platform fee is deducted on withdrawal.
 contract PurchasePool is Ownable {
     using SafeERC20 for IERC20;
 
@@ -205,11 +206,6 @@ contract PurchasePool is Ownable {
         }
 
         emit Committed(poolId, msg.sender, units, cost, tierPrice);
-
-        if (newTotal >= pool.fulfillmentThreshold) {
-            pool.status = PoolStatus.Fulfilled;
-            emit PoolFulfilled(poolId, newTotal);
-        }
     }
 
     function claimRefund(uint256 poolId) external {
@@ -245,7 +241,9 @@ contract PurchasePool is Ownable {
         Pool storage p = pools[poolId];
         PoolStatus s = p.status;
         if (s == PoolStatus.Open && block.timestamp > p.deadline) {
-            s = PoolStatus.Expired;
+            s = p.totalUnits >= p.fulfillmentThreshold
+                ? PoolStatus.Fulfilled
+                : PoolStatus.Expired;
         }
         uint256 basePrice = p.tierCount > 0 ? _poolTiers[poolId][0].pricePerUnit : 0;
         return (
@@ -317,8 +315,13 @@ contract PurchasePool is Ownable {
     function _refreshStatus(uint256 poolId) internal {
         Pool storage pool = pools[poolId];
         if (pool.status == PoolStatus.Open && block.timestamp > pool.deadline) {
-            pool.status = PoolStatus.Expired;
-            emit PoolExpired(poolId);
+            if (pool.totalUnits >= pool.fulfillmentThreshold) {
+                pool.status = PoolStatus.Fulfilled;
+                emit PoolFulfilled(poolId, pool.totalUnits);
+            } else {
+                pool.status = PoolStatus.Expired;
+                emit PoolExpired(poolId);
+            }
         }
     }
 }
