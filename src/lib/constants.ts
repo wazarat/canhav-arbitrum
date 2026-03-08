@@ -111,30 +111,62 @@ export const TIERED_PRICING: Record<string, TieredPricing> = {
   "ethiopian single-origin coffee beans": {
     basePriceUsd: 10.80,
     tiers: [
-      {
-        label: "Starter",
-        minUnits: 1,
-        maxUnits: 79,
-        priceUsd: 10.80,
-        mandatory: false,
-      },
-      {
-        label: "Bulk",
-        minUnits: 80,
-        maxUnits: 399,
-        priceUsd: 8.98,
-        mandatory: true,
-      },
-      {
-        label: "Wholesale",
-        minUnits: 400,
-        maxUnits: null,
-        priceUsd: 8.08,
-        mandatory: true,
-      },
+      { label: "Starter", minUnits: 1, maxUnits: 79, priceUsd: 10.80, mandatory: false },
+      { label: "Bulk", minUnits: 80, maxUnits: 399, priceUsd: 8.98, mandatory: true },
+      { label: "Wholesale", minUnits: 400, maxUnits: null, priceUsd: 8.08, mandatory: true },
     ],
     poolDurationDays: 7,
     shipmentDaysAfterClose: 10,
+  },
+  "colombian single-origin coffee beans": {
+    basePriceUsd: 8.40,
+    tiers: [
+      { label: "Starter", minUnits: 1, maxUnits: 59, priceUsd: 8.40, mandatory: false },
+      { label: "Bulk", minUnits: 60, maxUnits: 249, priceUsd: 7.14, mandatory: true },
+      { label: "Wholesale", minUnits: 250, maxUnits: null, priceUsd: 6.30, mandatory: true },
+    ],
+    poolDurationDays: 7,
+    shipmentDaysAfterClose: 10,
+  },
+  "kenyan single-origin coffee beans": {
+    basePriceUsd: 10.80,
+    tiers: [
+      { label: "Starter", minUnits: 1, maxUnits: 49, priceUsd: 10.80, mandatory: false },
+      { label: "Bulk", minUnits: 50, maxUnits: 199, priceUsd: 9.18, mandatory: true },
+      { label: "Wholesale", minUnits: 200, maxUnits: null, priceUsd: 8.10, mandatory: true },
+    ],
+    poolDurationDays: 7,
+    shipmentDaysAfterClose: 12,
+  },
+  "hot paper cups 12oz (1000/case)": {
+    basePriceUsd: 48.00,
+    tiers: [
+      { label: "Starter", minUnits: 1, maxUnits: 24, priceUsd: 48.00, mandatory: false },
+      { label: "Bulk", minUnits: 25, maxUnits: 99, priceUsd: 40.00, mandatory: true },
+      { label: "Wholesale", minUnits: 100, maxUnits: null, priceUsd: 36.00, mandatory: true },
+    ],
+    poolDurationDays: 5,
+    shipmentDaysAfterClose: 7,
+  },
+  "3-compartment clamshell boxes (200/case)": {
+    basePriceUsd: 21.00,
+    tiers: [
+      { label: "Starter", minUnits: 1, maxUnits: 49, priceUsd: 21.00, mandatory: false },
+      { label: "Bulk", minUnits: 50, maxUnits: 199, priceUsd: 17.50, mandatory: true },
+      { label: "Wholesale", minUnits: 200, maxUnits: null, priceUsd: 15.75, mandatory: true },
+    ],
+    poolDurationDays: 5,
+    shipmentDaysAfterClose: 7,
+  },
+  "compostable cutlery kits (250/case)": {
+    basePriceUsd: 12.00,
+    tiers: [
+      { label: "Starter", minUnits: 1, maxUnits: 74, priceUsd: 12.00, mandatory: false },
+      { label: "Bulk", minUnits: 75, maxUnits: 299, priceUsd: 9.60, mandatory: true },
+      { label: "Wholesale", minUnits: 300, maxUnits: null, priceUsd: 8.40, mandatory: true },
+    ],
+    poolDurationDays: 5,
+    shipmentDaysAfterClose: 7,
   },
 };
 
@@ -247,6 +279,69 @@ export const CLOSED_POOL_META: Record<number, ClosedPoolMeta> = {
 
 export function getClosedPoolMeta(poolId: number): ClosedPoolMeta | null {
   return CLOSED_POOL_META[poolId] ?? null;
+}
+
+export interface SupplierInfo {
+  name: string;
+  region: string;
+  rating: number;
+  description: string;
+  certifications: string[];
+}
+
+export const SUPPLIER_INFO: Record<string, SupplierInfo> = {
+  "ethiopian single-origin coffee beans": {
+    name: "Yirgacheffe Coffee Farmers Cooperative",
+    region: "Yirgacheffe, Ethiopia",
+    rating: 4.7,
+    description:
+      "A cooperative of 300+ smallholder farmers in the Yirgacheffe region, known worldwide for bright, fruity, and floral single-origin beans. Operating since 2002 with direct-trade partnerships.",
+    certifications: ["Fair Trade", "Organic", "Rainforest Alliance"],
+  },
+  "colombian single-origin coffee beans": {
+    name: "Federación Nacional de Cafeteros",
+    region: "Huila, Colombia",
+    rating: 4.5,
+    description:
+      "Colombia's national coffee federation, sourcing high-altitude Huila beans with rich caramel and citrus notes. Supports over 500,000 farming families across the country.",
+    certifications: ["Fair Trade", "UTZ Certified"],
+  },
+  "kenyan single-origin coffee beans": {
+    name: "Nyeri Hill Estate",
+    region: "Nyeri County, Kenya",
+    rating: 4.8,
+    description:
+      "An award-winning single-estate farm at 1,800m elevation producing SCA 87+ scored lots. Known for complex blackcurrant and tomato-like acidity prized by specialty roasters.",
+    certifications: ["Direct Trade", "SCA Specialty Grade"],
+  },
+  "hot paper cups 12oz (1000/case)": {
+    name: "Dart Container Corporation",
+    region: "Mason, Michigan, USA",
+    rating: 4.2,
+    description:
+      "The world's largest manufacturer of foam and paper foodservice products. Supplies cups, lids, and containers to over 100,000 businesses globally with consistent quality and on-time delivery.",
+    certifications: ["FSC Certified", "SFI Sourcing"],
+  },
+  "3-compartment clamshell boxes (200/case)": {
+    name: "World Centric",
+    region: "Petaluma, California, USA",
+    rating: 4.0,
+    description:
+      "A certified B Corporation producing plant-based compostable foodservice packaging. 25% of profits go to grassroots social and environmental organizations.",
+    certifications: ["BPI Compostable", "USDA Biobased", "B Corp"],
+  },
+  "compostable cutlery kits (250/case)": {
+    name: "Eco-Products",
+    region: "Boulder, Colorado, USA",
+    rating: 4.3,
+    description:
+      "A Novamont subsidiary specializing in renewable and compostable foodservice products. Their cutlery is made from plant-based Ingeo biopolymer, not petroleum plastic.",
+    certifications: ["BPI Certified", "B Corp", "Green Restaurant Approved"],
+  },
+};
+
+export function getSupplierInfo(productName: string): SupplierInfo | null {
+  return SUPPLIER_INFO[productName.toLowerCase()] ?? null;
 }
 
 export type PoolUIStatus = "Active" | "Evaluating" | "Closed";

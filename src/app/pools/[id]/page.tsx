@@ -27,6 +27,7 @@ import {
   getDiscountPct,
   getPoolUIStatus,
   getClosedPoolMeta,
+  getSupplierInfo,
 } from "@/lib/constants";
 
 export default function PoolDetailPage({
@@ -241,6 +242,7 @@ export default function PoolDetailPage({
   };
 
   const pricing = getTieredPricing(pool.productName);
+  const supplier = getSupplierInfo(pool.productName);
   const currentTotal = Number(pool.totalUnits);
   const activeTier = pricing ? getActiveTier(pricing, currentTotal || 1) : null;
 
@@ -286,6 +288,36 @@ export default function PoolDetailPage({
               <PoolProgress pool={pool} />
             </CardContent>
           </Card>
+
+          {/* Supplier information */}
+          {supplier && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Supplier</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <p className="font-semibold">{supplier.name}</p>
+                    <p className="text-sm text-muted-foreground">{supplier.region}</p>
+                  </div>
+                  <StarRating rating={supplier.rating} size="sm" />
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {supplier.description}
+                </p>
+                {supplier.certifications.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {supplier.certifications.map((cert) => (
+                      <Badge key={cert} variant="outline" className="text-xs">
+                        {cert}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Tiered pricing visualization */}
           {pricing && activeTier && (
