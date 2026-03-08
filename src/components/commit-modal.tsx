@@ -5,7 +5,9 @@ import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useSwitchChain,
 } from "wagmi";
+import { arbitrumSepolia } from "viem/chains";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +52,16 @@ function usdToUsdc(usd: number): bigint {
 
 function extractRevertReason(err: Error): string {
   const msg = err.message || "Transaction failed";
+  if (msg.includes("max fee per gas less than block base fee"))
+    return "Gas fee too low — please try again (network fees fluctuated).";
+  if (msg.includes("insufficient funds") || msg.includes("InsufficientBalance"))
+    return "Insufficient mUSDC balance. Please mint tokens via the faucet first.";
+  if (msg.includes("User rejected") || msg.includes("user rejected"))
+    return "Transaction cancelled.";
+  if (msg.includes("chain mismatch") || msg.includes("does not match"))
+    return "Wrong network — switch to Arbitrum Sepolia in your wallet.";
+  if (msg.includes("InsufficientAllowance"))
+    return "Allowance too low — please approve mUSDC spending first.";
   const revertMatch = msg.match(/reason:\s*(.+?)(?:\n|$)/);
   if (revertMatch) return revertMatch[1].trim();
   const shortMatch = msg.match(/reverted with the following reason:\s*(.+?)(?:\n|$)/);
@@ -123,7 +135,8 @@ function TieredCommitContent({
   pricing: TieredPricing;
   onSuccess: () => void;
 }) {
-  const { address } = useAccount();
+  const { address, chain } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
   const [units, setUnits] = useState("");
   const [open, setOpen] = useState(false);
   const { data: onChainTiers } = usePoolTiers(pool.id);
@@ -193,7 +206,21 @@ function TieredCommitContent({
     return new Date(poolCloseDate.getTime() + pricing.shipmentDaysAfterClose * 86400000);
   }, [poolCloseDate, pricing.shipmentDaysAfterClose]);
 
-  function handleApprove() {
+  async function ensureChain(): Promise<boolean> {
+    if (chain?.id !== arbitrumSepolia.id) {
+      try {
+        await switchChainAsync({ chainId: arbitrumSepolia.id });
+        return true;
+      } catch {
+        toast.error("Please switch to Arbitrum Sepolia in your wallet.");
+        return false;
+      }
+    }
+    return true;
+  }
+
+  async function handleApprove() {
+    if (!(await ensureChain())) return;
     approve(
       {
         ...mockUsdcConfig,
@@ -209,7 +236,8 @@ function TieredCommitContent({
     );
   }
 
-  function handleCommit() {
+  async function handleCommit() {
+    if (!(await ensureChain())) return;
     commit(
       {
         ...purchasePoolConfig,
@@ -495,7 +523,8 @@ function FallbackCommitModal({
   pool: PoolData;
   onSuccess: () => void;
 }) {
-  const { address } = useAccount();
+  const { address, chain } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
   const [units, setUnits] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -543,7 +572,21 @@ function FallbackCommitModal({
     query: { enabled: !!commitTx },
   });
 
-  function handleApprove() {
+  async function ensureChain(): Promise<boolean> {
+    if (chain?.id !== arbitrumSepolia.id) {
+      try {
+        await switchChainAsync({ chainId: arbitrumSepolia.id });
+        return true;
+      } catch {
+        toast.error("Please switch to Arbitrum Sepolia in your wallet.");
+        return false;
+      }
+    }
+    return true;
+  }
+
+  async function handleApprove() {
+    if (!(await ensureChain())) return;
     approve(
       {
         ...mockUsdcConfig,
@@ -559,7 +602,8 @@ function FallbackCommitModal({
     );
   }
 
-  function handleCommit() {
+  async function handleCommit() {
+    if (!(await ensureChain())) return;
     commit(
       {
         ...purchasePoolConfig,

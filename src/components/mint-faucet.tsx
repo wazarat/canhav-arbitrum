@@ -4,17 +4,34 @@ import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useSwitchChain,
 } from "wagmi";
+import { arbitrumSepolia } from "viem/chains";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { mockUsdcConfig } from "@/lib/contracts";
 import { useUsdcBalance } from "@/lib/hooks";
 import { formatUsdc } from "@/lib/constants";
+import { ChainGuard } from "@/components/chain-guard";
 
 const MINT_AMOUNT = 10_000n * 10n ** 6n;
 
-export function MintFaucet() {
-  const { address, isConnected } = useAccount();
+function friendlyError(err: Error): string {
+  const msg = err.message || "";
+  if (msg.includes("max fee per gas less than block base fee"))
+    return "Gas fee too low — please try again (network fees fluctuated).";
+  if (msg.includes("insufficient funds"))
+    return "Your wallet needs ETH on Arbitrum Sepolia for gas fees.";
+  if (msg.includes("User rejected") || msg.includes("user rejected"))
+    return "Transaction cancelled.";
+  if (msg.includes("chain mismatch") || msg.includes("does not match"))
+    return "Wrong network — switch to Arbitrum Sepolia in your wallet.";
+  return msg.split("\n")[0] || "Mint failed";
+}
+
+function MintFaucetInner() {
+  const { address, isConnected, chain } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
 
   const { data: balance, refetch } = useUsdcBalance(address);
 
@@ -22,12 +39,19 @@ export function MintFaucet() {
 
   const { isLoading: isConfirming } = useWaitForTransactionReceipt({
     hash: txHash,
-    query: {
-      enabled: !!txHash,
-    },
+    query: { enabled: !!txHash },
   });
 
-  function handleMint() {
+  async function handleMint() {
+    if (chain?.id !== arbitrumSepolia.id) {
+      try {
+        await switchChainAsync({ chainId: arbitrumSepolia.id });
+      } catch {
+        toast.error("Please switch to Arbitrum Sepolia in your wallet.");
+        return;
+      }
+    }
+
     writeContract(
       {
         ...mockUsdcConfig,
@@ -40,7 +64,7 @@ export function MintFaucet() {
           refetch();
         },
         onError: (err) => {
-          toast.error(err.message.split("\n")[0] || "Mint failed");
+          toast.error(friendlyError(err));
         },
       },
     );
@@ -67,5 +91,13 @@ export function MintFaucet() {
         {isPending || isConfirming ? "Minting..." : "Mint 10,000 mUSDC"}
       </Button>
     </div>
+  );
+}
+
+export function MintFaucet() {
+  return (
+    <ChainGuard>
+      <MintFaucetInner />
+    </ChainGuard>
   );
 }
