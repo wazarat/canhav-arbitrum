@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { mockUsdcConfig } from "@/lib/contracts";
 import { useUsdcBalance } from "@/lib/hooks";
+import { useGasOverrides } from "@/lib/gas";
 import { formatUsdc } from "@/lib/constants";
 import { ChainGuard } from "@/components/chain-guard";
 
@@ -32,6 +33,7 @@ function friendlyError(err: Error): string {
 function MintFaucetInner() {
   const { address, isConnected, chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
+  const gasOverrides = useGasOverrides();
 
   const { data: balance, refetch } = useUsdcBalance(address);
 
@@ -57,6 +59,7 @@ function MintFaucetInner() {
         ...mockUsdcConfig,
         functionName: "mint",
         args: [MINT_AMOUNT],
+        ...gasOverrides,
       },
       {
         onSuccess: () => {

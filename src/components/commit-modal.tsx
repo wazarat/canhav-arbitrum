@@ -34,6 +34,7 @@ import {
   usePoolTiers,
   getOnChainActiveTierPrice,
 } from "@/lib/hooks";
+import { useGasOverrides } from "@/lib/gas";
 import type { PoolData, OnChainTier } from "@/lib/hooks";
 import {
   formatUsdc,
@@ -137,6 +138,7 @@ function TieredCommitContent({
 }) {
   const { address, chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
+  const gasOverrides = useGasOverrides();
   const [units, setUnits] = useState("");
   const [open, setOpen] = useState(false);
   const { data: onChainTiers } = usePoolTiers(pool.id);
@@ -226,6 +228,7 @@ function TieredCommitContent({
         ...mockUsdcConfig,
         functionName: "approve",
         args: [PURCHASE_POOL_ADDRESS, onChainCost],
+        ...gasOverrides,
       },
       {
         onSuccess: () =>
@@ -243,6 +246,7 @@ function TieredCommitContent({
         ...purchasePoolConfig,
         functionName: "commit",
         args: [BigInt(pool.id), parsedUnits],
+        ...gasOverrides,
       },
       {
         onSuccess: () => {
@@ -525,6 +529,7 @@ function FallbackCommitModal({
 }) {
   const { address, chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
+  const gasOverrides = useGasOverrides();
   const [units, setUnits] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -592,6 +597,7 @@ function FallbackCommitModal({
         ...mockUsdcConfig,
         functionName: "approve",
         args: [PURCHASE_POOL_ADDRESS, cost],
+        ...gasOverrides,
       },
       {
         onSuccess: () =>
@@ -609,6 +615,7 @@ function FallbackCommitModal({
         ...purchasePoolConfig,
         functionName: "commit",
         args: [BigInt(pool.id), parsedUnits],
+        ...gasOverrides,
       },
       {
         onSuccess: () => {
