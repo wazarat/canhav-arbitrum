@@ -1,5 +1,7 @@
 # CanHav Group Pool
 
+![image alt](https://github.com/wazarat/canhav-arbitrum/blob/d3f619c270e006e29a9fb4d02647fda5a2983363/CanHavArbitrum%20pitch.png)
+
 A group-purchasing platform where small businesses pool funds together to meet supplier minimum order quantities (MOQs). Built on **Arbitrum Sepolia** with on-chain escrow and tiered pricing.
 
 Live at [canhav.io](https://www.canhav.io)
