@@ -17,7 +17,13 @@ import { Countdown } from "@/components/countdown";
 import { StarRating } from "@/components/star-rating";
 import { OrderTracker, isDelivered } from "@/components/order-tracker";
 import { RatingDialog } from "@/components/rating-dialog";
-import { usePool, useCommitment, useBuyerCount } from "@/lib/hooks";
+import {
+  usePool,
+  useCommitment,
+  useBuyerCount,
+  usePoolTiers,
+  getOnChainActiveTierPrice,
+} from "@/lib/hooks";
 import {
   POOL_STATUS_LABELS,
   POOL_STATUS_COLORS,
@@ -47,6 +53,7 @@ export default function PoolDetailPage({
     address,
   );
   const { data: buyerCount } = useBuyerCount(poolId);
+  const { data: onChainTiers } = usePoolTiers(poolId);
 
   if (isLoading) {
     return (
@@ -248,6 +255,10 @@ export default function PoolDetailPage({
   const currentTotal = Number(pool.totalUnits);
   const activeTier = pricing ? getActiveTier(pricing, currentTotal || 1) : null;
 
+  const currentTierPrice = onChainTiers
+    ? getOnChainActiveTierPrice(onChainTiers, pool.totalUnits > 0n ? pool.totalUnits : 1n)
+    : pool.pricePerUnit;
+
   return (
     <div className="space-y-6">
       <div>
@@ -333,24 +344,29 @@ export default function PoolDetailPage({
             </Card>
           )}
 
-          {/* Tiered pricing visualization */}
-          {pricing && activeTier && (
+          {/* Tiered pricing visualization — on-chain data preferred */}
+          {onChainTiers && onChainTiers.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Volume Pricing Tiers</CardTitle>
+                <CardTitle>Volume Pricing Tiers (On-Chain)</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {pricing.tiers.map((tier) => {
-                  const isActive = activeTier.label === tier.label;
-                  const discount = getDiscountPct(pricing.basePriceUsd, tier.priceUsd);
-                  const rangeLabel =
-                    tier.maxUnits === null
-                      ? `${tier.minUnits}+ units`
-                      : `${tier.minUnits}–${tier.maxUnits} units`;
+                {onChainTiers.map((tier, idx) => {
+                  const TIER_LABELS = ["Starter", "Bulk", "Wholesale", "Tier 4", "Tier 5"];
+                  const label = pricing?.tiers[idx]?.label ?? TIER_LABELS[idx] ?? `Tier ${idx + 1}`;
+                  const isActive = currentTierPrice === tier.pricePerUnit;
+                  const basePrice = onChainTiers[0].pricePerUnit;
+                  const discount = basePrice > 0n
+                    ? Number(((basePrice - tier.pricePerUnit) * 10000n) / basePrice) / 100
+                    : 0;
+                  const nextMin = idx < onChainTiers.length - 1 ? onChainTiers[idx + 1].minUnits - 1n : null;
+                  const rangeLabel = nextMin === null
+                    ? `${tier.minUnits}+ units`
+                    : `${tier.minUnits}–${nextMin} units`;
 
                   return (
                     <div
-                      key={tier.label}
+                      key={idx}
                       className={`relative flex items-center justify-between rounded-lg border p-4 transition-colors ${
                         isActive
                           ? "border-primary bg-primary/5"
@@ -359,7 +375,7 @@ export default function PoolDetailPage({
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold">{tier.label}</span>
+                          <span className="font-semibold">{label}</span>
                           {isActive && (
                             <Badge className="bg-primary/20 text-primary text-xs">
                               Active
@@ -377,12 +393,12 @@ export default function PoolDetailPage({
                       </div>
                       <div className="text-right shrink-0 ml-4">
                         <p className="text-xl font-bold">
-                          ${tier.priceUsd.toFixed(2)}
+                          {formatUsdc(tier.pricePerUnit)} mUSDC
                         </p>
                         <p className="text-xs text-muted-foreground">per unit</p>
                         {discount > 0 && (
                           <p className="text-sm font-medium text-green-400">
-                            Save {discount}%
+                            Save {discount.toFixed(1)}%
                           </p>
                         )}
                       </div>
@@ -408,7 +424,7 @@ export default function PoolDetailPage({
                   Total value at MOQ
                 </span>
                 <span>
-                  {formatUsdc(pool.pricePerUnit * pool.moq)} mUSDC
+                  {formatUsdc(currentTierPrice * pool.moq)} mUSDC
                 </span>
               </div>
               <Separator />
@@ -416,13 +432,14 @@ export default function PoolDetailPage({
                 <span className="text-muted-foreground">Buyers</span>
                 <span>{buyerCount !== undefined ? buyerCount.toString() : "—"}</span>
               </div>
-              {pricing && (
+              {onChainTiers && (
                 <>
                   <Separator />
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Current tier</span>
+                    <span className="text-muted-foreground">Current price/unit</span>
                     <span className="font-medium">
-                      {activeTier?.label} (${activeTier?.priceUsd.toFixed(2)}/unit)
+                      {formatUsdc(currentTierPrice)} mUSDC
+                      {activeTier ? ` (${activeTier.label})` : ""}
                     </span>
                   </div>
                 </>
@@ -465,19 +482,19 @@ export default function PoolDetailPage({
                 <CardTitle>Join This Pool</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {pricing && activeTier && (
+                {onChainTiers && (
                   <div className="rounded-lg bg-muted/50 p-3 text-sm space-y-1">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Current price</span>
-                      <span className="font-semibold">${activeTier.priceUsd.toFixed(2)}/unit</span>
+                      <span className="font-semibold">{formatUsdc(currentTierPrice)} mUSDC/unit</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Pool units</span>
                       <span>{currentTotal} committed</span>
                     </div>
-                    {!activeTier.mandatory && pricing && (() => {
-                      const bulkMin = pricing.tiers.find((t) => t.mandatory)?.minUnits ?? 0;
-                      const remaining = bulkMin - currentTotal;
+                    {(() => {
+                      const threshold = Number(pool.moq);
+                      const remaining = threshold - currentTotal;
                       return remaining > 0 ? (
                         <p className="text-xs text-amber-400/80 mt-1">
                           Pool needs {remaining} more units to lock in fulfillment.

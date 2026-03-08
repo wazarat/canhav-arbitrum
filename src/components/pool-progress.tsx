@@ -1,17 +1,19 @@
 "use client";
 
 import { Progress } from "@/components/ui/progress";
-import { formatUsdc, getTieredPricing } from "@/lib/constants";
+import { formatUsdc } from "@/lib/constants";
+import { usePoolTiers, getOnChainActiveTierPrice } from "@/lib/hooks";
 import type { PoolData } from "@/lib/hooks";
 
 export function PoolProgress({ pool }: { pool: PoolData }) {
-  const pricing = getTieredPricing(pool.productName);
-  const bulkThreshold = pricing
-    ? BigInt(pricing.tiers.find((t) => t.mandatory)?.minUnits ?? Number(pool.moq))
-    : pool.moq;
+  const { data: tiers } = usePoolTiers(pool.id);
 
-  const target = bulkThreshold > pool.moq ? bulkThreshold : pool.moq;
+  const target = pool.moq;
   const pct = target > 0n ? Number((pool.totalUnits * 100n) / target) : 0;
+
+  const currentPrice = tiers
+    ? getOnChainActiveTierPrice(tiers, pool.totalUnits > 0n ? pool.totalUnits : 1n)
+    : pool.pricePerUnit;
 
   return (
     <div className="space-y-4">
@@ -24,8 +26,8 @@ export function PoolProgress({ pool }: { pool: PoolData }) {
       <Progress value={Math.min(pct, 100)} className="h-3" />
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <span className="text-muted-foreground">Price per unit</span>
-          <p className="font-medium">{formatUsdc(pool.pricePerUnit)} mUSDC</p>
+          <span className="text-muted-foreground">Current price/unit</span>
+          <p className="font-medium">{formatUsdc(currentPrice)} mUSDC</p>
         </div>
         <div>
           <span className="text-muted-foreground">Total deposited</span>

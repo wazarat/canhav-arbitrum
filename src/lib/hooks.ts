@@ -152,3 +152,47 @@ export function useTotalFeesCollected() {
     functionName: "totalFeesCollected",
   });
 }
+
+export interface OnChainTier {
+  minUnits: bigint;
+  pricePerUnit: bigint;
+  mandatory: boolean;
+}
+
+type GetPoolTiersResult = readonly [
+  readonly bigint[],
+  readonly bigint[],
+  readonly boolean[],
+];
+
+export function usePoolTiers(poolId: number): {
+  data: OnChainTier[] | undefined;
+  isLoading: boolean;
+} {
+  const result = useReadContract({
+    ...purchasePoolConfig,
+    functionName: "getPoolTiers",
+    args: [BigInt(poolId)],
+  });
+
+  const raw = result.data as GetPoolTiersResult | undefined;
+  const data = raw
+    ? raw[0].map((_, i) => ({
+        minUnits: raw[0][i],
+        pricePerUnit: raw[1][i],
+        mandatory: raw[2][i],
+      }))
+    : undefined;
+
+  return { data, isLoading: result.isLoading };
+}
+
+export function getOnChainActiveTierPrice(
+  tiers: OnChainTier[],
+  totalUnits: bigint,
+): bigint {
+  for (let i = tiers.length - 1; i >= 0; i--) {
+    if (totalUnits >= tiers[i].minUnits) return tiers[i].pricePerUnit;
+  }
+  return tiers[0].pricePerUnit;
+}

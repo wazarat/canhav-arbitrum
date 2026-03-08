@@ -15,7 +15,6 @@ import {
   SECTOR_ICONS,
   formatUsdc,
   getSector,
-  getTieredPricing,
   getPoolUIStatus,
   getClosedPoolMeta,
 } from "@/lib/constants";
@@ -25,11 +24,7 @@ import { RegisterInterestDialog } from "@/components/register-interest-dialog";
 import { StarRating } from "@/components/star-rating";
 
 export function PoolCard({ pool }: { pool: PoolData }) {
-  const pricing = getTieredPricing(pool.productName);
-  const bulkThreshold = pricing
-    ? BigInt(pricing.tiers.find((t) => t.mandatory)?.minUnits ?? Number(pool.moq))
-    : pool.moq;
-  const target = bulkThreshold > pool.moq ? bulkThreshold : pool.moq;
+  const target = pool.moq;
   const pct = target > 0n ? Number((pool.totalUnits * 100n) / target) : 0;
 
   const sector = getSector(pool.productName);

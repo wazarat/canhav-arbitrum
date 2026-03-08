@@ -54,11 +54,15 @@ function CreatePoolForm({ onSuccess }: { onSuccess: () => void }) {
     const moqVal = BigInt(moq);
     const deadline = BigInt(Math.floor(Date.now() / 1000) + Number(deadlineDays) * 86400);
 
+    const tierMinUnits = [1n, moqVal];
+    const tierPrices = [price, price];
+    const tierMandatory = [false, true];
+
     writeContract(
       {
         ...purchasePoolConfig,
         functionName: "createPool",
-        args: [productName, price, moqVal, deadline, MOCK_USDC_ADDRESS],
+        args: [productName, tierMinUnits, tierPrices, tierMandatory, deadline, MOCK_USDC_ADDRESS],
       },
       {
         onSuccess: () => {

@@ -26,8 +26,14 @@ import {
   mockUsdcConfig,
   PURCHASE_POOL_ADDRESS,
 } from "@/lib/contracts";
-import { useUsdcBalance, useUsdcAllowance, useFeeBps } from "@/lib/hooks";
-import type { PoolData } from "@/lib/hooks";
+import {
+  useUsdcBalance,
+  useUsdcAllowance,
+  useFeeBps,
+  usePoolTiers,
+  getOnChainActiveTierPrice,
+} from "@/lib/hooks";
+import type { PoolData, OnChainTier } from "@/lib/hooks";
 import {
   formatUsdc,
   getTieredPricing,
@@ -125,6 +131,7 @@ function TieredCommitContent({
   const { address } = useAccount();
   const [units, setUnits] = useState("");
   const [open, setOpen] = useState(false);
+  const { data: onChainTiers } = usePoolTiers(pool.id);
 
   const parsedUnits = BigInt(Math.max(0, Math.floor(Number(units) || 0)));
   const currentTotalUnits = Number(pool.totalUnits);
@@ -135,7 +142,10 @@ function TieredCommitContent({
     ? getActiveTier(pricing, projectedTotal)
     : activeTier;
 
-  const onChainCost = parsedUnits * pool.pricePerUnit;
+  const tierPrice = onChainTiers
+    ? getOnChainActiveTierPrice(onChainTiers, pool.totalUnits + parsedUnits)
+    : pool.pricePerUnit;
+  const onChainCost = parsedUnits * tierPrice;
 
   const { data: balance } = useUsdcBalance(address);
   const { data: allowance, refetch: refetchAllowance } = useUsdcAllowance(
