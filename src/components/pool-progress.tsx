@@ -38,7 +38,7 @@ export function PoolProgress({ pool }: { pool: PoolData }) {
       {moqMet && pool.status === 0 && (
         <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-2.5 text-center">
           <p className="text-sm font-semibold text-emerald-400">
-            MOQ met &mdash; fulfillment is locked in
+            MOQ met. Fulfillment is locked in
           </p>
           <p className="text-xs text-emerald-400/70 mt-0.5">
             Pool stays open until the deadline. Keep committing for better tier pricing.

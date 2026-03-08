@@ -99,6 +99,17 @@ contract PurchasePool is Ownable {
         feeRecipient = _feeRecipient;
     }
 
+    /// @notice Extend (or change) the deadline for an open pool.
+    function setDeadline(uint256 poolId, uint256 newDeadline) external onlyOwner {
+        Pool storage pool = pools[poolId];
+        require(pool.status == PoolStatus.Open || pool.status == PoolStatus.Fulfilled, "Pool not active");
+        require(newDeadline > block.timestamp, "Deadline must be in the future");
+        pool.deadline = newDeadline;
+        if (pool.status == PoolStatus.Fulfilled) {
+            pool.status = PoolStatus.Open;
+        }
+    }
+
     /// @notice Create a pool with on-chain price tiers.
     /// @param tierMinUnits  Sorted ascending array of unit thresholds (first must be 1).
     /// @param tierPrices    Corresponding price-per-unit in token smallest units.

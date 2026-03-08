@@ -83,7 +83,7 @@ export function CommitForm({
       },
       {
         onSuccess: () => {
-          toast.success("Approval confirmed — click Commit to finalize");
+          toast.success("Approval confirmed. Click Commit to finalize");
         },
         onError: (err) => {
           toast.error(err.message.split("\n")[0] || "Approval failed");

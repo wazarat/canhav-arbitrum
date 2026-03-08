@@ -54,15 +54,15 @@ function usdToUsdc(usd: number): bigint {
 function extractRevertReason(err: Error): string {
   const msg = err.message || "Transaction failed";
   if (msg.includes("max fee per gas less than block base fee"))
-    return "Gas fee too low — please try again (network fees fluctuated).";
+    return "Gas fee too low. Please try again (network fees fluctuated).";
   if (msg.includes("insufficient funds") || msg.includes("InsufficientBalance"))
     return "Insufficient mUSDC balance. Please mint tokens via the faucet first.";
   if (msg.includes("User rejected") || msg.includes("user rejected"))
     return "Transaction cancelled.";
   if (msg.includes("chain mismatch") || msg.includes("does not match"))
-    return "Wrong network — switch to Arbitrum Sepolia in your wallet.";
+    return "Wrong network. Switch to Arbitrum Sepolia in your wallet.";
   if (msg.includes("InsufficientAllowance"))
-    return "Allowance too low — please approve mUSDC spending first.";
+    return "Allowance too low. Please approve mUSDC spending first.";
   const revertMatch = msg.match(/reason:\s*(.+?)(?:\n|$)/);
   if (revertMatch) return revertMatch[1].trim();
   const shortMatch = msg.match(/reverted with the following reason:\s*(.+?)(?:\n|$)/);
@@ -232,7 +232,7 @@ function TieredCommitContent({
       },
       {
         onSuccess: () =>
-          toast.success("Approval confirmed — click Commit to finalize"),
+          toast.success("Approval confirmed. Click Commit to finalize"),
         onError: (err) =>
           toast.error(extractRevertReason(err)),
       },
@@ -398,12 +398,12 @@ function TieredCommitContent({
               </div>
               {!projectedTier.mandatory && (
                 <p className="text-xs text-amber-400/80 mt-1">
-                  Below {pricing.tiers.find((t) => t.mandatory)?.minUnits ?? "?"} units — pool fulfillment is optional. Pool may not execute.
+                  Below {pricing.tiers.find((t) => t.mandatory)?.minUnits ?? "?"} units. Pool fulfillment is optional. Pool may not execute.
                 </p>
               )}
               {projectedTier.mandatory && (
                 <p className="text-xs text-green-400/80 mt-1">
-                  This tier locks in fulfillment — the pool will execute.
+                  This tier locks in fulfillment. The pool will execute.
                 </p>
               )}
             </div>
@@ -601,7 +601,7 @@ function FallbackCommitModal({
       },
       {
         onSuccess: () =>
-          toast.success("Approval confirmed — click Commit to finalize"),
+          toast.success("Approval confirmed. Click Commit to finalize"),
         onError: (err) =>
           toast.error(extractRevertReason(err)),
       },

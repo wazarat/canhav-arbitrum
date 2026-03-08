@@ -290,7 +290,7 @@ export default function AdminPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {feeBps !== undefined ? `${Number(feeBps) / 100}%` : "—"}
+              {feeBps !== undefined ? `${Number(feeBps) / 100}%` : "-"}
             </div>
             <p className="text-xs text-muted-foreground">Platform fee rate</p>
           </CardContent>
@@ -298,7 +298,7 @@ export default function AdminPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {totalFees !== undefined ? `${formatUsdc(totalFees as bigint)} mUSDC` : "—"}
+              {totalFees !== undefined ? `${formatUsdc(totalFees as bigint)} mUSDC` : "-"}
             </div>
             <p className="text-xs text-muted-foreground">Total fees collected</p>
           </CardContent>

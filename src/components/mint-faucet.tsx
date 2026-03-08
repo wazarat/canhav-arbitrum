@@ -20,13 +20,13 @@ const MINT_AMOUNT = 10_000n * 10n ** 6n;
 function friendlyError(err: Error): string {
   const msg = err.message || "";
   if (msg.includes("max fee per gas less than block base fee"))
-    return "Gas fee too low — please try again (network fees fluctuated).";
+    return "Gas fee too low. Please try again (network fees fluctuated).";
   if (msg.includes("insufficient funds"))
     return "Your wallet needs ETH on Arbitrum Sepolia for gas fees.";
   if (msg.includes("User rejected") || msg.includes("user rejected"))
     return "Transaction cancelled.";
   if (msg.includes("chain mismatch") || msg.includes("does not match"))
-    return "Wrong network — switch to Arbitrum Sepolia in your wallet.";
+    return "Wrong network. Switch to Arbitrum Sepolia in your wallet.";
   return msg.split("\n")[0] || "Mint failed";
 }
 

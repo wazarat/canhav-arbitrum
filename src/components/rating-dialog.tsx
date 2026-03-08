@@ -90,7 +90,7 @@ export function RatingDialog({
         body: JSON.stringify({ poolId, address, rating, comment }),
       });
       if (res.ok) {
-        toast.success("Rating submitted — thank you!");
+        toast.success("Rating submitted. Thank you!");
         setOpen(false);
         fetchRating();
       } else {

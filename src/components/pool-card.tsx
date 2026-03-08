@@ -108,7 +108,7 @@ export function PoolCard({ pool }: { pool: PoolData }) {
         </div>
         {uiStatus === "Active" && pool.totalUnits >= target && (
           <p className="text-xs font-medium text-emerald-400">
-            MOQ met &mdash; still accepting commits for better rates
+            MOQ met. Still accepting commits for better rates
           </p>
         )}
         {closedMeta && (

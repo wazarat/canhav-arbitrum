@@ -344,7 +344,7 @@ export default function PoolDetailPage({
             </Card>
           )}
 
-          {/* Tiered pricing visualization — on-chain data preferred */}
+          {/* Tiered pricing visualization - on-chain data preferred */}
           {onChainTiers && onChainTiers.length > 0 && (
             <Card>
               <CardHeader>
@@ -388,7 +388,7 @@ export default function PoolDetailPage({
                         <p className="text-xs text-muted-foreground">
                           {tier.mandatory
                             ? "Fulfillment locked in once this tier is reached"
-                            : "Optional — pool may not execute at this level"}
+                            : "Optional. Pool may not execute at this level"}
                         </p>
                       </div>
                       <div className="text-right shrink-0 ml-4">
@@ -430,7 +430,7 @@ export default function PoolDetailPage({
               <Separator />
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Buyers</span>
-                <span>{buyerCount !== undefined ? buyerCount.toString() : "—"}</span>
+                <span>{buyerCount !== undefined ? buyerCount.toString() : "-"}</span>
               </div>
               {onChainTiers && (
                 <>
@@ -503,7 +503,7 @@ export default function PoolDetailPage({
                         return (
                           <div className="mt-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-2 space-y-1">
                             <p className="text-xs font-semibold text-emerald-400">
-                              MOQ reached &mdash; fulfillment locked in!
+                              MOQ reached! Fulfillment locked in.
                             </p>
                             {nextTier ? (
                               <p className="text-xs text-emerald-400/80">
@@ -567,7 +567,7 @@ export default function PoolDetailPage({
             </Card>
           )}
 
-          {/* Rating section — visible after delivery */}
+          {/* Rating section - visible after delivery */}
           {isDelivered(pool) && commitment && commitment.units > 0n && (
             <Card>
               <CardHeader>

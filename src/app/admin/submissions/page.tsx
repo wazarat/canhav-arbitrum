@@ -39,7 +39,7 @@ function groupByProduct(items: SubmissionRecord[], productKey: "productName" | "
       const u = parseInt(String(e.units ?? "0"), 10);
       if (!isNaN(u)) totalUnits += u;
 
-      const freq = String(e.frequency ?? e.quantity ?? "—");
+      const freq = String(e.frequency ?? e.quantity ?? "-");
       frequencyBreakdown[freq] = (frequencyBreakdown[freq] ?? 0) + 1;
 
       if (e.submittedAt && e.submittedAt > latestAt) latestAt = e.submittedAt;
@@ -56,15 +56,15 @@ function InterestEntry({ item }: { item: SubmissionRecord }) {
   return (
     <div className="rounded-lg border p-3 text-sm space-y-1">
       <div className="flex items-center justify-between">
-        <span className="font-medium">{String(item.name ?? "—")}</span>
+        <span className="font-medium">{String(item.name ?? "-")}</span>
         <span className="text-xs text-muted-foreground">
           {item.submittedAt ? new Date(item.submittedAt).toLocaleString() : ""}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-muted-foreground">
-        <span>Email: {String(item.email ?? "—")}</span>
-        <span>Units: {String(item.units ?? "—")}</span>
-        <span>Frequency: {String(item.frequency ?? "—")}</span>
+        <span>Email: {String(item.email ?? "-")}</span>
+        <span>Units: {String(item.units ?? "-")}</span>
+        <span>Frequency: {String(item.frequency ?? "-")}</span>
         {item.comments ? (
           <span className="col-span-2">Comments: {String(item.comments)}</span>
         ) : null}
@@ -77,15 +77,15 @@ function RequestEntry({ item }: { item: SubmissionRecord }) {
   return (
     <div className="rounded-lg border p-3 text-sm space-y-1">
       <div className="flex items-center justify-between">
-        <span className="font-medium">{String(item.product ?? "—")}</span>
+        <span className="font-medium">{String(item.product ?? "-")}</span>
         <span className="text-xs text-muted-foreground">
           {item.submittedAt ? new Date(item.submittedAt).toLocaleString() : ""}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-muted-foreground">
-        <span>Quantity: {String(item.quantity ?? "—")}</span>
-        <span>Price range: {String(item.priceRange ?? "—")}</span>
-        <span className="col-span-2">Contact: {String(item.contact ?? "—")}</span>
+        <span>Quantity: {String(item.quantity ?? "-")}</span>
+        <span>Price range: {String(item.priceRange ?? "-")}</span>
+        <span className="col-span-2">Contact: {String(item.contact ?? "-")}</span>
         {item.notes ? (
           <span className="col-span-2">Notes: {String(item.notes)}</span>
         ) : null}

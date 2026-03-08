@@ -37,7 +37,7 @@ export default function HomePage() {
 
         <p className="relative max-w-2xl text-lg sm:text-xl leading-relaxed text-muted-foreground">
           Small businesses pool funds together to meet supplier minimum order
-          quantities. Commit stablecoins to a pool &mdash; when the MOQ is hit,
+          quantities. Commit stablecoins to a pool. When the MOQ is hit,
           the order executes. If it isn&apos;t met by the deadline, get a full refund.
         </p>
 

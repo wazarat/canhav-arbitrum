@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 function formatTimeLeft(seconds: number): string {
-  if (seconds <= 0) return "Expired";
+  if (seconds <= 0) return "Deadline passed";
   const d = Math.floor(seconds / 86400);
   const h = Math.floor((seconds % 86400) / 3600);
   const m = Math.floor((seconds % 3600) / 60);

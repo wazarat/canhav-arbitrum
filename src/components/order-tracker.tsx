@@ -41,13 +41,13 @@ function computeStages(pool: PoolData): FulfillmentStage[] {
     {
       label: "MOQ Reached",
       description: moqMet
-        ? "Minimum order met — fulfillment is locked in. Keep committing for better rates!"
-        : "Minimum order quantity reached — the group order will be locked in.",
+        ? "Minimum order met. Fulfillment is locked in. Keep committing for better rates!"
+        : "Minimum order quantity reached. The group order will be locked in.",
       status: "upcoming",
     },
     {
       label: "Deadline & Order Executed",
-      description: "Pool closed at deadline — the group order has been finalized.",
+      description: "Pool closed at deadline. The group order has been finalized.",
       status: "upcoming",
     },
     {
@@ -72,14 +72,14 @@ function computeStages(pool: PoolData): FulfillmentStage[] {
   const now = Date.now();
 
   switch (pool.status) {
-    case 0: // Open — pool stays open until deadline
+    case 0: // Open - pool stays open until deadline
       stages[0].status = "active";
       if (moqMet) {
         stages[0].description = "Pool is open and accepting further commitments for better tier rates.";
         stages[1].status = "completed";
       }
       break;
-    case 1: // Fulfilled — deadline passed, MOQ met
+    case 1: // Fulfilled - deadline passed, MOQ met
       stages[0].status = "completed";
       stages[1].status = "completed";
       stages[2].status = "active";
@@ -102,7 +102,7 @@ function computeStages(pool: PoolData): FulfillmentStage[] {
       break;
     case 2: // Expired
       stages[0].status = "completed";
-      stages[0].description = "Pool expired — MOQ was not met before the deadline.";
+      stages[0].description = "Pool expired. MOQ was not met before the deadline.";
       stages[1].description = "Minimum order was not reached.";
       stages.splice(2);
       break;
