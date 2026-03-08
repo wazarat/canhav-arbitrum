@@ -175,8 +175,8 @@ export function formatUsdc(amount: bigint): string {
   return fracStr ? `${whole}.${fracStr}` : whole.toString();
 }
 
-export const ACTIVE_POOL_IDS = new Set([9]);
-export const CLOSED_POOL_IDS = new Set([0, 2, 3, 4, 5, 6]);
+export const ACTIVE_POOL_IDS = new Set([2, 3, 5, 12, 17, 20]);
+export const CLOSED_POOL_IDS = new Set([0, 7, 8, 9, 14, 19]);
 
 export interface ClosedPoolMeta {
   source: string;
@@ -195,37 +195,37 @@ export const CLOSED_POOL_META: Record<number, ClosedPoolMeta> = {
     closureReason: "Pool successfully fulfilled — order shipped to all 12 participants.",
     rating: 4.5,
     totalBuyers: 12,
-    totalUnitsCommitted: 65,
+    totalUnitsCommitted: 120,
     closedDate: "2026-02-20",
   },
-  2: {
-    source: "King Arthur Milling Co.",
+  7: {
+    source: "Counter Culture Coffee, Durham NC",
     region: "United States",
-    closureReason: "MOQ not met within deadline — all deposits refunded to participants.",
-    rating: 3.0,
-    totalBuyers: 5,
-    totalUnitsCommitted: 90,
-    closedDate: "2026-02-15",
+    closureReason: "Pool successfully fulfilled — light roast delivered to 9 cafes.",
+    rating: 4.2,
+    totalBuyers: 9,
+    totalUnitsCommitted: 85,
+    closedDate: "2026-02-25",
   },
-  3: {
-    source: "Oleificio Ferrara, Puglia",
-    region: "Italy",
-    closureReason: "Pool successfully fulfilled — premium extra-virgin olive oil delivered.",
-    rating: 5.0,
-    totalBuyers: 18,
-    totalUnitsCommitted: 120,
+  8: {
+    source: "Intelligentsia Coffee, Chicago",
+    region: "United States",
+    closureReason: "MOQ not met within deadline — all deposits refunded.",
+    rating: 3.0,
+    totalBuyers: 6,
+    totalUnitsCommitted: 45,
+    closedDate: "2026-02-18",
+  },
+  9: {
+    source: "Stumptown Coffee Roasters, Portland",
+    region: "United States",
+    closureReason: "Pool successfully fulfilled — dark roast delivered across 15 businesses.",
+    rating: 4.8,
+    totalBuyers: 15,
+    totalUnitsCommitted: 130,
     closedDate: "2026-02-28",
   },
-  4: {
-    source: "Kohinoor Foods Ltd.",
-    region: "India",
-    closureReason: "Supplier unable to fulfill at agreed price due to export restrictions. Deposits refunded.",
-    rating: 2.5,
-    totalBuyers: 8,
-    totalUnitsCommitted: 180,
-    closedDate: "2026-01-30",
-  },
-  5: {
+  14: {
     source: "Dart Container Corporation",
     region: "United States",
     closureReason: "Pool successfully fulfilled — 600 cases delivered across 22 businesses.",
@@ -234,14 +234,14 @@ export const CLOSED_POOL_META: Record<number, ClosedPoolMeta> = {
     totalUnitsCommitted: 600,
     closedDate: "2026-02-10",
   },
-  6: {
-    source: "World Centric, Petaluma CA",
+  19: {
+    source: "Durable Packaging International",
     region: "United States",
-    closureReason: "MOQ not reached — pool expired. Deposits refunded to all 3 participants.",
-    rating: 3.5,
-    totalBuyers: 3,
-    totalUnitsCommitted: 150,
-    closedDate: "2026-02-05",
+    closureReason: "Supplier discontinued this SKU. Deposits refunded to all 8 participants.",
+    rating: 2.5,
+    totalBuyers: 8,
+    totalUnitsCommitted: 180,
+    closedDate: "2026-01-30",
   },
 };
 
