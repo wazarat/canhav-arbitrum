@@ -413,10 +413,24 @@ function TieredCommitContent({
             </div>
           )}
 
+          {parsedUnits > 0n &&
+            balance !== undefined &&
+            onChainCost > (balance as bigint) && (
+              <p className="text-xs text-red-400 font-medium">
+                Insufficient mUSDC balance. You need{" "}
+                {formatUsdc(onChainCost)} mUSDC but have{" "}
+                {formatUsdc(balance as bigint)}. Use the faucet to mint
+                more tokens.
+              </p>
+            )}
+
           {parsedUnits > 0n && needsApproval ? (
             <Button
               onClick={handleApprove}
-              disabled={isWorking}
+              disabled={
+                isWorking ||
+                (balance !== undefined && onChainCost > (balance as bigint))
+              }
               className="w-full"
             >
               {isApproving
@@ -428,7 +442,13 @@ function TieredCommitContent({
           ) : (
             <Button
               onClick={handleCommit}
-              disabled={parsedUnits === 0n || isWorking || !address || !allowanceLoaded}
+              disabled={
+                parsedUnits === 0n ||
+                isWorking ||
+                !address ||
+                !allowanceLoaded ||
+                (balance !== undefined && onChainCost > (balance as bigint))
+              }
               className="w-full"
             >
               {!allowanceLoaded && parsedUnits > 0n
@@ -639,10 +659,24 @@ function FallbackCommitModal({
             </div>
           )}
 
+          {parsedUnits > 0n &&
+            balance !== undefined &&
+            cost > (balance as bigint) && (
+              <p className="text-xs text-red-400 font-medium">
+                Insufficient mUSDC balance. You need{" "}
+                {formatUsdc(cost)} mUSDC but have{" "}
+                {formatUsdc(balance as bigint)}. Use the faucet to mint
+                more tokens.
+              </p>
+            )}
+
           {parsedUnits > 0n && needsApproval ? (
             <Button
               onClick={handleApprove}
-              disabled={isWorking}
+              disabled={
+                isWorking ||
+                (balance !== undefined && cost > (balance as bigint))
+              }
               className="w-full"
             >
               {isApproving
@@ -654,7 +688,13 @@ function FallbackCommitModal({
           ) : (
             <Button
               onClick={handleCommit}
-              disabled={parsedUnits === 0n || isWorking || !address || !allowanceLoaded}
+              disabled={
+                parsedUnits === 0n ||
+                isWorking ||
+                !address ||
+                !allowanceLoaded ||
+                (balance !== undefined && cost > (balance as bigint))
+              }
               className="w-full"
             >
               {!allowanceLoaded && parsedUnits > 0n
