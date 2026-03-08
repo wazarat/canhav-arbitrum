@@ -15,6 +15,8 @@ import { RegisterInterestDialog } from "@/components/register-interest-dialog";
 import { PoolProgress } from "@/components/pool-progress";
 import { Countdown } from "@/components/countdown";
 import { StarRating } from "@/components/star-rating";
+import { OrderTracker, isDelivered } from "@/components/order-tracker";
+import { RatingDialog } from "@/components/rating-dialog";
 import { usePool, useCommitment, useBuyerCount } from "@/lib/hooks";
 import {
   POOL_STATUS_LABELS,
@@ -289,6 +291,18 @@ export default function PoolDetailPage({
             </CardContent>
           </Card>
 
+          {/* Order Fulfillment Tracker */}
+          {(pool.status !== 2) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Order Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <OrderTracker pool={pool} />
+              </CardContent>
+            </Card>
+          )}
+
           {/* Supplier information */}
           {supplier && (
             <Card>
@@ -497,6 +511,31 @@ export default function PoolDetailPage({
                   This pool has been fulfilled. The admin will withdraw funds to
                   pay the supplier.
                 </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {pool.status === 3 && (
+            <Card>
+              <CardContent className="py-6 text-center space-y-2">
+                <p className="text-lg font-semibold text-green-400">
+                  Supplier Paid
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Funds have been sent to the supplier. Your order is on its way!
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Rating section — visible after delivery */}
+          {isDelivered(pool) && commitment && commitment.units > 0n && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Rate This Order</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RatingDialog poolId={pool.id} productName={pool.productName} />
               </CardContent>
             </Card>
           )}

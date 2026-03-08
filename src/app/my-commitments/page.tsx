@@ -17,6 +17,8 @@ import {
   formatUsdc,
 } from "@/lib/constants";
 import { purchasePoolConfig } from "@/lib/contracts";
+import { OrderTracker, isDelivered } from "@/components/order-tracker";
+import { RatingDialog } from "@/components/rating-dialog";
 import type { PoolData } from "@/lib/hooks";
 
 function CommitmentRow({
@@ -118,6 +120,24 @@ function CommitmentRow({
           <Badge variant="outline" className="text-green-400 border-green-400/30">
             Refund claimed
           </Badge>
+        )}
+
+        {/* Order fulfillment tracker */}
+        {pool.status !== 2 && !commitment.refunded && (
+          <>
+            <div className="border-t pt-4 mt-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Order Tracking
+              </p>
+              <OrderTracker pool={pool} />
+            </div>
+
+            {isDelivered(pool) && (
+              <div className="border-t pt-4 mt-2">
+                <RatingDialog poolId={pool.id} productName={pool.productName} />
+              </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>
