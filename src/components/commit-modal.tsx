@@ -363,7 +363,7 @@ function TieredCommitContent({
               </div>
               {!projectedTier.mandatory && (
                 <p className="text-xs text-amber-400/80 mt-1">
-                  Below 80 units — pool fulfillment is optional. Pool may not execute.
+                  Below {pricing.tiers.find((t) => t.mandatory)?.minUnits ?? "?"} units — pool fulfillment is optional. Pool may not execute.
                 </p>
               )}
               {projectedTier.mandatory && (
