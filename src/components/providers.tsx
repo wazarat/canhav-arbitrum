@@ -1,17 +1,30 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { PrivyProvider } from "@privy-io/react-auth";
+import { PrivyProvider, type ConnectedWallet, type User } from "@privy-io/react-auth";
 import { WagmiProvider } from "@privy-io/wagmi";
 import { arbitrumSepolia } from "viem/chains";
 import { wagmiConfig } from "@/lib/wagmi-config";
 import { ErrorBoundary } from "@/components/error-boundary";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useState, useCallback } from "react";
+
+function usePreferExternalWallet() {
+  return useCallback(
+    ({ wallets }: { wallets: ConnectedWallet[]; user: User | null }) => {
+      const external = wallets.find(
+        (w) => w.walletClientType !== "privy",
+      );
+      return external ?? wallets[0];
+    },
+    [],
+  );
+}
 
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
+  const preferExternal = usePreferExternalWallet();
 
   if (!PRIVY_APP_ID || PRIVY_APP_ID === "REPLACE_WITH_YOUR_PRIVY_APP_ID") {
     return (
@@ -56,7 +69,7 @@ export function Providers({ children }: { children: ReactNode }) {
       }}
     >
       <QueryClientProvider client={queryClient}>
-        <WagmiProvider config={wagmiConfig}>
+        <WagmiProvider config={wagmiConfig} setActiveWalletForWagmi={preferExternal}>
           <ErrorBoundary>{children}</ErrorBoundary>
         </WagmiProvider>
       </QueryClientProvider>
