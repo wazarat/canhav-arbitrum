@@ -1,17 +1,66 @@
 # CanHav Group Pool
 
-![image alt](https://github.com/wazarat/canhav-arbitrum/blob/d3f619c270e006e29a9fb4d02647fda5a2983363/CanHavArbitrum%20pitch.png)
+![CanHav Group Pool](https://github.com/wazarat/canhav-arbitrum/blob/d3f619c270e006e29a9fb4d02647fda5a2983363/CanHavArbitrum%20pitch.png)
 
 A group-purchasing platform where small businesses pool funds together to meet supplier minimum order quantities (MOQs). Built on **Arbitrum Sepolia** with on-chain escrow and tiered pricing.
 
-Live at [canhav.io](https://www.canhav.io)
+**Live at [canhav.io](https://www.canhav.io)**
+
+**Contract on Arbitrum Sepolia:** [`0x3b0cb807778cb900caec181c1ce1b0133dcf8cb8`](https://sepolia.arbiscan.io/address/0x3b0cb807778cb900caec181c1ce1b0133dcf8cb8)
+
+---
+
+## For Judges: What to Look At
+
+### 1. Smart Contract (`contracts/src/PurchasePool.sol`)
+
+This is the core of the project. A single Solidity contract handles all escrow, tiered pricing, and refund logic on-chain. Key things to note:
+
+- **On-chain tiered pricing** with up to 10 tiers per pool, stored directly in contract storage. Tiers define unit thresholds, prices, and whether reaching them locks in fulfillment.
+- **Escrow pattern**: Buyer funds are held by the contract itself (no intermediary wallet). The `commit()` function transfers tokens into the contract, and funds are only released via `withdrawFunds()` (to the supplier, after deadline + MOQ met) or `claimRefund()` (back to buyers, if MOQ not met).
+- **Pools stay open past MOQ**: Even after the minimum order is hit, the pool remains open until the deadline so buyers can keep committing toward cheaper tiers. Status resolves to `Fulfilled` or `Expired` only when `block.timestamp > deadline`.
+- **Platform fee**: A configurable fee (capped at 10% on-chain via `MAX_FEE_BPS`) is deducted on withdrawal.
+- **Security measures**:
+  - OpenZeppelin `SafeERC20` for all token transfers (no silent failures).
+  - OpenZeppelin `Ownable` for admin-only functions.
+  - Checks-Effects-Interactions (CEI) pattern in `commit()`: state updates happen before the external `safeTransferFrom` call.
+  - Double-refund prevention via `refunded` flag.
+  - Sorted, validated tiers enforced at creation time.
+
+### 2. Test Suite (`contracts/test/PurchasePool.t.sol`)
+
+38 passing tests covering:
+
+- Pool creation with validation (tier sorting, mandatory tier requirement, deadline checks, owner-only access).
+- Tiered pricing across Starter, Bulk, and Wholesale tiers (including boundary crossing).
+- Fulfillment lifecycle: pools stay open after MOQ, resolve to Fulfilled only after deadline.
+- Refund flow: full refund on expiry, double-refund prevention, non-participant rejection.
+- Fee configuration: accumulation across pools, zero-fee edge case, max-fee cap.
+
+Run them with `cd contracts && forge test -v`.
+
+### 3. Frontend + Web3 Integration (`src/`)
+
+- **Wallet handling**: Privy for authentication with MetaMask/external wallet prioritization. Automatic chain switching to Arbitrum Sepolia before every transaction.
+- **Dynamic gas estimation**: Custom `useGasOverrides` hook fetches live `baseFeePerGas` from the chain and applies buffers, working around Arbitrum Sepolia gas estimation quirks.
+- **ERC-20 approval flow**: The commit modal walks users through Approve then Commit, with real-time balance and allowance checks.
+- **On-chain reads**: All pool data, tiers, and commitments are read directly from the contract via Alchemy RPC.
+
+### 4. Try It Live
+
+1. Visit [canhav.io](https://www.canhav.io)
+2. Connect a MetaMask wallet on Arbitrum Sepolia
+3. Mint test mUSDC from the faucet
+4. Browse pools, commit to one, and watch the tiered pricing update
+
+---
 
 ## How It Works
 
-1. **Browse Pools** - Find a product pool your business needs (coffee beans, cups, packaging, etc.).
-2. **Commit Funds** - Approve and deposit mUSDC for the quantity you want. Tokens are held in escrow by the smart contract.
-3. **Tiers Unlock** - As more businesses commit, the pool crosses pricing thresholds and everyone gets a cheaper rate.
-4. **Deadline Resolves** - The pool stays open until its deadline. If the MOQ is met, the order is locked in and fulfilled. If not, every buyer can claim a full refund.
+1. **Browse Pools**: Find a product pool your business needs (coffee beans, cups, packaging, etc.).
+2. **Commit Funds**: Approve and deposit mUSDC for the quantity you want. Tokens are held in escrow by the smart contract.
+3. **Tiers Unlock**: As more businesses commit, the pool crosses pricing thresholds and everyone gets a cheaper rate.
+4. **Deadline Resolves**: The pool stays open until its deadline. If the MOQ is met, the order is locked in and fulfilled. If not, every buyer can claim a full refund.
 
 ## Smart Contract
 
@@ -58,6 +107,7 @@ When a buyer commits, the contract looks up the active tier based on the pool's 
 - Commitments are tracked per buyer per pool (`units`, `deposited`, `refunded`).
 - Refunds are guaranteed for expired pools. The contract holds the tokens until claimed.
 - The contract uses OpenZeppelin's `SafeERC20` for token transfers and `Ownable` for admin access.
+- The `commit()` function follows the Checks-Effects-Interactions pattern: state is updated before external calls to prevent reentrancy.
 
 ### Token
 
@@ -67,10 +117,10 @@ The platform uses `MockUSDC` (mUSDC), an ERC-20 test stablecoin with 6 decimals.
 
 Arbitrum is an Ethereum Layer 2 rollup. Transactions settle on Ethereum for security but execute on Arbitrum for speed and low cost. This means:
 
-- **Low gas fees** - Committing to a pool costs a fraction of a cent, making it practical for smaller transactions.
-- **Fast confirmations** - Transactions confirm in seconds, not minutes.
-- **Ethereum security** - All state is anchored to Ethereum L1. The escrow is as secure as Ethereum itself.
-- **EVM compatible** - Standard Solidity, standard tools (Foundry, Wagmi, Viem).
+- **Low gas fees**: Committing to a pool costs a fraction of a cent, making it practical for smaller transactions.
+- **Fast confirmations**: Transactions confirm in seconds, not minutes.
+- **Ethereum security**: All state is anchored to Ethereum L1. The escrow is as secure as Ethereum itself.
+- **EVM compatible**: Standard Solidity, standard tools (Foundry, Wagmi, Viem).
 
 The testnet deployment uses **Arbitrum Sepolia** (chain ID 421614).
 

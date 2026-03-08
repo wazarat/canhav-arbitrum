@@ -202,8 +202,7 @@ contract PurchasePool is Ownable {
         uint256 tierPrice = _getActiveTierPrice(poolId, newTotal);
         uint256 cost = units * tierPrice;
 
-        pool.token.safeTransferFrom(msg.sender, address(this), cost);
-
+        // Effects before interaction (CEI pattern)
         Commitment storage c = commitments[poolId][msg.sender];
         c.units     += units;
         c.deposited += cost;
@@ -215,6 +214,9 @@ contract PurchasePool is Ownable {
             poolBuyers[poolId].push(msg.sender);
             _isBuyer[poolId][msg.sender] = true;
         }
+
+        // Interaction last
+        pool.token.safeTransferFrom(msg.sender, address(this), cost);
 
         emit Committed(poolId, msg.sender, units, cost, tierPrice);
     }

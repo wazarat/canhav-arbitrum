@@ -265,9 +265,15 @@ contract PurchasePoolTest is Test {
         pool.commit(poolId, 50);
         vm.stopPrank();
 
+        // Pool stays Open until deadline even after MOQ is met
         (, , , , , uint256 totalUnits, , PurchasePool.PoolStatus status) = pool.getPool(poolId);
         assertEq(totalUnits, 110);
-        assertEq(uint8(status), uint8(PurchasePool.PoolStatus.Fulfilled));
+        assertEq(uint8(status), uint8(PurchasePool.PoolStatus.Open));
+
+        // After deadline, resolves to Fulfilled
+        vm.warp(block.timestamp + DEADLINE_OFFSET + 1);
+        (, , , , , , , PurchasePool.PoolStatus statusAfter) = pool.getPool(poolId);
+        assertEq(uint8(statusAfter), uint8(PurchasePool.PoolStatus.Fulfilled));
     }
 
     function test_noFulfillmentBelowMandatoryTier() public {
@@ -289,6 +295,9 @@ contract PurchasePoolTest is Test {
         usdc.approve(address(pool), 100 * BULK_PRICE);
         pool.commit(poolId, 100);
         vm.stopPrank();
+
+        // Warp past deadline so pool resolves to Fulfilled
+        vm.warp(block.timestamp + DEADLINE_OFFSET + 1);
 
         uint256 totalDeposit = 100 * BULK_PRICE;
         uint256 expectedFee = (totalDeposit * FEE_BPS) / 10_000;
@@ -355,6 +364,8 @@ contract PurchasePoolTest is Test {
         usdc.approve(address(pool), 100 * BULK_PRICE);
         pool.commit(poolId, 100);
         vm.stopPrank();
+
+        vm.warp(block.timestamp + DEADLINE_OFFSET + 1);
 
         uint256 adminBefore = usdc.balanceOf(admin);
         uint256 treasuryBefore = usdc.balanceOf(treasury);
@@ -496,6 +507,8 @@ contract PurchasePoolTest is Test {
         pool.commit(p2, 100);
         vm.stopPrank();
 
+        vm.warp(block.timestamp + DEADLINE_OFFSET + 1);
+
         pool.withdrawFunds(p1);
         pool.withdrawFunds(p2);
 
@@ -558,7 +571,13 @@ contract PurchasePoolTest is Test {
         pool.commit(poolId, 1);
         vm.stopPrank();
 
+        // Still open before deadline
         (, , , , , , , PurchasePool.PoolStatus status) = pool.getPool(poolId);
-        assertEq(uint8(status), uint8(PurchasePool.PoolStatus.Fulfilled));
+        assertEq(uint8(status), uint8(PurchasePool.PoolStatus.Open));
+
+        // Fulfilled after deadline
+        vm.warp(block.timestamp + DEADLINE_OFFSET + 1);
+        (, , , , , , , PurchasePool.PoolStatus statusAfter) = pool.getPool(poolId);
+        assertEq(uint8(statusAfter), uint8(PurchasePool.PoolStatus.Fulfilled));
     }
 }
