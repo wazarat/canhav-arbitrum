@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title PurchasePool — collaborative group-purchasing escrow with on-chain tiered pricing
 /// @notice Businesses pool ERC-20 commitments toward a supplier MOQ.
@@ -12,7 +13,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 ///         so buyers can keep committing toward higher (cheaper) tiers.
 ///         At the deadline the pool resolves to Fulfilled (threshold met) or
 ///         Expired (threshold not met). A platform fee is deducted on withdrawal.
-contract PurchasePool is Ownable {
+///         Early committers who paid a higher tier price are automatically refunded
+///         the difference via claimRebate() once the pool is fulfilled or withdrawn.
+contract PurchasePool is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     uint256 public constant MAX_FEE_BPS = 1000; // 10 % hard cap
@@ -41,6 +44,7 @@ contract PurchasePool is Ownable {
         uint256 units;
         uint256 deposited;
         bool    refunded;
+        bool    rebateClaimed;
     }
 
     uint256 public nextPoolId;
@@ -74,7 +78,8 @@ contract PurchasePool is Ownable {
     event PoolFulfilled(uint256 indexed poolId, uint256 totalUnits);
     event PoolExpired(uint256 indexed poolId);
     event Refunded(uint256 indexed poolId, address indexed buyer, uint256 amount);
-    event FundsWithdrawn(uint256 indexed poolId, uint256 amount, uint256 fee);
+    event RebateClaimed(uint256 indexed poolId, address indexed buyer, uint256 rebateAmount);
+    event FundsWithdrawn(uint256 indexed poolId, uint256 amount, uint256 fee, uint256 rebateReserve);
     event FeeUpdated(uint256 oldBps, uint256 newBps);
     event FeeRecipientUpdated(address oldRecipient, address newRecipient);
 
@@ -99,15 +104,12 @@ contract PurchasePool is Ownable {
         feeRecipient = _feeRecipient;
     }
 
-    /// @notice Extend (or change) the deadline for an open pool.
+    /// @notice Extend the deadline for a pool that is still open.
     function setDeadline(uint256 poolId, uint256 newDeadline) external onlyOwner {
         Pool storage pool = pools[poolId];
-        require(pool.status == PoolStatus.Open || pool.status == PoolStatus.Fulfilled, "Pool not active");
+        require(pool.status == PoolStatus.Open, "Pool not open");
         require(newDeadline > block.timestamp, "Deadline must be in the future");
         pool.deadline = newDeadline;
-        if (pool.status == PoolStatus.Fulfilled) {
-            pool.status = PoolStatus.Open;
-        }
     }
 
     /// @notice Create a pool with on-chain price tiers.
@@ -167,16 +169,22 @@ contract PurchasePool is Ownable {
         );
     }
 
-    function withdrawFunds(uint256 poolId) external onlyOwner {
+    /// @notice Withdraw supplier funds from a fulfilled pool. Rebate reserves
+    ///         (the difference between what was deposited and the final tier cost)
+    ///         are kept in the contract for buyers to claim via claimRebate().
+    function withdrawFunds(uint256 poolId) external onlyOwner nonReentrant {
         Pool storage pool = pools[poolId];
         _refreshStatus(poolId);
         require(pool.status == PoolStatus.Fulfilled, "Pool not fulfilled");
 
-        uint256 amount = pool.totalDeposited;
+        uint256 finalPrice = _getActiveTierPrice(poolId, pool.totalUnits);
+        uint256 fairTotal = pool.totalUnits * finalPrice;
+        uint256 rebateReserve = pool.totalDeposited - fairTotal;
+
         pool.status = PoolStatus.Withdrawn;
 
-        uint256 fee = (amount * feeBps) / 10_000;
-        uint256 payout = amount - fee;
+        uint256 fee = (fairTotal * feeBps) / 10_000;
+        uint256 payout = fairTotal - fee;
 
         if (fee > 0) {
             pool.token.safeTransfer(feeRecipient, fee);
@@ -184,14 +192,14 @@ contract PurchasePool is Ownable {
         }
         pool.token.safeTransfer(msg.sender, payout);
 
-        emit FundsWithdrawn(poolId, payout, fee);
+        emit FundsWithdrawn(poolId, payout, fee, rebateReserve);
     }
 
     // ── Buyer ───────────────────────────────────────────────────────────
 
     /// @notice Commit `units` to a pool. Cost is calculated from the active
     ///         tier based on the pool's total units after this commit.
-    function commit(uint256 poolId, uint256 units) external {
+    function commit(uint256 poolId, uint256 units) external nonReentrant {
         require(units > 0, "Units must be > 0");
 
         Pool storage pool = pools[poolId];
@@ -202,7 +210,6 @@ contract PurchasePool is Ownable {
         uint256 tierPrice = _getActiveTierPrice(poolId, newTotal);
         uint256 cost = units * tierPrice;
 
-        // Effects before interaction (CEI pattern)
         Commitment storage c = commitments[poolId][msg.sender];
         c.units     += units;
         c.deposited += cost;
@@ -215,13 +222,12 @@ contract PurchasePool is Ownable {
             _isBuyer[poolId][msg.sender] = true;
         }
 
-        // Interaction last
         pool.token.safeTransferFrom(msg.sender, address(this), cost);
 
         emit Committed(poolId, msg.sender, units, cost, tierPrice);
     }
 
-    function claimRefund(uint256 poolId) external {
+    function claimRefund(uint256 poolId) external nonReentrant {
         Pool storage pool = pools[poolId];
         _refreshStatus(poolId);
         require(pool.status == PoolStatus.Expired, "Pool not expired");
@@ -235,6 +241,33 @@ contract PurchasePool is Ownable {
 
         pool.token.safeTransfer(msg.sender, amount);
         emit Refunded(poolId, msg.sender, amount);
+    }
+
+    /// @notice Claim a rebate if the final tier price is lower than what you paid.
+    ///         Available after a pool is Fulfilled or Withdrawn.
+    function claimRebate(uint256 poolId) external nonReentrant {
+        Pool storage pool = pools[poolId];
+        _refreshStatus(poolId);
+        require(
+            pool.status == PoolStatus.Fulfilled || pool.status == PoolStatus.Withdrawn,
+            "Pool not settled"
+        );
+
+        Commitment storage c = commitments[poolId][msg.sender];
+        require(c.units > 0, "No commitment");
+        require(!c.rebateClaimed, "Rebate already claimed");
+
+        uint256 finalPrice = _getActiveTierPrice(poolId, pool.totalUnits);
+        uint256 fairCost = c.units * finalPrice;
+        uint256 rebate = c.deposited - fairCost;
+
+        c.rebateClaimed = true;
+
+        if (rebate > 0) {
+            pool.token.safeTransfer(msg.sender, rebate);
+        }
+
+        emit RebateClaimed(poolId, msg.sender, rebate);
     }
 
     // ── Views ───────────────────────────────────────────────────────────
@@ -301,6 +334,29 @@ contract PurchasePool is Ownable {
     ) {
         Commitment storage c = commitments[poolId][buyer];
         return (c.units, c.deposited, c.refunded);
+    }
+
+    /// @notice Returns the rebate amount a buyer can claim for a settled pool.
+    function getRebate(uint256 poolId, address buyer) external view returns (
+        uint256 rebateAmount,
+        bool    claimed
+    ) {
+        Pool storage pool = pools[poolId];
+        Commitment storage c = commitments[poolId][buyer];
+        claimed = c.rebateClaimed;
+        if (c.units == 0) return (0, claimed);
+
+        PoolStatus s = pool.status;
+        if (s == PoolStatus.Open && block.timestamp > pool.deadline) {
+            s = pool.totalUnits >= pool.fulfillmentThreshold
+                ? PoolStatus.Fulfilled
+                : PoolStatus.Expired;
+        }
+        if (s != PoolStatus.Fulfilled && s != PoolStatus.Withdrawn) return (0, claimed);
+
+        uint256 finalPrice = _getActiveTierPrice(poolId, pool.totalUnits);
+        uint256 fairCost = c.units * finalPrice;
+        rebateAmount = c.deposited > fairCost ? c.deposited - fairCost : 0;
     }
 
     function getBuyerCount(uint256 poolId) external view returns (uint256) {

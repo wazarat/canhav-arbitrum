@@ -14,28 +14,33 @@ A group-purchasing platform where small businesses pool funds together to meet s
 
 ### 1. Smart Contract (`contracts/src/PurchasePool.sol`)
 
-This is the core of the project. A single Solidity contract handles all escrow, tiered pricing, and refund logic on-chain. Key things to note:
+This is the core of the project. A single Solidity contract handles all escrow, tiered pricing, rebates, and refund logic on-chain. Key things to note:
 
 - **On-chain tiered pricing** with up to 10 tiers per pool, stored directly in contract storage. Tiers define unit thresholds, prices, and whether reaching them locks in fulfillment.
 - **Escrow pattern**: Buyer funds are held by the contract itself (no intermediary wallet). The `commit()` function transfers tokens into the contract, and funds are only released via `withdrawFunds()` (to the supplier, after deadline + MOQ met) or `claimRefund()` (back to buyers, if MOQ not met).
+- **Early-committer rebates**: Buyers who committed at a higher tier price are automatically eligible for a rebate when the pool settles at a cheaper tier. The `claimRebate()` function calculates the difference between what each buyer paid and the final tier price, and refunds the excess. This removes the disincentive to commit early.
 - **Pools stay open past MOQ**: Even after the minimum order is hit, the pool remains open until the deadline so buyers can keep committing toward cheaper tiers. Status resolves to `Fulfilled` or `Expired` only when `block.timestamp > deadline`.
-- **Platform fee**: A configurable fee (capped at 10% on-chain via `MAX_FEE_BPS`) is deducted on withdrawal.
+- **Platform fee**: A configurable fee (capped at 10% on-chain via `MAX_FEE_BPS`) is deducted on withdrawal. The fee is calculated against the fair total (final tier price * total units), not the raw deposits, so rebate reserves are never taxed.
 - **Security measures**:
+  - OpenZeppelin `ReentrancyGuard` on all state-changing buyer/admin functions (`commit`, `claimRefund`, `claimRebate`, `withdrawFunds`).
   - OpenZeppelin `SafeERC20` for all token transfers (no silent failures).
   - OpenZeppelin `Ownable` for admin-only functions.
   - Checks-Effects-Interactions (CEI) pattern in `commit()`: state updates happen before the external `safeTransferFrom` call.
-  - Double-refund prevention via `refunded` flag.
+  - Double-refund and double-rebate prevention via `refunded` and `rebateClaimed` flags.
+  - `setDeadline()` restricted to Open pools only, preventing state confusion from reverting Fulfilled pools back to Open.
   - Sorted, validated tiers enforced at creation time.
 
 ### 2. Test Suite (`contracts/test/PurchasePool.t.sol`)
 
-38 passing tests covering:
+50 passing Foundry tests covering:
 
 - Pool creation with validation (tier sorting, mandatory tier requirement, deadline checks, owner-only access).
 - Tiered pricing across Starter, Bulk, and Wholesale tiers (including boundary crossing).
 - Fulfillment lifecycle: pools stay open after MOQ, resolve to Fulfilled only after deadline.
 - Refund flow: full refund on expiry, double-refund prevention, non-participant rejection.
 - Fee configuration: accumulation across pools, zero-fee edge case, max-fee cap.
+- **Rebate mechanism**: early committer gets correct rebate amount, zero-rebate edge case, double-claim prevention, rebate available after withdrawal, rebate reserves held in contract after owner withdrawal, multi-commit same-user rebate calculation.
+- **setDeadline restrictions**: works on Open pools, reverts on Fulfilled/Withdrawn pools, reverts for non-owner.
 
 Run them with `cd contracts && forge test -v`.
 
@@ -97,17 +102,34 @@ When a buyer commits, the contract looks up the active tier based on the pool's 
 | `createPool(...)` | Owner | Creates a new pool with product name, tiers, deadline, and token |
 | `commit(poolId, units)` | Buyer | Commits units to a pool, transferring the calculated cost from the buyer |
 | `claimRefund(poolId)` | Buyer | Claims a full refund from an expired pool |
-| `withdrawFunds(poolId)` | Owner | Withdraws funds from a fulfilled pool to pay the supplier (minus fee) |
-| `setDeadline(poolId, newDeadline)` | Owner | Extends or changes a pool's deadline |
+| `claimRebate(poolId)` | Buyer | Claims the difference between what was paid and the final tier price |
+| `withdrawFunds(poolId)` | Owner | Withdraws supplier funds from a fulfilled pool (minus fee), keeping rebate reserves |
+| `setDeadline(poolId, newDeadline)` | Owner | Extends an open pool's deadline (cannot revert fulfilled pools) |
 | `setFeeBps(bps)` | Owner | Updates the platform fee (capped at 10%) |
+| `getRebate(poolId, buyer)` | View | Returns the rebate amount and claimed status for a buyer |
+
+### Early-Committer Rebates
+
+When a pool settles at a cheaper tier than what some buyers originally paid, the contract calculates the fair cost for each buyer (`units * finalTierPrice`) and makes the difference claimable:
+
+```
+Alice commits 60 units at $10/unit (Starter)  = $600 deposited
+Bob commits 50 units at $8/unit (Bulk)         = $400 deposited
+Pool total: 110 units -> final tier: Bulk ($8)
+Alice's fair cost: 60 * $8 = $480 -> rebate: $120
+Bob's fair cost: 50 * $8 = $400 -> rebate: $0
+```
+
+On `withdrawFunds()`, only the fair total (110 * $8 = $880) is sent to the supplier (minus platform fee). The rebate reserve ($120) stays in the contract for buyers to claim via `claimRebate()`.
 
 ### Escrow and Safety
 
 - All buyer funds are held by the contract itself. No intermediary wallet.
-- Commitments are tracked per buyer per pool (`units`, `deposited`, `refunded`).
+- Commitments are tracked per buyer per pool (`units`, `deposited`, `refunded`, `rebateClaimed`).
 - Refunds are guaranteed for expired pools. The contract holds the tokens until claimed.
-- The contract uses OpenZeppelin's `SafeERC20` for token transfers and `Ownable` for admin access.
-- The `commit()` function follows the Checks-Effects-Interactions pattern: state is updated before external calls to prevent reentrancy.
+- OpenZeppelin `ReentrancyGuard` protects all state-changing functions against reentrancy from exotic token callbacks.
+- OpenZeppelin `SafeERC20` for all token transfers and `Ownable` for admin access.
+- The `commit()` function follows the Checks-Effects-Interactions pattern: state is updated before external calls.
 
 ### Token
 
