@@ -22,26 +22,30 @@ function parse(entry: unknown): SubmissionRecord {
 export async function fetchSubmissions(): Promise<{
   interests: SubmissionRecord[];
   requests: SubmissionRecord[];
+  leads: SubmissionRecord[];
   error?: string;
 }> {
   if (!redis) {
-    return { interests: [], requests: [], error: "Storage not configured" };
+    return { interests: [], requests: [], leads: [], error: "Storage not configured" };
   }
 
   try {
-    const [interests, requests] = await Promise.all([
+    const [interests, requests, leads] = await Promise.all([
       redis.lrange("submissions:register-interest", 0, -1),
       redis.lrange("submissions:request-pool", 0, -1),
+      redis.lrange("submissions:lead-capture", 0, -1),
     ]);
 
     return {
       interests: interests.map(parse),
       requests: requests.map(parse),
+      leads: leads.map(parse),
     };
   } catch (err) {
     return {
       interests: [],
       requests: [],
+      leads: [],
       error: err instanceof Error ? err.message : "Failed to fetch",
     };
   }

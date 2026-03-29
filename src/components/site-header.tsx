@@ -81,7 +81,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/pools" className="flex items-center gap-2">
             <Image
               src="/canhav-logo.svg"
               alt="CanHav Group Pool"

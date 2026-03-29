@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { type, ...data } = body;
 
-  if (!type || !["register-interest", "request-pool"].includes(type)) {
+  if (!type || !["register-interest", "request-pool", "lead-capture"].includes(type)) {
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   }
 
@@ -46,13 +46,15 @@ export async function GET(req: NextRequest) {
   const type = searchParams.get("type") || "all";
 
   if (type === "all") {
-    const [interests, requests] = await Promise.all([
+    const [interests, requests, leads] = await Promise.all([
       redis.lrange("submissions:register-interest", 0, -1),
       redis.lrange("submissions:request-pool", 0, -1),
+      redis.lrange("submissions:lead-capture", 0, -1),
     ]);
     return NextResponse.json({
       "register-interest": interests.map(parse),
       "request-pool": requests.map(parse),
+      "lead-capture": leads.map(parse),
     });
   }
 

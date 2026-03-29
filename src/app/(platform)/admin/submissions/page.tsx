@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { toast } from "sonner";
@@ -94,6 +94,28 @@ function RequestEntry({ item }: { item: SubmissionRecord }) {
   );
 }
 
+function LeadEntry({ item }: { item: SubmissionRecord }) {
+  return (
+    <div className="rounded-lg border p-3 text-sm space-y-1">
+      <div className="flex items-center justify-between">
+        <span className="font-medium">{String(item.businessName ?? "-")}</span>
+        <span className="text-xs text-muted-foreground">
+          {item.submittedAt ? new Date(item.submittedAt).toLocaleString() : ""}
+        </span>
+      </div>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-muted-foreground">
+        <span>Contact: {String(item.yourName ?? "-")}</span>
+        <span>Email: {String(item.email ?? "-")}</span>
+        <span>Phone: {String(item.phone ?? "-")}</span>
+        <span>Industry: {String(item.industry ?? "-")}</span>
+        {item.supplies ? (
+          <span className="col-span-2">Supplies: {String(item.supplies)}</span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function ProductGroupCard({
   group,
   type,
@@ -158,8 +180,9 @@ export default function SubmissionsPage() {
 
   const [interests, setInterests] = useState<SubmissionRecord[]>([]);
   const [requests, setRequests] = useState<SubmissionRecord[]>([]);
+  const [leads, setLeads] = useState<SubmissionRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"interests" | "requests">("interests");
+  const [tab, setTab] = useState<"leads" | "interests" | "requests">("leads");
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -169,6 +192,7 @@ export default function SubmissionsPage() {
     } else {
       setInterests(result.interests);
       setRequests(result.requests);
+      setLeads(result.leads);
     }
     setLoading(false);
   }, []);
@@ -205,7 +229,7 @@ export default function SubmissionsPage() {
 
   const interestGroups = groupByProduct(interests, "productName");
   const requestGroups = groupByProduct(requests, "product");
-  const groups = tab === "interests" ? interestGroups : requestGroups;
+  const groups = tab === "interests" ? interestGroups : tab === "requests" ? requestGroups : [];
 
   return (
     <div className="space-y-6">
@@ -234,7 +258,17 @@ export default function SubmissionsPage() {
       </div>
 
       {/* Type tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
+        <button
+          onClick={() => setTab("leads")}
+          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+            tab === "leads"
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Inbound Leads ({leads.length})
+        </button>
         <button
           onClick={() => setTab("interests")}
           className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
@@ -258,11 +292,17 @@ export default function SubmissionsPage() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{interests.length + requests.length}</div>
+            <div className="text-2xl font-bold">{leads.length + interests.length + requests.length}</div>
             <p className="text-xs text-muted-foreground">Total submissions</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">{leads.length}</div>
+            <p className="text-xs text-muted-foreground">Inbound leads</p>
           </CardContent>
         </Card>
         <Card>
@@ -279,13 +319,27 @@ export default function SubmissionsPage() {
         </Card>
       </div>
 
-      {/* Grouped submissions */}
+      {/* Submissions list */}
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-24 animate-pulse rounded-lg border bg-muted" />
           ))}
         </div>
+      ) : tab === "leads" ? (
+        leads.length === 0 ? (
+          <Card>
+            <CardContent className="py-10 text-center">
+              <p className="text-muted-foreground">No inbound leads yet.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {leads.map((item, i) => (
+              <LeadEntry key={i} item={item} />
+            ))}
+          </div>
+        )
       ) : groups.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center">
@@ -297,7 +351,7 @@ export default function SubmissionsPage() {
       ) : (
         <div className="space-y-4">
           {groups.map((group) => (
-            <ProductGroupCard key={group.product} group={group} type={tab} />
+            <ProductGroupCard key={group.product} group={group} type={tab as "interests" | "requests"} />
           ))}
         </div>
       )}

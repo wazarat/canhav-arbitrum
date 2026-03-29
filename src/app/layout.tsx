@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
 import "./globals.css";
-import { Providers } from "@/components/providers";
-import { SiteHeader } from "@/components/site-header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CanHav Group Pool",
+  title: "CanHav — Group Purchasing for Small Businesses",
   description:
-    "Pool funds with other businesses to meet supplier MOQs on Arbitrum",
+    "Pool purchasing power with other small businesses. Save 15-40% on essential supplies through group buying.",
 };
 
 export default function RootLayout({
@@ -27,15 +24,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          <SiteHeader />
-          <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-          <Toaster theme="dark" position="bottom-right" richColors />
-        </Providers>
+        {children}
       </body>
     </html>
   );
