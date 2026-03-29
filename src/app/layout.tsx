@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CanHav — Group Purchasing for Small Businesses",
+  title: "CanHav | Group Purchasing for Small Businesses",
   description:
     "Pool purchasing power with other small businesses. Save 15-40% on essential supplies through group buying.",
 };
