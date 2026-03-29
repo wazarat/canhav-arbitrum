@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { redis } from "@/lib/redis";
 
 const HUBSPOT_TOKEN = process.env.HUBSPOT_TOKEN;
+const HUBSPOT_API = "https://api.hubapi.com/crm/v3/objects/contacts";
+
+function hubspotHeaders() {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${HUBSPOT_TOKEN}`,
+  };
+}
 
 async function pushToHubSpot(data: Record<string, unknown>) {
   if (!HUBSPOT_TOKEN) return;
@@ -9,14 +17,14 @@ async function pushToHubSpot(data: Record<string, unknown>) {
   const email = String(data.email ?? "").trim();
   if (!email) return;
 
-  const step = data.step as string | undefined;
-  const isPartial = step === "partial";
+  const isComplete = data.step === "complete";
 
-  const properties: Record<string, string> = { email };
+  const properties: Record<string, string> = {
+    email,
+    lifecyclestage: "lead",
+  };
 
-  if (data.industry) properties.industry = String(data.industry);
-
-  if (!isPartial) {
+  if (isComplete) {
     if (data.yourName) {
       const parts = String(data.yourName).split(" ");
       properties.firstname = parts[0];
@@ -24,41 +32,36 @@ async function pushToHubSpot(data: Record<string, unknown>) {
     }
     if (data.businessName) properties.company = String(data.businessName);
     if (data.phone) properties.phone = String(data.phone);
-    if (data.supplies) properties.message = String(data.supplies);
-    if (data.heardAboutUs) properties.hs_analytics_source = String(data.heardAboutUs);
     properties.hs_lead_status = "NEW";
   }
 
-  if (data.utm_source) properties.hs_analytics_source = String(data.utm_source);
-  if (data.utm_medium) properties.utm_medium = String(data.utm_medium);
-  if (data.utm_campaign) properties.utm_campaign = String(data.utm_campaign);
-
   try {
-    const createRes = await fetch("https://api.hubapi.com/crm/v3/objects/contacts", {
+    const createRes = await fetch(HUBSPOT_API, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${HUBSPOT_TOKEN}`,
-      },
+      headers: hubspotHeaders(),
       body: JSON.stringify({ properties }),
     });
 
     if (createRes.status === 409) {
-      const conflict = await createRes.json();
-      const existingId = conflict?.message?.match(/Existing ID: (\d+)/)?.[1];
+      let existingId: string | undefined;
+      try {
+        const conflict = await createRes.json();
+        existingId = conflict?.message?.match(/Existing ID: (\d+)/)?.[1];
+      } catch { /* response parse failed, skip update */ }
+
       if (existingId) {
-        await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/${existingId}`, {
+        await fetch(`${HUBSPOT_API}/${existingId}`, {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${HUBSPOT_TOKEN}`,
-          },
+          headers: hubspotHeaders(),
           body: JSON.stringify({ properties }),
         });
       }
+    } else if (!createRes.ok) {
+      const errBody = await createRes.text().catch(() => "unknown");
+      console.error(`[HubSpot] Create failed (${createRes.status}):`, errBody);
     }
   } catch (err) {
-    console.error("[HubSpot] Failed to sync contact:", err);
+    console.error("[HubSpot] Network error:", err);
   }
 }
 
@@ -84,13 +87,15 @@ export async function POST(req: NextRequest) {
   };
 
   const key = `submissions:${type}`;
-  const redisPromise = redis.lpush(key, JSON.stringify(entry));
+  await redis.lpush(key, JSON.stringify(entry));
 
-  const hubspotPromise = type === "lead-capture"
-    ? pushToHubSpot(data)
-    : Promise.resolve();
-
-  await Promise.all([redisPromise, hubspotPromise]);
+  if (type === "lead-capture") {
+    try {
+      await pushToHubSpot(data);
+    } catch (err) {
+      console.error("[HubSpot] Unexpected error:", err);
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }
