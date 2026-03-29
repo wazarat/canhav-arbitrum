@@ -12,13 +12,15 @@ const INDUSTRIES = [
   { name: "Yoga Studios", emoji: "\ud83e\uddd8", desc: "Mats, blocks, cleaning supplies, wellness products \u2014 wholesale for studios.", savings: "30%", offer: "Wholesale yoga supplies \u2014 save 30% pooling together" },
 ] as const;
 
-function LogoSVG({ size = 40 }: { size?: number }) {
+function Logo({ height = 40 }: { height?: number }) {
   return (
-    <svg className="logo-mark" width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <circle cx="15" cy="20" r="12" stroke="currentColor" strokeWidth="2.5" fill="none" opacity="0.7" />
-      <circle cx="25" cy="20" r="12" stroke="currentColor" strokeWidth="2.5" fill="none" opacity="0.7" />
-      <path d="M20 10.5a12 12 0 0 1 0 19" stroke="var(--color-accent)" strokeWidth="2.5" fill="none" />
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/ch-logo.svg"
+      alt="CanHav"
+      className="logo-img"
+      style={{ height, width: "auto" }}
+    />
   );
 }
 
@@ -169,7 +171,7 @@ export default function MarketingPage() {
             aria-label="CanHav home"
             onClick={(e) => { e.preventDefault(); scrollToSection("hero"); }}
           >
-            <LogoSVG />
+            <Logo height={36} />
             <span className="logo-text">CanHav</span>
           </a>
 
@@ -532,7 +534,7 @@ export default function MarketingPage() {
               aria-label="CanHav home"
               onClick={(e) => { e.preventDefault(); scrollToSection("hero"); }}
             >
-              <LogoSVG size={32} />
+              <Logo height={28} />
               <span className="logo-text">CanHav</span>
             </a>
             <p className="footer-tagline">Group purchasing power for small businesses.</p>

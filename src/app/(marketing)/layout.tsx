@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     description:
       "Save 15-40% on essential supplies by buying together with other GTA small businesses.",
   },
+  icons: {
+    icon: "/ch-logo.svg",
+  },
 };
 
 export default function MarketingLayout({
