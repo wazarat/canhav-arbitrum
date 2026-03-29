@@ -111,6 +111,131 @@ function MoonIcon() {
   );
 }
 
+function IndustriesSlider({ selectIndustry }: { selectIndustry: (name: string) => void }) {
+  const VISIBLE = 3;
+  const total = INDUSTRIES.length;
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const dragStart = useRef<number | null>(null);
+
+  const goTo = useCallback((idx: number) => {
+    setCurrent(((idx % total) + total) % total);
+  }, [total]);
+
+  const prev = useCallback(() => goTo(current - 1), [current, goTo]);
+  const next = useCallback(() => goTo(current + 1), [current, goTo]);
+
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => goTo(current + 1), 4000);
+    return () => clearInterval(id);
+  }, [current, paused, goTo]);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    dragStart.current = e.clientX;
+    setPaused(true);
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (dragStart.current === null) return;
+    const delta = e.clientX - dragStart.current;
+    if (Math.abs(delta) > 40) delta < 0 ? next() : prev();
+    dragStart.current = null;
+    setPaused(false);
+  };
+
+  const visibleCards = Array.from({ length: VISIBLE }, (_, i) =>
+    INDUSTRIES[(current + i) % total]
+  );
+
+  return (
+    <section className="mkt-section industries" id="industries">
+      <div className="container">
+        <div className="section-header">
+          <span className="section-label">Industries We Serve</span>
+          <h2 className="section-title">Built for the businesses that keep the GTA running</h2>
+          <p className="section-sub">Every industry has supplies that cost too much at small quantities. We fix that.</p>
+        </div>
+
+        <div className="industries-slider-wrap">
+          {/* Prev arrow */}
+          <button
+            className="slider-arrow slider-arrow--prev"
+            aria-label="Previous industry"
+            onClick={prev}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+
+          {/* Track */}
+          <div
+            className="industries-track"
+            ref={trackRef}
+            onPointerDown={onPointerDown}
+            onPointerUp={onPointerUp}
+            onPointerLeave={onPointerUp}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+          >
+            {visibleCards.map((ind, i) => (
+              <div
+                key={`${ind.name}-${i}`}
+                className="industry-card slider-card"
+                data-industry={ind.name}
+              >
+                <div className="industry-icon-wrap">{ind.icon}</div>
+                <h3 className="industry-name">{ind.name}</h3>
+                <p className="industry-pain">{ind.pain}</p>
+                <p className="industry-solution">{ind.solution}</p>
+                <div className="industry-tags">
+                  {ind.tags.map((tag) => (
+                    <span key={tag} className="supply-tag">{tag}</span>
+                  ))}
+                </div>
+                <button
+                  className="mkt-btn mkt-btn--outline mkt-btn--sm industry-cta"
+                  onClick={() => selectIndustry(ind.name)}
+                >
+                  Get My Estimate
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Next arrow */}
+          <button
+            className="slider-arrow slider-arrow--next"
+            aria-label="Next industry"
+            onClick={next}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Dot indicators */}
+        <div className="slider-dots">
+          {INDUSTRIES.map((_, i) => (
+            <button
+              key={i}
+              className={`slider-dot${i === current ? " active" : ""}`}
+              aria-label={`Go to ${INDUSTRIES[i].name}`}
+              onClick={() => { goTo(i); setPaused(false); }}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function MarketingPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -445,36 +570,7 @@ export default function MarketingPage() {
         </section>
 
         {/* INDUSTRIES */}
-        <section className="mkt-section industries" id="industries">
-          <div className="container">
-            <div className="section-header">
-              <span className="section-label">Industries We Serve</span>
-              <h2 className="section-title">Built for the businesses that keep the GTA running</h2>
-              <p className="section-sub">Every industry has supplies that cost too much at small quantities. We fix that.</p>
-            </div>
-            <div className="industries-grid">
-              {INDUSTRIES.map((ind) => (
-                <div key={ind.name} className="industry-card reveal" data-industry={ind.name}>
-                  <div className="industry-icon-wrap">{ind.icon}</div>
-                  <h3 className="industry-name">{ind.name}</h3>
-                  <p className="industry-pain">{ind.pain}</p>
-                  <p className="industry-solution">{ind.solution}</p>
-                  <div className="industry-tags">
-                    {ind.tags.map((tag) => (
-                      <span key={tag} className="supply-tag">{tag}</span>
-                    ))}
-                  </div>
-                  <button
-                    className="mkt-btn mkt-btn--outline mkt-btn--sm industry-cta"
-                    onClick={() => selectIndustry(ind.name)}
-                  >
-                    Get My Estimate
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <IndustriesSlider selectIndustry={selectIndustry} />
 
         {/* WHY IT WORKS (logic-based proof) */}
         <section className="mkt-section benefits" id="why-it-works">

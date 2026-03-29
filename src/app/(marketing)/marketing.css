@@ -524,26 +524,96 @@
   line-height: 1.6;
 }
 
-/* ─── INDUSTRIES ─── */
-.marketing-root .industries-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-6);
+/* ─── INDUSTRIES SLIDER ─── */
+.marketing-root .industries-slider-wrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-4);
 }
 
-@media (min-width: 640px) {
-  .marketing-root .industries-grid {
+.marketing-root .industries-track {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+  flex: 1;
+  min-width: 0;
+  cursor: grab;
+  user-select: none;
+}
+
+.marketing-root .industries-track:active {
+  cursor: grabbing;
+}
+
+@media (max-width: 767px) {
+  .marketing-root .industries-track {
+    grid-template-columns: 1fr;
+  }
+  .marketing-root .industries-track .slider-card:not(:first-child) {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 959px) {
+  .marketing-root .industries-track {
     grid-template-columns: repeat(2, 1fr);
   }
+  .marketing-root .industries-track .slider-card:last-child {
+    display: none;
+  }
 }
 
-@media (min-width: 960px) {
-  .marketing-root .industries-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .marketing-root .industries-grid .industry-card:last-child {
-    grid-column: 2;
-  }
+/* Arrow buttons */
+.marketing-root .slider-arrow {
+  flex-shrink: 0;
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--mkt-radius-md);
+  color: var(--color-text-muted);
+  transition: background var(--transition-interactive),
+              color var(--transition-interactive),
+              border-color var(--transition-interactive),
+              box-shadow var(--transition-interactive);
+  cursor: pointer;
+}
+
+.marketing-root .slider-arrow:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Dot indicators */
+.marketing-root .slider-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-8);
+}
+
+.marketing-root .slider-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--transition-interactive),
+              width var(--transition-interactive),
+              border-radius var(--transition-interactive);
+}
+
+.marketing-root .slider-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: var(--color-primary);
 }
 
 .marketing-root .industry-card {
@@ -1048,13 +1118,6 @@
 .marketing-root .steps-grid .reveal:nth-child(2) { transition-delay: 80ms; }
 .marketing-root .steps-grid .reveal:nth-child(3) { transition-delay: 160ms; }
 
-.marketing-root .industries-grid .reveal:nth-child(1) { transition-delay: 0ms; }
-.marketing-root .industries-grid .reveal:nth-child(2) { transition-delay: 60ms; }
-.marketing-root .industries-grid .reveal:nth-child(3) { transition-delay: 120ms; }
-.marketing-root .industries-grid .reveal:nth-child(4) { transition-delay: 180ms; }
-.marketing-root .industries-grid .reveal:nth-child(5) { transition-delay: 240ms; }
-.marketing-root .industries-grid .reveal:nth-child(6) { transition-delay: 300ms; }
-.marketing-root .industries-grid .reveal:nth-child(7) { transition-delay: 360ms; }
 
 .marketing-root .benefits-grid .reveal:nth-child(1) { transition-delay: 0ms; }
 .marketing-root .benefits-grid .reveal:nth-child(2) { transition-delay: 80ms; }
