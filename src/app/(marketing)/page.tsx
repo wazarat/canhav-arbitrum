@@ -504,7 +504,7 @@ export default function MarketingPage() {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label htmlFor="supplies">What supplies do you spend the most on?</label>
+                    <label htmlFor="supplies">What supplies are you looking to buy for a cheaper price?</label>
                     <textarea id="supplies" name="supplies" rows={3} placeholder="e.g. coffee beans, ceramic coatings, legal software..." />
                   </div>
                   <button type="submit" className="mkt-btn mkt-btn--primary mkt-btn--lg form-submit" disabled={submitting}>
