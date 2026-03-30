@@ -8,6 +8,7 @@ const INDUSTRIES = [
     pain: "You are paying retail for beans, cups, and lids while the chain next door gets distributor pricing.",
     solution: "We group your orders with other independent cafes so you all buy at the volume that unlocks wholesale rates.",
     tags: ["Beans", "Cups & Lids", "Syrups", "Milk"],
+    monthlySpend: "$1,200 - $3,500/mo on supplies",
     icon: (
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/>
@@ -19,6 +20,7 @@ const INDUSTRIES = [
     pain: "Clippers, capes, and disinfectants add up fast when you are buying one chair at a time.",
     solution: "Pool with other shops in the GTA and access the same bulk pricing that franchise chains get.",
     tags: ["Clippers", "Capes", "Disinfectants", "Styling Products"],
+    monthlySpend: "$600 - $1,800/mo on supplies",
     icon: (
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="6" cy="6" r="3"/><path d="M6 9v12"/><path d="M13 6l-7 12"/><circle cx="18" cy="18" r="3"/><path d="M18 15V3"/>
@@ -30,6 +32,7 @@ const INDUSTRIES = [
     pain: "Ceramic coatings and polishing compounds are expensive at small-shop quantities.",
     solution: "Combine orders with other detailers to reach the minimums that unlock distributor pricing.",
     tags: ["Ceramic Coatings", "Microfibers", "Polishing Compounds"],
+    monthlySpend: "$800 - $2,500/mo on supplies",
     icon: (
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/>
@@ -41,6 +44,7 @@ const INDUSTRIES = [
     pain: "Software subscriptions, office supplies, and client tools eat into your margins every month.",
     solution: "Group licenses and bulk office orders with other small firms to cut your overhead.",
     tags: ["Legal Software", "Office Supplies", "Client Tools"],
+    monthlySpend: "$1,500 - $4,000/mo on overhead",
     icon: (
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -52,6 +56,7 @@ const INDUSTRIES = [
     pain: "Design tools, analytics platforms, and ad credits cost the same whether you have 3 clients or 300.",
     solution: "Pool subscriptions and ad spend credits with other agencies to unlock volume discounts.",
     tags: ["Ad Credits", "Design Tools", "Analytics"],
+    monthlySpend: "$2,000 - $6,000/mo on tools & ads",
     icon: (
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -63,6 +68,7 @@ const INDUSTRIES = [
     pain: "Staging materials, signage, and photography packages drain your commission before you cash it.",
     solution: "Share the cost with other agents and brokerages so everyone gets group rates.",
     tags: ["Staging Materials", "Signage", "Photography"],
+    monthlySpend: "$1,000 - $3,000/mo on marketing materials",
     icon: (
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
@@ -74,6 +80,7 @@ const INDUSTRIES = [
     pain: "Mats, blocks, and cleaning supplies are a recurring cost that never seems to shrink.",
     solution: "Pool orders with studios across the GTA and buy at the same volume as large fitness chains.",
     tags: ["Mats", "Blocks", "Cleaning Supplies", "Wellness Products"],
+    monthlySpend: "$500 - $1,500/mo on studio supplies",
     icon: (
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
@@ -189,6 +196,7 @@ function IndustriesSlider({ selectIndustry }: { selectIndustry: (name: string) =
               >
                 <div className="industry-icon-wrap">{ind.icon}</div>
                 <h3 className="industry-name">{ind.name}</h3>
+                <div className="industry-spend">{ind.monthlySpend}</div>
                 <p className="industry-pain">{ind.pain}</p>
                 <p className="industry-solution">{ind.solution}</p>
                 <div className="industry-tags">

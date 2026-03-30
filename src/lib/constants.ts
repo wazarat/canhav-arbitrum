@@ -3,13 +3,29 @@ export const USDC_DECIMALS = 6;
 export const PLATFORM_FEE_BPS = 250; // 2.5 % — must match the deployed contract's feeBps
 export const PLATFORM_FEE_PCT = PLATFORM_FEE_BPS / 100; // 2.5
 
-export type Sector = "Coffee Beans" | "Food Ingredients" | "Beverage Service Supplies" | "Food Packaging";
+export type Sector =
+  | "Coffee Beans"
+  | "Food Ingredients"
+  | "Beverage Service Supplies"
+  | "Food Packaging"
+  | "Barbershop Supplies"
+  | "Auto Detailing Supplies"
+  | "Legal & Office Supplies"
+  | "Marketing & Ad Tools"
+  | "Real Estate Supplies"
+  | "Yoga & Wellness Supplies";
 
 export const SECTORS: Sector[] = [
   "Coffee Beans",
   "Food Ingredients",
   "Beverage Service Supplies",
   "Food Packaging",
+  "Barbershop Supplies",
+  "Auto Detailing Supplies",
+  "Legal & Office Supplies",
+  "Marketing & Ad Tools",
+  "Real Estate Supplies",
+  "Yoga & Wellness Supplies",
 ];
 
 export const SECTOR_ICONS: Record<Sector, string> = {
@@ -17,6 +33,12 @@ export const SECTOR_ICONS: Record<Sector, string> = {
   "Food Ingredients": "🌾",
   "Beverage Service Supplies": "🥤",
   "Food Packaging": "📦",
+  "Barbershop Supplies": "✂️",
+  "Auto Detailing Supplies": "🚗",
+  "Legal & Office Supplies": "⚖️",
+  "Marketing & Ad Tools": "📣",
+  "Real Estate Supplies": "🏠",
+  "Yoga & Wellness Supplies": "🧘",
 };
 
 const SECTOR_PRODUCTS: Record<Sector, string[]> = {
@@ -49,7 +71,7 @@ const SECTOR_PRODUCTS: Record<Sector, string[]> = {
     "Compostable Hot Cups 12oz (500/case)",
     "Lids",
     "Flat Lids for 12-16oz Cups",
-    "Flat Lids for 12–16oz Cups",
+    "Flat Lids for 12-16oz Cups",
     "Eco Paper Straws",
   ],
   "Food Packaging": [
@@ -61,6 +83,60 @@ const SECTOR_PRODUCTS: Record<Sector, string[]> = {
     "Foil & Parchment Food Wrap Rolls",
     "Bulk Napkins (8000/case)",
     "Compostable Cutlery Kits (250/case)",
+  ],
+  "Barbershop Supplies": [
+    "Andis Professional Clipper Blades (10-pack)",
+    "Disposable Neck Strips (1200/case)",
+    "Barbicide Disinfectant Concentrate (64oz)",
+    "Styling Gel Professional Grade (32oz, 12/case)",
+    "Barber Capes (12-pack)",
+    "Disposable Latex Gloves (1000/case)",
+    "Hot Lather Machine Cartridges (12-pack)",
+  ],
+  "Auto Detailing Supplies": [
+    "Ceramic Coating Pro Kit (12-unit case)",
+    "Microfiber Towels 400GSM (200-pack)",
+    "Dual-Action Polishing Compound (1gal, 4/case)",
+    "Interior Detailing Spray (32oz, 12/case)",
+    "Foam Cannon Snow Soap (5gal)",
+    "Clay Bar Kit (12-pack)",
+    "Tire Dressing Gel (1gal, 4/case)",
+  ],
+  "Legal & Office Supplies": [
+    "Copy Paper 8.5x11 (10-ream case)",
+    "Legal Pads Yellow Ruled (72-pack)",
+    "File Folders Letter Size (500/box)",
+    "Printer Toner Cartridges (HP Universal, 4-pack)",
+    "Document Shredder Bags (100/case)",
+    "Client Intake Folders (250-pack)",
+    "Bulk Pens Blue Ink (144/box)",
+  ],
+  "Marketing & Ad Tools": [
+    "Meta Ad Credits ($500 bundle)",
+    "Google Ads Credits ($500 bundle)",
+    "Stock Photo Annual License (10-seat team)",
+    "Adobe Creative Cloud Team License (annual)",
+    "Email Marketing Platform (10k contacts, annual)",
+    "Analytics Dashboard License (annual)",
+    "Social Media Scheduling Tool (annual, 5-seat)",
+  ],
+  "Real Estate Supplies": [
+    "Open House Sign Riders (50-pack)",
+    "Lockbox Combo Keysafe (24-pack)",
+    "Professional Listing Photography Package",
+    "Virtual Staging Credits (20-listing bundle)",
+    "Property Brochure Printing (500/run)",
+    "Moving Supply Kits for Clients (25-pack)",
+    "Yard Signs Double-Sided (30-pack)",
+  ],
+  "Yoga & Wellness Supplies": [
+    "Premium Yoga Mats 6mm (24-pack)",
+    "Cork Yoga Blocks (48-pack)",
+    "Yoga Straps 8ft (36-pack)",
+    "Mat Sanitizer Spray (1gal, 4/case)",
+    "Meditation Cushions (18-pack)",
+    "Essential Oil Diffuser Refills (24-pack)",
+    "Bolsters Round (12-pack)",
   ],
 };
 
@@ -84,10 +160,16 @@ export function getSector(productName: string): Sector | null {
     }
   }
 
-  if (lower.includes("coffee") || lower.includes("roast")) return "Coffee Beans";
+  if (lower.includes("coffee") || lower.includes("roast") || lower.includes("bean")) return "Coffee Beans";
   if (lower.includes("flour") || lower.includes("rice") || lower.includes("oil")) return "Food Ingredients";
   if (lower.includes("cup") || lower.includes("lid") || lower.includes("straw")) return "Beverage Service Supplies";
   if (lower.includes("bag") || lower.includes("napkin") || lower.includes("foil") || lower.includes("cutlery") || lower.includes("container") || lower.includes("clamshell") || lower.includes("wrap")) return "Food Packaging";
+  if (lower.includes("clipper") || lower.includes("barber") || lower.includes("barbicide") || lower.includes("cape") || lower.includes("neck strip")) return "Barbershop Supplies";
+  if (lower.includes("ceramic coating") || lower.includes("microfiber") || lower.includes("polish") || lower.includes("detailing") || lower.includes("clay bar") || lower.includes("tire dressing")) return "Auto Detailing Supplies";
+  if (lower.includes("legal pad") || lower.includes("toner") || lower.includes("shredder") || lower.includes("file folder") || lower.includes("copy paper")) return "Legal & Office Supplies";
+  if (lower.includes("ad credit") || lower.includes("adobe") || lower.includes("stock photo") || lower.includes("analytics")) return "Marketing & Ad Tools";
+  if (lower.includes("sign") || lower.includes("lockbox") || lower.includes("staging") || lower.includes("brochure") || lower.includes("listing")) return "Real Estate Supplies";
+  if (lower.includes("yoga") || lower.includes("mat") || lower.includes("meditation") || lower.includes("bolster") || lower.includes("essential oil")) return "Yoga & Wellness Supplies";
 
   return null;
 }
