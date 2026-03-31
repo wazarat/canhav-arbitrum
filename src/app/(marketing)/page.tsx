@@ -643,9 +643,9 @@ export default function MarketingPage() {
               <div className="step-card step-card--featured reveal">
                 <div className="step-number">02</div>
                 <div className="step-icon-wrap step-icon-wrap--featured">
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round">
-                    <rect x="2" y="2" width="20" height="20" rx="3" fill="var(--color-accent)" opacity="0.1" stroke="none" />
-                    <line x1="12" y1="2" x2="12" y2="22" stroke="var(--color-accent)" opacity="0.15" /><path d="M16 8h-2a2 2 0 0 0 0 4h1a2 2 0 0 1 0 4h-3" /><line x1="12" y1="6" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="18" />
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round">
+                    <rect x="2" y="2" width="20" height="20" rx="3" fill="var(--color-primary)" opacity="0.1" stroke="none" />
+                    <line x1="12" y1="2" x2="12" y2="22" stroke="var(--color-primary)" opacity="0.15" /><path d="M16 8h-2a2 2 0 0 0 0 4h1a2 2 0 0 1 0 4h-3" /><line x1="12" y1="6" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="18" />
                   </svg>
                 </div>
                 <h3 className="step-heading">See your savings</h3>
@@ -774,22 +774,6 @@ export default function MarketingPage() {
                   <span>{b.label}</span>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* FOUNDER NOTE */}
-        <section className="mkt-section founder-section" id="founder-note">
-          <div className="container">
-            <div className="founder-card reveal">
-              <div className="founder-content">
-                <span className="section-label">A Note from the Founder</span>
-                <h2 className="section-title">Why I built CanHav</h2>
-                <p>I spent years watching small business owners in Toronto pay 30-40% more for the exact same supplies that big chains get at wholesale. The only difference? Volume. A single coffee shop cannot order 500 cases of beans, but 50 coffee shops together can.</p>
-                <p>CanHav exists to close that gap. We are not a marketplace. We are not a middleman taking a cut. We are a tool that lets independent businesses organize their purchasing power and compete on price with the chains that are slowly pushing them out.</p>
-                <p>If you run a small business in the GTA, I would love to show you what you could save. It costs nothing to find out.</p>
-                <p className="founder-name"><strong>Wazarat</strong><br /><span className="founder-title">Founder, CanHav</span></p>
-              </div>
             </div>
           </div>
         </section>

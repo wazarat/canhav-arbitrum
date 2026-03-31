@@ -570,22 +570,24 @@
   background: var(--color-surface);
 }
 
-/* Featured Step 2 */
+/* Featured Step 2 (emphasis without accent border) */
 .marketing-root .step-card--featured {
   transform: scale(1.04);
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent), var(--shadow-md);
+  border-color: var(--color-border);
+  background: rgba(37, 99, 235, 0.04);
+  box-shadow: var(--shadow-md);
   z-index: 1;
 }
 
 .marketing-root .step-card--featured:hover {
   transform: scale(1.04) translateY(-4px);
-  border-color: var(--color-accent);
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.15), var(--shadow-lg);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
 }
 
 .marketing-root[data-theme="dark"] .step-card--featured {
-  box-shadow: 0 0 0 1px var(--color-accent), 0 0 30px rgba(167, 139, 250, 0.08), var(--shadow-md);
+  background: rgba(96, 165, 250, 0.06);
+  box-shadow: var(--shadow-md);
 }
 
 /* Arrows between cards */
@@ -607,9 +609,6 @@
   letter-spacing: 0.05em;
 }
 
-.marketing-root .step-card--featured .step-number {
-  color: var(--color-accent);
-}
 
 /* Icon wrap with background */
 .marketing-root .step-icon-wrap {
@@ -624,7 +623,7 @@
 }
 
 .marketing-root .step-icon-wrap--featured {
-  background: rgba(124, 58, 237, 0.08);
+  background: rgba(37, 99, 235, 0.1);
 }
 
 .marketing-root[data-theme="dark"] .step-icon-wrap {
@@ -632,7 +631,7 @@
 }
 
 .marketing-root[data-theme="dark"] .step-icon-wrap--featured {
-  background: rgba(167, 139, 250, 0.1);
+  background: rgba(96, 165, 250, 0.14);
 }
 
 .marketing-root .step-heading {
@@ -938,52 +937,6 @@
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   line-height: 1.6;
-}
-
-/* ─── FOUNDER SECTION ─── */
-.marketing-root .founder-section {
-  background: var(--color-bg-alt);
-}
-
-.marketing-root .founder-card {
-  max-width: 720px;
-  margin: 0 auto;
-  background: var(--color-surface);
-  border-radius: var(--mkt-radius-xl);
-  border: 1px solid var(--color-border);
-  padding: clamp(var(--space-8), 5vw, var(--space-12));
-  box-shadow: var(--shadow-sm);
-}
-
-.marketing-root .founder-content .section-label {
-  display: inline-block;
-  margin-bottom: var(--space-3);
-}
-
-.marketing-root .founder-content .section-title {
-  margin-bottom: var(--space-6);
-}
-
-.marketing-root .founder-content p {
-  font-size: var(--text-base);
-  color: var(--color-text-muted);
-  line-height: 1.7;
-  margin-bottom: var(--space-4);
-}
-
-.marketing-root .founder-content p:last-of-type {
-  margin-bottom: 0;
-}
-
-.marketing-root .founder-name {
-  margin-top: var(--space-6) !important;
-  color: var(--color-text) !important;
-}
-
-.marketing-root .founder-title {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  font-weight: 400;
 }
 
 /* Trust badges */
