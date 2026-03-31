@@ -502,10 +502,12 @@ export default function MarketingPage() {
         <section className="hero" id="hero">
           <div className="container hero-inner">
             <div className="hero-content">
-              <h1 className="hero-title">Stop overpaying for the same supplies as every other shop on your block</h1>
+              <p className="hero-eyebrow">Helping businesses in the Greater Toronto Area save on everyday supplies</p>
+              <h1 className="hero-title">Stop overpaying for supplies</h1>
               <p className="hero-sub">
-                CanHav groups small businesses across the GTA into buying pools. You get the wholesale pricing that is normally reserved for large chains. Free to join, and if a pool does not fill, you pay nothing.
+                Join forces with other small businesses. Pay what big chains pay.
               </p>
+              <p className="hero-supporting">Free to try. If the group order doesn&apos;t go through, you don&apos;t pay.</p>
               <div className="hero-ctas">
                 <a href="#interest-form" className="mkt-btn mkt-btn--primary mkt-btn--lg" onClick={(e) => { e.preventDefault(); scrollToSection("interest-form"); }}>
                   Get My Savings Estimate
@@ -517,27 +519,87 @@ export default function MarketingPage() {
             </div>
             <div className="hero-visual" aria-hidden="true">
               <div className="hero-graphic">
-                <svg width="360" height="320" viewBox="0 0 360 320" fill="none">
-                  <circle cx="180" cy="160" r="120" fill="var(--color-primary)" opacity="0.06" />
-                  <circle cx="130" cy="140" r="50" stroke="var(--color-primary)" strokeWidth="2" fill="none" opacity="0.3">
-                    <animate attributeName="r" values="50;55;50" dur="4s" repeatCount="indefinite" />
+                <svg width="420" height="380" viewBox="0 0 420 380" fill="none">
+                  {/* Central pool circle - pulsing */}
+                  <circle cx="210" cy="190" r="50" fill="var(--color-accent)" opacity="0.08">
+                    <animate attributeName="r" values="50;62;50" dur="3s" repeatCount="indefinite" />
                   </circle>
-                  <circle cx="220" cy="130" r="40" stroke="var(--color-primary)" strokeWidth="2" fill="none" opacity="0.3">
-                    <animate attributeName="r" values="40;45;40" dur="5s" repeatCount="indefinite" />
+                  <circle cx="210" cy="190" r="35" fill="var(--color-accent)" opacity="0.12">
+                    <animate attributeName="r" values="35;44;35" dur="3s" repeatCount="indefinite" />
                   </circle>
-                  <circle cx="190" cy="200" r="45" stroke="var(--color-primary)" strokeWidth="2" fill="none" opacity="0.3">
-                    <animate attributeName="r" values="45;50;45" dur="4.5s" repeatCount="indefinite" />
+                  <circle cx="210" cy="190" r="18" fill="var(--color-accent)" opacity="0.25">
+                    <animate attributeName="r" values="18;24;18" dur="3s" repeatCount="indefinite" />
                   </circle>
-                  <path d="M80 80 L150 140" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-                  <path d="M280 70 L220 130" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-                  <path d="M300 240 L210 195" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-                  <path d="M60 250 L150 190" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-                  <circle cx="180" cy="160" r="20" fill="var(--color-accent)" opacity="0.15" />
-                  <circle cx="180" cy="160" r="8" fill="var(--color-accent)" opacity="0.5" />
-                  <circle cx="80" cy="80" r="5" fill="var(--color-primary)" opacity="0.5" />
-                  <circle cx="280" cy="70" r="5" fill="var(--color-primary)" opacity="0.5" />
-                  <circle cx="300" cy="240" r="5" fill="var(--color-primary)" opacity="0.5" />
-                  <circle cx="60" cy="250" r="5" fill="var(--color-primary)" opacity="0.5" />
+                  {/* Dollar sign in center */}
+                  <text x="210" y="196" textAnchor="middle" fontFamily="var(--font-display)" fontWeight="700" fontSize="18" fill="var(--color-accent)" opacity="0.7">$</text>
+
+                  {/* Business owner outlines + fund lines */}
+                  {/* Top-left: Coffee shop owner */}
+                  <g opacity="0.7">
+                    <circle cx="70" cy="60" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
+                    <path d="M70 72 v8 M62 84 h16 M62 84 v12 M78 84 v12 M66 80 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                    <line x1="70" y1="100" x2="185" y2="178" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
+                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2s" repeatCount="indefinite" />
+                    </line>
+                    <circle cx="70" cy="100" r="3" fill="var(--color-primary)" opacity="0.4" />
+                  </g>
+
+                  {/* Top-right: Barber */}
+                  <g opacity="0.7">
+                    <circle cx="350" cy="55" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
+                    <path d="M350 67 v8 M342 79 h16 M342 79 v12 M358 79 v12 M346 75 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                    <line x1="350" y1="95" x2="235" y2="178" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
+                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2.3s" repeatCount="indefinite" />
+                    </line>
+                    <circle cx="350" cy="95" r="3" fill="var(--color-primary)" opacity="0.4" />
+                  </g>
+
+                  {/* Left: Detailer */}
+                  <g opacity="0.7">
+                    <circle cx="30" cy="200" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
+                    <path d="M30 212 v8 M22 224 h16 M22 224 v12 M38 224 v12 M26 220 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                    <line x1="48" y1="215" x2="175" y2="192" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
+                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2.6s" repeatCount="indefinite" />
+                    </line>
+                    <circle cx="48" cy="215" r="3" fill="var(--color-primary)" opacity="0.4" />
+                  </g>
+
+                  {/* Right: Yoga owner */}
+                  <g opacity="0.7">
+                    <circle cx="390" cy="210" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
+                    <path d="M390 222 v8 M382 234 h16 M382 234 v12 M398 234 v12 M386 230 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                    <line x1="372" y1="225" x2="245" y2="195" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
+                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2.1s" repeatCount="indefinite" />
+                    </line>
+                    <circle cx="372" cy="225" r="3" fill="var(--color-primary)" opacity="0.4" />
+                  </g>
+
+                  {/* Bottom-left: Lawyer */}
+                  <g opacity="0.7">
+                    <circle cx="90" cy="320" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
+                    <path d="M90 332 v8 M82 344 h16 M82 344 v12 M98 344 v12 M86 340 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                    <line x1="100" y1="325" x2="195" y2="215" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
+                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2.4s" repeatCount="indefinite" />
+                    </line>
+                    <circle cx="100" cy="325" r="3" fill="var(--color-primary)" opacity="0.4" />
+                  </g>
+
+                  {/* Bottom-right: Real estate */}
+                  <g opacity="0.7">
+                    <circle cx="340" cy="330" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
+                    <path d="M340 342 v8 M332 354 h16 M332 354 v12 M348 354 v12 M336 350 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                    <line x1="328" y1="330" x2="228" y2="210" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
+                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2.7s" repeatCount="indefinite" />
+                    </line>
+                    <circle cx="328" cy="330" r="3" fill="var(--color-primary)" opacity="0.4" />
+                  </g>
+
+                  {/* Building icon in center (shop front outline) */}
+                  <g transform="translate(193, 150)" opacity="0.5">
+                    <rect x="0" y="14" width="34" height="26" rx="2" stroke="var(--color-accent)" strokeWidth="1.5" fill="none" />
+                    <polyline points="-3,14 17,2 37,14" stroke="var(--color-accent)" strokeWidth="1.5" fill="none" strokeLinejoin="round" />
+                    <rect x="12" y="26" width="10" height="14" rx="1" stroke="var(--color-accent)" strokeWidth="1.2" fill="none" />
+                  </g>
                 </svg>
               </div>
             </div>
@@ -552,17 +614,17 @@ export default function MarketingPage() {
           <div className="container">
             <div className="section-header">
               <span className="section-label">How It Works</span>
-              <h2 className="section-title">From signup to savings in three steps</h2>
+              <h2 className="section-title">Go from signup to savings in 3 simple steps</h2>
             </div>
             <div className="steps-grid">
               {[
-                { num: "01", title: "Tell us what you buy", desc: "Fill out a 30-second form with your industry and the supplies you spend the most on. That is all we need to start.", icon: (
+                { num: "01", title: "Tell us what you buy", desc: "Share what you spend the most on. It takes under 30 seconds.", icon: (
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 ) },
-                { num: "02", title: "We build your savings report", desc: "We research supplier pricing for your category, find the best bulk deals, and send you a personalized savings estimate.", icon: (
+                { num: "02", title: "See your savings", desc: "We find better pricing and show you exactly how much you can save.", icon: (
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 ) },
-                { num: "03", title: "Join the pool (or don't)", desc: "If you like the numbers, join the buying pool. If the pool does not fill, you pay nothing. Your money is only committed when the deal goes through.", icon: (
+                { num: "03", title: "Join the order", desc: "Like the deal? Join the group order. If it doesn't go through, you don't pay.", icon: (
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 ) },
               ].map((s) => (
