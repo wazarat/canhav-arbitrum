@@ -7,6 +7,7 @@ const ALLOWED_PATHS_ON_LANDING = ["/", "/api/submissions"];
 function isAllowedOnLandingDomain(pathname: string): boolean {
   if (ALLOWED_PATHS_ON_LANDING.includes(pathname)) return true;
   if (pathname.startsWith("/_next/")) return true;
+  if (pathname.startsWith("/api/webhooks/")) return true;
   if (pathname === "/ch-logo.svg") return true;
   if (pathname === "/favicon.ico") return true;
   return false;

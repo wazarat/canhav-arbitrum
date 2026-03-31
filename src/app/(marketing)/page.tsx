@@ -270,7 +270,8 @@ export default function MarketingPage() {
       const val = params.get(key);
       if (val) utm[key] = val;
     }
-    if (Object.keys(utm).length > 0) setUtmParams(utm);
+    utm.source = window.location.hostname;
+    setUtmParams(utm);
   }, []);
 
   useEffect(() => {
