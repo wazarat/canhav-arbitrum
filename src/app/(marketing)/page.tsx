@@ -612,29 +612,77 @@ export default function MarketingPage() {
         {/* HOW IT WORKS */}
         <section className="mkt-section how-it-works" id="how-it-works">
           <div className="container">
-            <div className="section-header">
+            <div className="section-header section-header--center">
               <span className="section-label">How It Works</span>
               <h2 className="section-title">Go from signup to savings in 3 simple steps</h2>
             </div>
-            <div className="steps-grid">
-              {[
-                { num: "01", title: "Tell us what you buy", desc: "Share what you spend the most on. It takes under 30 seconds.", icon: (
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                ) },
-                { num: "02", title: "See your savings", desc: "We find better pricing and show you exactly how much you can save.", icon: (
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                ) },
-                { num: "03", title: "Join the order", desc: "Like the deal? Join the group order. If it doesn't go through, you don't pay.", icon: (
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                ) },
-              ].map((s) => (
-                <div key={s.num} className="step-card reveal">
-                  <div className="step-number">{s.num}</div>
-                  <div className="step-icon">{s.icon}</div>
-                  <h3 className="step-heading">{s.title}</h3>
-                  <p className="step-desc">{s.desc}</p>
+
+            <div className="steps-flow">
+              {/* Step 1 */}
+              <div className="step-card reveal">
+                <div className="step-number">01</div>
+                <div className="step-icon-wrap">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="var(--color-primary)" opacity="0.15" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round">
+                    <rect x="3" y="3" width="18" height="18" rx="3" fill="var(--color-primary)" opacity="0.1" stroke="none" />
+                    <path d="M9 11l2 2 4-4" /><rect x="3" y="3" width="18" height="18" rx="3" fill="none" />
+                  </svg>
                 </div>
-              ))}
+                <h3 className="step-heading">Tell us what you buy</h3>
+                <p className="step-desc">Share what you spend the most on.</p>
+                <span className="step-meta">30 seconds</span>
+              </div>
+
+              {/* Arrow 1 */}
+              <div className="step-arrow" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                </svg>
+              </div>
+
+              {/* Step 2 (featured) */}
+              <div className="step-card step-card--featured reveal">
+                <div className="step-number">02</div>
+                <div className="step-icon-wrap step-icon-wrap--featured">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round">
+                    <rect x="2" y="2" width="20" height="20" rx="3" fill="var(--color-accent)" opacity="0.1" stroke="none" />
+                    <line x1="12" y1="2" x2="12" y2="22" stroke="var(--color-accent)" opacity="0.15" /><path d="M16 8h-2a2 2 0 0 0 0 4h1a2 2 0 0 1 0 4h-3" /><line x1="12" y1="6" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="18" />
+                  </svg>
+                </div>
+                <h3 className="step-heading">See your savings</h3>
+                <p className="step-desc">We find better pricing and show you exactly how much you can save.</p>
+              </div>
+
+              {/* Arrow 2 */}
+              <div className="step-arrow" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                </svg>
+              </div>
+
+              {/* Step 3 */}
+              <div className="step-card reveal">
+                <div className="step-number">03</div>
+                <div className="step-icon-wrap">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round">
+                    <rect x="2" y="2" width="20" height="20" rx="3" fill="var(--color-primary)" opacity="0.1" stroke="none" />
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="10" cy="7" r="3" /><path d="M22 21v-2a3 3 0 0 0-2.1-2.86" /><path d="M17 3.14a3 3 0 0 1 0 5.72" />
+                  </svg>
+                </div>
+                <h3 className="step-heading">Join the order</h3>
+                <p className="step-desc">Like the deal? Join the group order.<br />If it doesn&apos;t go through, you don&apos;t pay.</p>
+              </div>
+            </div>
+
+            {/* Trust cue + CTA */}
+            <div className="steps-footer reveal">
+              <p className="steps-trust">No commitment. No upfront payment.</p>
+              <a
+                href="#interest-form"
+                className="mkt-btn mkt-btn--primary mkt-btn--lg"
+                onClick={(e) => { e.preventDefault(); scrollToSection("interest-form"); }}
+              >
+                Get My Savings Estimate
+              </a>
             </div>
           </div>
         </section>

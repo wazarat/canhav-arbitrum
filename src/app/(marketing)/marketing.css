@@ -514,27 +514,88 @@
 /* ─── HOW IT WORKS ─── */
 .marketing-root .how-it-works {
   background: var(--color-bg-alt);
+  position: relative;
+  overflow: hidden;
 }
 
-.marketing-root .steps-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-6);
+.marketing-root .how-it-works::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+  opacity: 0.03;
+  pointer-events: none;
 }
 
-@media (min-width: 640px) {
-  .marketing-root .steps-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-8);
-  }
+.marketing-root .section-header--center {
+  text-align: center;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Flow layout */
+.marketing-root .steps-flow {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-4);
+  position: relative;
 }
 
 .marketing-root .step-card {
-  padding: var(--space-8);
+  flex: 1;
+  padding: var(--space-8) var(--space-6);
   background: var(--color-surface);
   border-radius: var(--mkt-radius-lg);
   border: 1px solid var(--color-border);
   position: relative;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.25s var(--ease-out),
+              box-shadow 0.25s var(--ease-out),
+              border-color 0.25s var(--ease-out),
+              background 0.25s var(--ease-out);
+}
+
+.marketing-root .step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+/* Featured Step 2 */
+.marketing-root .step-card--featured {
+  transform: scale(1.04);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent), var(--shadow-md);
+  z-index: 1;
+}
+
+.marketing-root .step-card--featured:hover {
+  transform: scale(1.04) translateY(-4px);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.15), var(--shadow-lg);
+}
+
+.marketing-root[data-theme="dark"] .step-card--featured {
+  box-shadow: 0 0 0 1px var(--color-accent), 0 0 30px rgba(167, 139, 250, 0.08), var(--shadow-md);
+}
+
+/* Arrows between cards */
+.marketing-root .step-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  opacity: 0.4;
 }
 
 .marketing-root .step-number {
@@ -546,22 +607,97 @@
   letter-spacing: 0.05em;
 }
 
-.marketing-root .step-icon {
-  font-size: 2rem;
+.marketing-root .step-card--featured .step-number {
+  color: var(--color-accent);
+}
+
+/* Icon wrap with background */
+.marketing-root .step-icon-wrap {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(37, 99, 235, 0.06);
+  border-radius: var(--mkt-radius-md);
   margin-bottom: var(--space-4);
+}
+
+.marketing-root .step-icon-wrap--featured {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.marketing-root[data-theme="dark"] .step-icon-wrap {
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.marketing-root[data-theme="dark"] .step-icon-wrap--featured {
+  background: rgba(167, 139, 250, 0.1);
 }
 
 .marketing-root .step-heading {
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-weight: 700;
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
 .marketing-root .step-desc {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   line-height: 1.6;
+}
+
+.marketing-root .step-meta {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: rgba(37, 99, 235, 0.06);
+  padding: 2px var(--space-3);
+  border-radius: var(--mkt-radius-xl);
+}
+
+.marketing-root[data-theme="dark"] .step-meta {
+  background: rgba(96, 165, 250, 0.1);
+}
+
+/* Footer with trust cue + CTA */
+.marketing-root .steps-footer {
+  text-align: center;
+  margin-top: var(--space-10);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.marketing-root .steps-trust {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* Mobile: stack vertically, arrows become down arrows */
+@media (max-width: 767px) {
+  .marketing-root .steps-flow {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .marketing-root .step-arrow {
+    transform: rotate(90deg);
+  }
+
+  .marketing-root .step-card--featured {
+    transform: scale(1);
+  }
+
+  .marketing-root .step-card--featured:hover {
+    transform: translateY(-4px);
+  }
 }
 
 /* ─── INDUSTRIES SLIDER ─── */
@@ -1162,9 +1298,10 @@
 }
 
 /* Stagger children */
-.marketing-root .steps-grid .reveal:nth-child(1) { transition-delay: 0ms; }
-.marketing-root .steps-grid .reveal:nth-child(2) { transition-delay: 80ms; }
-.marketing-root .steps-grid .reveal:nth-child(3) { transition-delay: 160ms; }
+.marketing-root .steps-flow .reveal:nth-child(1) { transition-delay: 0ms; }
+.marketing-root .steps-flow .reveal:nth-child(3) { transition-delay: 80ms; }
+.marketing-root .steps-flow .reveal:nth-child(5) { transition-delay: 160ms; }
+.marketing-root .steps-footer.reveal { transition-delay: 240ms; }
 
 
 .marketing-root .benefits-grid .reveal:nth-child(1) { transition-delay: 0ms; }
