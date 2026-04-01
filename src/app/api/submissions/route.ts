@@ -148,7 +148,7 @@ async function pushToInstantly(data: Record<string, unknown>) {
   if (data.source) customVariables.source = String(data.source);
 
   try {
-    const res = await fetch("https://api.instantly.ai/api/v2/leads", {
+    const res = await fetch("https://api.instantly.ai/api/v2/leads/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
