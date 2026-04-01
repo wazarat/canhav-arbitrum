@@ -205,6 +205,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   }
 
+  if (type === "lead-capture" && !HUBSPOT_TOKEN) {
+    console.error("[Pipeline] HUBSPOT_TOKEN is not set — lead data will be lost");
+    return NextResponse.json(
+      { error: "CRM not configured. Contact support." },
+      { status: 503 },
+    );
+  }
+
   const promises: Promise<unknown>[] = [];
 
   if (type === "lead-capture") {
