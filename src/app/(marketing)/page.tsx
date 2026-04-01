@@ -314,19 +314,8 @@ export default function MarketingPage() {
   }, []);
 
   const selectIndustry = useCallback((name: string) => {
-    setSavedIndustry(name);
-    if (formStep !== 1) setFormStep(1);
-    setTimeout(() => {
-      if (industryRef.current) {
-        industryRef.current.value = name;
-        industryRef.current.style.borderColor = "var(--color-accent)";
-        setTimeout(() => {
-          if (industryRef.current) industryRef.current.style.borderColor = "";
-        }, 2000);
-      }
-    }, 50);
-    scrollToSection("interest-form");
-  }, [scrollToSection, formStep]);
+    window.location.href = `/getstarted?industry=${encodeURIComponent(name)}`;
+  }, []);
 
   const handleStepOne = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -441,9 +430,8 @@ export default function MarketingPage() {
               ))}
               <li>
                 <a
-                  href="#interest-form"
+                  href="/getstarted"
                   className="nav-cta mkt-btn mkt-btn--sm"
-                  onClick={(e) => { e.preventDefault(); scrollToSection("interest-form"); }}
                 >
                   Get My Savings Estimate
                 </a>
@@ -487,9 +475,8 @@ export default function MarketingPage() {
             ))}
             <li>
               <a
-                href="#interest-form"
+                href="/getstarted"
                 className="mkt-btn mkt-btn--primary"
-                onClick={(e) => { e.preventDefault(); scrollToSection("interest-form"); }}
               >
                 Get My Savings Estimate
               </a>
@@ -510,7 +497,7 @@ export default function MarketingPage() {
               </p>
               <p className="hero-supporting">Free to try. If the group order doesn&apos;t go through, you don&apos;t pay.</p>
               <div className="hero-ctas">
-                <a href="#interest-form" className="mkt-btn mkt-btn--primary mkt-btn--lg" onClick={(e) => { e.preventDefault(); scrollToSection("interest-form"); }}>
+                <a href="/getstarted" className="mkt-btn mkt-btn--primary mkt-btn--lg">
                   Get My Savings Estimate
                 </a>
                 <a href="#how-it-works" className="mkt-btn mkt-btn--outline mkt-btn--lg" onClick={(e) => { e.preventDefault(); scrollToSection("how-it-works"); }}>
@@ -678,9 +665,8 @@ export default function MarketingPage() {
             <div className="steps-footer reveal">
               <p className="steps-trust">No commitment. No upfront payment.</p>
               <a
-                href="#interest-form"
+                href="/getstarted"
                 className="mkt-btn mkt-btn--primary mkt-btn--lg"
-                onClick={(e) => { e.preventDefault(); scrollToSection("interest-form"); }}
               >
                 Get My Savings Estimate
               </a>
@@ -907,7 +893,7 @@ export default function MarketingPage() {
                 </li>
               ))}
               <li>
-                <a href="#interest-form" onClick={(e) => { e.preventDefault(); scrollToSection("interest-form"); }}>
+                <a href="/getstarted">
                   Get Started
                 </a>
               </li>
