@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { redis } from "@/lib/redis";
 
 const HUBSPOT_TOKEN = process.env.HUBSPOT_TOKEN;
 const HUBSPOT_API = "https://api.hubapi.com/crm/v3/objects/contacts";
@@ -13,10 +12,13 @@ function hubspotHeaders() {
   };
 }
 
-/* ─── HubSpot: create/update contact + attach qualifying note ─── */
+/* ─── HubSpot: create or update contact ─── */
 
 async function pushToHubSpot(data: Record<string, unknown>): Promise<string | undefined> {
-  if (!HUBSPOT_TOKEN) return undefined;
+  if (!HUBSPOT_TOKEN) {
+    console.warn("[HubSpot] No HUBSPOT_TOKEN configured — skipping");
+    return undefined;
+  }
 
   const email = String(data.email ?? "").trim();
   if (!email) return undefined;
@@ -72,7 +74,7 @@ async function pushToHubSpot(data: Record<string, unknown>): Promise<string | un
     }
 
     if (contactId) {
-      await attachNoteToContact(contactId, data);
+      await attachNote(contactId, data);
     }
 
     return contactId;
@@ -86,27 +88,24 @@ function buildNoteBody(data: Record<string, unknown>): string {
   const lines: string[] = [];
   const step = String(data.step ?? "unknown");
 
-  lines.push(`<strong>CanHav Lead Submission (${step})</strong>`);
-  lines.push("");
+  lines.push(`<strong>CanHav Lead (${step})</strong>`);
 
   if (data.industry) lines.push(`<b>Industry:</b> ${String(data.industry)}`);
   if (data.supplies) lines.push(`<b>Supplies:</b> ${String(data.supplies)}`);
-  if (data.heardAboutUs) lines.push(`<b>How they heard about us:</b> ${String(data.heardAboutUs)}`);
-  if (data.source) lines.push(`<b>Source domain:</b> ${String(data.source)}`);
+  if (data.heardAboutUs) lines.push(`<b>Heard about us:</b> ${String(data.heardAboutUs)}`);
+  if (data.source) lines.push(`<b>Domain:</b> ${String(data.source)}`);
 
   const utmFields = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
   const utms = utmFields.filter((k) => data[k]).map((k) => `${k}=${String(data[k])}`);
-  if (utms.length > 0) lines.push(`<b>Attribution:</b> ${utms.join(", ")}`);
+  if (utms.length > 0) lines.push(`<b>UTM:</b> ${utms.join(", ")}`);
 
   return lines.join("<br/>");
 }
 
-async function attachNoteToContact(contactId: string, data: Record<string, unknown>) {
-  const hasQualifyingData = data.industry || data.supplies || data.heardAboutUs ||
-    data.utm_source || data.utm_medium || data.utm_campaign || data.source;
-  if (!hasQualifyingData) return;
-
-  const noteBody = buildNoteBody(data);
+async function attachNote(contactId: string, data: Record<string, unknown>) {
+  const hasData = data.industry || data.supplies || data.heardAboutUs || data.source ||
+    data.utm_source || data.utm_medium || data.utm_campaign;
+  if (!hasData) return;
 
   try {
     await fetch("https://api.hubapi.com/crm/v3/objects/notes", {
@@ -114,7 +113,7 @@ async function attachNoteToContact(contactId: string, data: Record<string, unkno
       headers: hubspotHeaders(),
       body: JSON.stringify({
         properties: {
-          hs_note_body: noteBody,
+          hs_note_body: buildNoteBody(data),
           hs_timestamp: new Date().toISOString(),
         },
         associations: [{
@@ -124,14 +123,17 @@ async function attachNoteToContact(contactId: string, data: Record<string, unkno
       }),
     });
   } catch (err) {
-    console.error("[HubSpot] Failed to attach note:", err);
+    console.error("[HubSpot] Note failed:", err);
   }
 }
 
-/* ─── Instantly.ai: add lead to campaign for automated follow-up ─── */
+/* ─── Instantly.ai: add lead to campaign ─── */
 
 async function pushToInstantly(data: Record<string, unknown>) {
-  if (!INSTANTLY_API_KEY || !INSTANTLY_CAMPAIGN_ID) return;
+  if (!INSTANTLY_API_KEY || !INSTANTLY_CAMPAIGN_ID) {
+    console.warn("[Instantly] No API key or campaign ID configured — skipping");
+    return;
+  }
 
   const email = String(data.email ?? "").trim();
   if (!email) return;
@@ -171,66 +173,58 @@ async function pushToInstantly(data: Record<string, unknown>) {
   }
 }
 
-/* ─── Main POST handler ─── */
+/* ─── Optional: Redis backup log ─── */
+
+async function logToRedis(type: string, data: Record<string, unknown>) {
+  try {
+    const { redis } = await import("@/lib/redis");
+    if (!redis) return;
+    await redis.lpush(`submissions:${type}`, JSON.stringify({
+      ...data,
+      type,
+      submittedAt: new Date().toISOString(),
+    }));
+  } catch (err) {
+    console.warn("[Redis] Log failed (non-blocking):", err);
+  }
+}
+
+/* ─── POST handler ─── */
 
 export async function POST(req: NextRequest) {
-  if (!redis) {
-    return NextResponse.json(
-      { error: "Storage not configured" },
-      { status: 503 },
-    );
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const body = await req.json();
   const { type, ...data } = body;
 
-  if (!type || !["register-interest", "request-pool", "lead-capture"].includes(type)) {
+  if (!type || !["register-interest", "request-pool", "lead-capture"].includes(String(type))) {
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   }
 
-  const entry = {
-    ...data,
-    type,
-    submittedAt: new Date().toISOString(),
-  };
-
-  const key = `submissions:${type}`;
-  try {
-    await redis.lpush(key, JSON.stringify(entry));
-  } catch (err) {
-    console.error("[Redis] lpush failed:", err);
-    return NextResponse.json({ error: "Storage write failed" }, { status: 503 });
-  }
+  const promises: Promise<unknown>[] = [];
 
   if (type === "lead-capture") {
-    const isComplete = data.step === "complete";
+    promises.push(pushToHubSpot(data).catch((err) => console.error("[HubSpot]", err)));
 
-    try {
-      await pushToHubSpot(data);
-    } catch (err) {
-      console.error("[HubSpot] Unexpected error:", err);
-    }
-
-    if (isComplete) {
-      try {
-        await pushToInstantly(data);
-      } catch (err) {
-        console.error("[Instantly] Unexpected error:", err);
-      }
+    if (data.step === "complete") {
+      promises.push(pushToInstantly(data).catch((err) => console.error("[Instantly]", err)));
     }
   }
+
+  promises.push(logToRedis(String(type), data));
+
+  await Promise.allSettled(promises);
 
   return NextResponse.json({ ok: true });
 }
 
-export async function GET(req: NextRequest) {
-  if (!redis) {
-    return NextResponse.json(
-      { error: "Storage not configured" },
-      { status: 503 },
-    );
-  }
+/* ─── GET handler (admin) ─── */
 
+export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const secret = searchParams.get("secret");
 
@@ -238,23 +232,32 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const type = searchParams.get("type") || "all";
+  try {
+    const { redis } = await import("@/lib/redis");
+    if (!redis) {
+      return NextResponse.json({ error: "Redis not configured" }, { status: 503 });
+    }
 
-  if (type === "all") {
-    const [interests, requests, leads] = await Promise.all([
-      redis.lrange("submissions:register-interest", 0, -1),
-      redis.lrange("submissions:request-pool", 0, -1),
-      redis.lrange("submissions:lead-capture", 0, -1),
-    ]);
-    return NextResponse.json({
-      "register-interest": interests.map(parse),
-      "request-pool": requests.map(parse),
-      "lead-capture": leads.map(parse),
-    });
+    const type = searchParams.get("type") || "all";
+
+    if (type === "all") {
+      const [interests, requests, leads] = await Promise.all([
+        redis.lrange("submissions:register-interest", 0, -1),
+        redis.lrange("submissions:request-pool", 0, -1),
+        redis.lrange("submissions:lead-capture", 0, -1),
+      ]);
+      return NextResponse.json({
+        "register-interest": interests.map(parse),
+        "request-pool": requests.map(parse),
+        "lead-capture": leads.map(parse),
+      });
+    }
+
+    const entries = await redis.lrange(`submissions:${type}`, 0, -1);
+    return NextResponse.json({ [type]: entries.map(parse) });
+  } catch {
+    return NextResponse.json({ error: "Redis unavailable" }, { status: 503 });
   }
-
-  const entries = await redis.lrange(`submissions:${type}`, 0, -1);
-  return NextResponse.json({ [type]: entries.map(parse) });
 }
 
 function parse(entry: unknown) {
