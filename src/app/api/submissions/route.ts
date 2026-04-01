@@ -39,8 +39,6 @@ async function pushToHubSpot(data: Record<string, unknown>): Promise<string | un
     properties.hs_lead_status = "NEW";
   }
 
-  if (data.source) properties.hs_analytics_source = String(data.source);
-
   try {
     let contactId: string | undefined;
 
@@ -197,7 +195,12 @@ export async function POST(req: NextRequest) {
   };
 
   const key = `submissions:${type}`;
-  await redis.lpush(key, JSON.stringify(entry));
+  try {
+    await redis.lpush(key, JSON.stringify(entry));
+  } catch (err) {
+    console.error("[Redis] lpush failed:", err);
+    return NextResponse.json({ error: "Storage write failed" }, { status: 503 });
+  }
 
   if (type === "lead-capture") {
     const isComplete = data.step === "complete";
