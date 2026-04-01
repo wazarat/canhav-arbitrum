@@ -138,28 +138,31 @@ async function pushToInstantly(data: Record<string, unknown>) {
   const email = String(data.email ?? "").trim();
   if (!email) return;
 
-  const variables: Record<string, string> = {};
-  if (data.yourName) variables.name = String(data.yourName);
-  if (data.businessName) variables.company_name = String(data.businessName);
-  if (data.industry) variables.industry = String(data.industry);
-  if (data.phone) variables.phone = String(data.phone);
-  if (data.supplies) variables.supplies = String(data.supplies);
-  if (data.source) variables.source = String(data.source);
+  const firstName = data.yourName ? String(data.yourName).split(" ")[0] : "";
+  const lastName = data.yourName ? String(data.yourName).split(" ").slice(1).join(" ") : "";
+
+  const customVariables: Record<string, string> = {};
+  if (data.industry) customVariables.industry = String(data.industry);
+  if (data.phone) customVariables.phone = String(data.phone);
+  if (data.supplies) customVariables.supplies = String(data.supplies);
+  if (data.source) customVariables.source = String(data.source);
 
   try {
-    const res = await fetch("https://api.instantly.ai/api/v1/lead/add", {
+    const res = await fetch("https://api.instantly.ai/api/v2/leads", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${INSTANTLY_API_KEY}`,
+      },
       body: JSON.stringify({
-        api_key: INSTANTLY_API_KEY,
         campaign_id: INSTANTLY_CAMPAIGN_ID,
         skip_if_in_workspace: true,
         leads: [{
           email,
-          first_name: variables.name?.split(" ")[0] ?? "",
-          last_name: variables.name?.split(" ").slice(1).join(" ") ?? "",
-          company_name: variables.company_name ?? "",
-          custom_variables: variables,
+          first_name: firstName,
+          last_name: lastName,
+          company_name: data.businessName ? String(data.businessName) : "",
+          custom_variables: customVariables,
         }],
       }),
     });
