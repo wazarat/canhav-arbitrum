@@ -1166,11 +1166,53 @@
 
 /* ─── MOBILE REFINEMENTS ─── */
 @media (max-width: 767px) {
+  /* Tighter gutters + section spacing on phones */
+  .marketing-root .container {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+  .marketing-root .mkt-section {
+    padding: clamp(var(--space-12), 14vw, var(--space-16)) 0;
+  }
+
+  /* Hero */
   .marketing-root .hero-visual { display: none; }
   .marketing-root .hero-content { max-width: 100%; }
-  .marketing-root .hero-title { font-size: clamp(2rem, 6vw, 2.75rem); }
-  .marketing-root .hero-ctas { flex-direction: column; }
+  .marketing-root .hero { padding-top: var(--space-8); }
+  .marketing-root .hero-title { font-size: clamp(1.875rem, 8vw, 2.5rem); line-height: 1.15; }
+  .marketing-root .hero-sub { font-size: var(--text-base); }
+  .marketing-root .hero-ctas { flex-direction: column; gap: var(--space-3); }
   .marketing-root .hero-ctas .mkt-btn { width: 100%; }
+
+  /* Hero stats: stack cleanly, hide vertical dividers */
+  .marketing-root .hero-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+  .marketing-root .hero-stat-divider { display: none; }
+
+  /* Larger, comfortable tap targets */
+  .marketing-root .mkt-btn--lg { padding: var(--space-4) var(--space-6); min-height: 48px; }
+  .marketing-root .header-nav-pill { padding: var(--space-3) var(--space-4); }
+
+  /* Waitlist form card: less padding, full-width controls */
+  .marketing-root .form-wrapper { padding: clamp(var(--space-5), 6vw, var(--space-8)); }
+  .marketing-root .form-section .signup-form { max-width: 100% !important; }
+  .marketing-root .waitlist-form-row .form-submit { width: 100%; min-height: 48px; }
+  .marketing-root .form-group input,
+  .marketing-root .form-group textarea,
+  .marketing-root .waitlist-form-row input[type="email"] { font-size: 16px; min-height: 48px; }
+
+  /* Feature blocks: comfortable stacked spacing */
+  .marketing-root .feature-block { gap: var(--space-6); }
+  .marketing-root .feature-block--reverse .feature-visual-panel { order: -1; }
+
+  /* Section headers fill width */
+  .marketing-root .section-header,
+  .marketing-root .section-header--center { max-width: 100%; }
+
   .marketing-root .trust-badges { flex-direction: column; align-items: stretch; }
   .marketing-root .trust-badge { justify-content: center; }
 }
@@ -1492,142 +1534,6 @@
   color: var(--color-primary-light);
 }
 
-.marketing-root .use-cases-grid {
-  display: grid;
-  gap: var(--space-5);
-}
-
-@media (min-width: 768px) {
-  .marketing-root .use-cases-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.marketing-root .use-case-card {
-  padding: var(--space-6);
-  border-radius: var(--mkt-radius-lg);
-  border: 1px solid var(--color-border);
-  background: rgba(22, 26, 38, 0.4);
-}
-
-.marketing-root .use-case-card h3 {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: 600;
-  margin-bottom: var(--space-3);
-}
-
-.marketing-root .use-case-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-top: var(--space-4);
-}
-
-.marketing-root .use-case-tag {
-  font-size: var(--text-xs);
-  padding: var(--space-1) var(--space-3);
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-  color: var(--color-text-muted);
-}
-
-.marketing-root .roadmap-steps {
-  display: grid;
-  gap: var(--space-4);
-}
-
-@media (min-width: 768px) {
-  .marketing-root .roadmap-steps {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.marketing-root .roadmap-step {
-  position: relative;
-  padding: var(--space-5);
-  border-radius: var(--mkt-radius-lg);
-  border: 1px solid var(--color-border);
-  background: rgba(22, 26, 38, 0.35);
-  transition: border-color var(--transition-interactive), transform var(--transition-interactive), background var(--transition-interactive);
-}
-
-.marketing-root .roadmap-step:hover {
-  border-color: rgba(92, 146, 255, 0.35);
-  background: rgba(22, 26, 38, 0.55);
-  transform: translateY(-2px);
-}
-
-.marketing-root .roadmap-step:first-child {
-  border-color: rgba(34, 211, 238, 0.35);
-  background: linear-gradient(180deg, rgba(34, 211, 238, 0.08) 0%, rgba(22, 26, 38, 0.35) 60%);
-  box-shadow: 0 10px 30px -16px rgba(34, 211, 238, 0.35);
-}
-
-.marketing-root .roadmap-status {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: ui-monospace, monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-signal);
-  margin-bottom: var(--space-3);
-}
-
-.marketing-root .roadmap-status::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.12);
-}
-
-.marketing-root .roadmap-status--next {
-  color: var(--color-primary-light);
-}
-
-.marketing-root .roadmap-status--next::before {
-  box-shadow: 0 0 0 4px rgba(92, 146, 255, 0.10);
-}
-
-.marketing-root .use-case-card,
-.marketing-root .faq-item {
-  transition: border-color var(--transition-interactive), transform var(--transition-interactive), background var(--transition-interactive);
-}
-
-.marketing-root .use-case-card:hover,
-.marketing-root .faq-item:hover {
-  border-color: rgba(92, 146, 255, 0.28);
-  background: rgba(22, 26, 38, 0.55);
-  transform: translateY(-2px);
-}
-
-.marketing-root .role-chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-4);
-}
-
-.marketing-root .role-chip {
-  font-size: var(--text-xs);
-  padding: var(--space-2) var(--space-4);
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-  color: var(--color-text-muted);
-  transition: border-color var(--transition-interactive), background var(--transition-interactive), color var(--transition-interactive);
-}
-
-.marketing-root .role-chip.active {
-  border-color: var(--color-primary);
-  background: rgba(92, 146, 255, 0.15);
-  color: var(--color-text);
-}
-
 .marketing-root .waitlist-form-row {
   display: flex;
   flex-direction: column;
@@ -1642,34 +1548,6 @@
   .marketing-root .waitlist-form-row input[type="email"] {
     flex: 1;
   }
-}
-
-.marketing-root .faq-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-.marketing-root .faq-item {
-  padding: var(--space-5) var(--space-6);
-  border-radius: var(--mkt-radius-lg);
-  border: 1px solid var(--color-border);
-  background: rgba(22, 26, 38, 0.35);
-}
-
-.marketing-root .faq-item h3 {
-  font-family: var(--font-display);
-  font-size: var(--text-base);
-  font-weight: 600;
-  margin-bottom: var(--space-2);
-}
-
-.marketing-root .faq-item p {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  line-height: 1.6;
 }
 
 .marketing-root .section-header--center {

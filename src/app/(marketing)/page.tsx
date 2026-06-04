@@ -4,19 +4,10 @@ import { useState, useEffect, useRef, useCallback, type FormEvent } from "react"
 
 const X_UPDATES_URL = "https://x.com/wazarat";
 
-const ROLES = [
-  { id: "researcher", label: "Researcher" },
-  { id: "trader", label: "Trader / Investor" },
-  { id: "ai-builder", label: "AI Builder" },
-  { id: "all", label: "All of the above" },
-] as const;
-
-type RoleId = (typeof ROLES)[number]["id"];
-
 const VALUE_PROPS = [
   {
     title: "See the full picture",
-    body: "On-chain metrics fused with off-chain signals — governance, funding, team moves, narrative — in one research workspace.",
+    body: "On-chain metrics fused with off-chain signals like governance, funding, team moves, and narrative, in one research workspace.",
   },
   {
     title: "Act on conviction",
@@ -32,7 +23,7 @@ const FEATURES = [
   {
     eyebrow: "On-chain",
     title: "Ecosystem data that actually moves markets",
-    body: "Flows, liquidity, holder behavior, and protocol health across chains — curated for researchers who need signal, not noise.",
+    body: "Flows, liquidity, holder behavior, and protocol health across chains, curated for researchers who need signal, not noise.",
     bullets: [
       "Cross-chain activity and capital rotation",
       "Protocol-level risk and growth indicators",
@@ -43,7 +34,7 @@ const FEATURES = [
   {
     eyebrow: "Off-chain",
     title: "Intelligence beyond the chain",
-    body: "Funding rounds, governance, hiring, partnerships, narrative — the off-chain layer dashboards miss until price already moved.",
+    body: "Funding rounds, governance, hiring, partnerships, and narrative: the off-chain layer dashboards miss until price already moved.",
     bullets: [
       "Team and governance event tracking",
       "Narrative and sentiment overlays",
@@ -54,7 +45,7 @@ const FEATURES = [
   },
   {
     eyebrow: "Agent-ready",
-    title: "Built for humans — and the agents they train",
+    title: "Built for humans and the agents they train",
     body: "Whether you trade manually or orchestrate autonomous agents, CanHav delivers consistent, structured intelligence both can act on.",
     bullets: [
       "API-friendly exports for agent pipelines",
@@ -62,50 +53,6 @@ const FEATURES = [
       "Actionable summaries, not raw dumps",
     ],
     visual: "agents" as const,
-  },
-];
-
-const USE_CASES = [
-  {
-    title: "Researchers",
-    body: "Map ecosystems, stress-test narratives, and ship thesis-grade work with on-chain and off-chain evidence in one place.",
-    tags: ["Thesis building", "Due diligence", "Ecosystem maps"],
-  },
-  {
-    title: "Traders & investors",
-    body: "Spot regime shifts, monitor flows, and size positions with context typical dashboards don’t surface.",
-    tags: ["Flow analysis", "Risk monitoring", "Portfolio context"],
-  },
-  {
-    title: "AI builders",
-    body: "Train and deploy agents that reason over unified web3 intelligence — not fragmented APIs and scraped tweets.",
-    tags: ["Agent training", "Structured exports", "Evals"],
-  },
-];
-
-const ROADMAP = [
-  { step: "01", status: "Now", title: "Waitlist & research", desc: "Early access for researchers. The founding cohort shapes the data model." },
-  { step: "02", status: "Up next", title: "Unified intelligence", desc: "On-chain and off-chain layers in a single queryable workspace." },
-  { step: "03", status: "Up next", title: "Alerts & workflows", desc: "Custom monitors for the signals that matter to your thesis." },
-  { step: "04", status: "Later", title: "Agent integrations", desc: "First-class exports and APIs for autonomous research and execution." },
-];
-
-const FAQ = [
-  {
-    q: "Who is CanHav for?",
-    a: "Researchers, traders, investors, and builders working at the intersection of crypto data and decision-making — anyone who needs more than a dashboard.",
-  },
-  {
-    q: "How is this different from analytics tools?",
-    a: "We fuse on-chain metrics with off-chain intelligence — governance, funding, teams, narrative — so you can understand why markets move, not just that they moved.",
-  },
-  {
-    q: "Can I use this to train AI agents?",
-    a: "Yes. The platform is designed so your research flows into agent training, backtesting, and automated workflows with structured exports.",
-  },
-  {
-    q: "What does joining the waitlist get me?",
-    a: "Early access invites, product updates, and priority onboarding as we open the workspace to the founding cohort. Follow @wazarat on X for live updates between drops.",
   },
 ];
 
@@ -175,7 +122,7 @@ function FeatureVisual({ type }: { type: "onchain" | "offchain" | "agents" }) {
     return (
       <div className="feature-visual-panel">
         {[
-          { tag: "Flows", title: "ETH staking inflows — 7d", val: "+12.4%" },
+          { tag: "Flows", title: "ETH staking inflows, 7d", val: "+12.4%" },
           { tag: "Risk", title: "Bridge utilization spike", val: "L2 aggregate" },
           { tag: "Holders", title: "Smart money accumulation", val: "3 protocols" },
         ].map((row) => (
@@ -195,8 +142,8 @@ function FeatureVisual({ type }: { type: "onchain" | "offchain" | "agents" }) {
       <div className="feature-visual-panel">
         {[
           { tag: "Governance", title: "Major protocol upgrade vote opens", date: "Today" },
-          { tag: "Funding", title: "Series A — infra tooling", date: "2d ago" },
-          { tag: "Team", title: "Head of research hire — L2 team", date: "5d ago" },
+          { tag: "Funding", title: "Series A, infra tooling", date: "2d ago" },
+          { tag: "Team", title: "Head of research hire, L2 team", date: "5d ago" },
         ].map((row) => (
           <div key={row.title} className="metric-row">
             <div style={{ minWidth: 0 }}>
@@ -237,8 +184,6 @@ export default function MarketingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [utmParams, setUtmParams] = useState<Record<string, string>>({});
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<RoleId | "">("");
-  const [focus, setFocus] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
 
@@ -309,8 +254,6 @@ export default function MarketingPage() {
         body: JSON.stringify({
           type: "lead-capture",
           email: trimmed,
-          role: role || undefined,
-          focus: focus.trim() || undefined,
           step: "complete",
           ...utmParams,
         }),
@@ -325,13 +268,10 @@ export default function MarketingPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [email, role, focus, utmParams]);
+  }, [email, utmParams]);
 
   const navLinks = [
     { id: "platform", label: "Platform" },
-    { id: "use-cases", label: "Use Cases" },
-    { id: "roadmap", label: "Roadmap" },
-    { id: "faq", label: "FAQ" },
   ];
 
   return (
@@ -435,11 +375,11 @@ export default function MarketingPage() {
                 <span style={{ color: "var(--color-text-muted)" }}>Waitlist open</span>
               </div>
               <h1 className="hero-title">
-                <span className="text-gradient-brand">Web3 research</span> that moves markets — on-chain and off-chain, in one workspace.
+                <span className="text-gradient-brand">Web3 research</span> that moves markets. On-chain and off-chain, in one workspace.
               </h1>
               <p className="hero-sub">
                 Built for researchers, traders, and AI builders. Combine ecosystem data with off-chain signals so you can
-                trade, invest, or train agents on a unified thesis — not fragmented tabs.
+                trade, invest, or train agents on a unified thesis, not fragmented tabs.
               </p>
               <div className="hero-ctas">
                 <a
@@ -493,7 +433,7 @@ export default function MarketingPage() {
               <span className="section-label">Why CanHav</span>
               <h2 className="section-title">One workspace for research, conviction, and agents</h2>
               <p className="section-sub" style={{ margin: "0 auto" }}>
-                For practitioners who need more than price charts — and want their research to compound.
+                For practitioners who need more than price charts, and want their research to compound.
               </p>
             </div>
             <div className="value-grid" style={{ marginTop: "var(--space-12)" }}>
@@ -540,56 +480,6 @@ export default function MarketingPage() {
           </div>
         </section>
 
-        <section className="mkt-section" id="use-cases">
-          <div className="container">
-            <div className="section-header section-header--center reveal">
-              <span className="section-label">Use Cases</span>
-              <h2 className="section-title">From thesis to trade to trained agent</h2>
-              <p className="section-sub" style={{ margin: "0 auto" }}>
-                Whether you publish research, manage capital, or build autonomous systems — the same intelligence layer powers the work.
-              </p>
-            </div>
-            <div className="use-cases-grid" style={{ marginTop: "var(--space-12)" }}>
-              {USE_CASES.map((uc) => (
-                <div key={uc.title} className="use-case-card reveal">
-                  <h3>{uc.title}</h3>
-                  <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)", lineHeight: 1.6 }}>{uc.body}</p>
-                  <div className="use-case-tags">
-                    {uc.tags.map((tag) => (
-                      <span key={tag} className="use-case-tag">{tag}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="mkt-section" id="roadmap">
-          <div className="container">
-            <div className="section-header section-header--center reveal">
-              <span className="section-label">Roadmap</span>
-              <h2 className="section-title">Where we&apos;re headed</h2>
-              <p className="section-sub" style={{ margin: "0 auto" }}>
-                Shipping in milestones. Waitlist members shape what ships first.
-              </p>
-            </div>
-            <div className="roadmap-steps" style={{ marginTop: "var(--space-12)" }}>
-              {ROADMAP.map((step, i) => (
-                <div key={step.title} className="roadmap-step reveal">
-                  <div className={i === 0 ? "roadmap-status" : "roadmap-status roadmap-status--next"}>
-                    Step {step.step} · {step.status}
-                  </div>
-                  <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 600, marginBottom: "var(--space-2)" }}>
-                    {step.title}
-                  </h3>
-                  <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}>{step.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="mkt-section form-section" id="waitlist">
           <div className="container">
             <div className="form-wrapper reveal">
@@ -597,7 +487,7 @@ export default function MarketingPage() {
                 <span className="section-label">Waitlist</span>
                 <h2 className="section-title">Get early access to the intelligence workspace</h2>
                 <p className="form-sub">
-                  Join the founding cohort. We&apos;ll email you when onboarding opens — and share product updates along the way.
+                  Join the founding cohort. We&apos;ll email you when onboarding opens, and share product updates along the way.
                 </p>
               </div>
 
@@ -623,34 +513,6 @@ export default function MarketingPage() {
                     </button>
                   </div>
 
-                  <div className="role-chips">
-                    <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                      I am a
-                    </span>
-                    {ROLES.map((r) => (
-                      <button
-                        key={r.id}
-                        type="button"
-                        className={`role-chip${role === r.id ? " active" : ""}`}
-                        onClick={() => setRole(role === r.id ? "" : r.id)}
-                      >
-                        {r.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="form-group" style={{ marginTop: "var(--space-4)" }}>
-                    <label htmlFor="focus">What ecosystems or topics are you focused on? <span className="optional">(optional)</span></label>
-                    <textarea
-                      id="focus"
-                      name="focus"
-                      rows={2}
-                      value={focus}
-                      onChange={(e) => setFocus(e.target.value)}
-                      placeholder="e.g. L2 infra, DeFi flows, agent payments on Arbitrum"
-                    />
-                  </div>
-
                   <p className="form-note">No spam. Unsubscribe anytime. Follow <a href={X_UPDATES_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-primary-light)" }}>@wazarat</a> for live updates.</p>
                 </form>
               ) : (
@@ -660,23 +522,6 @@ export default function MarketingPage() {
                   <p>We&apos;ll reach out with early access invites. Follow <a href={X_UPDATES_URL} target="_blank" rel="noopener noreferrer">@wazarat on X</a> for product updates in the meantime.</p>
                 </div>
               )}
-            </div>
-          </div>
-        </section>
-
-        <section className="mkt-section" id="faq">
-          <div className="container">
-            <div className="section-header section-header--center reveal">
-              <span className="section-label">FAQ</span>
-              <h2 className="section-title">Questions, answered</h2>
-            </div>
-            <div className="faq-list" style={{ marginTop: "var(--space-12)" }}>
-              {FAQ.map((item) => (
-                <div key={item.q} className="faq-item reveal">
-                  <h3>{item.q}</h3>
-                  <p>{item.a}</p>
-                </div>
-              ))}
             </div>
           </div>
         </section>
