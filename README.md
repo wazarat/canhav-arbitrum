@@ -1,171 +1,44 @@
-# CanHav Group Pool
+# CanHav
 
-![CanHav Group Pool](https://github.com/wazarat/canhav-arbitrum/blob/d3f619c270e006e29a9fb4d02647fda5a2983363/CanHavArbitrum%20pitch.png)
+> On-chain and off-chain intelligence for web3 research that moves markets.
 
-A group-purchasing platform where small businesses pool funds together to meet supplier minimum order quantities (MOQs). Built on **Arbitrum Sepolia** with on-chain escrow and tiered pricing.
+CanHav is the research workspace for people building at the intersection of crypto and AI. We fuse on-chain ecosystem data with off-chain signals — governance, funding, hiring, partnerships, narrative — so researchers, traders, and AI builders can trade, invest, or train agents on a unified thesis.
 
-**Live at [canhav.io](https://www.canhav.io)**
+**Live at [canhav.co](https://www.canhav.co) · [canhav.io](https://www.canhav.io)** — waitlist open.
 
-**Contract on Arbitrum Sepolia:** [`0x3b0cb807778cb900caec181c1ce1b0133dcf8cb8`](https://sepolia.arbiscan.io/address/0x3b0cb807778cb900caec181c1ce1b0133dcf8cb8)
-
----
-
-## For Judges: What to Look At
-
-### 1. Smart Contract (`contracts/src/PurchasePool.sol`)
-
-This is the core of the project. A single Solidity contract handles all escrow, tiered pricing, rebates, and refund logic on-chain. Key things to note:
-
-- **On-chain tiered pricing** with up to 10 tiers per pool, stored directly in contract storage. Tiers define unit thresholds, prices, and whether reaching them locks in fulfillment.
-- **Escrow pattern**: Buyer funds are held by the contract itself (no intermediary wallet). The `commit()` function transfers tokens into the contract, and funds are only released via `withdrawFunds()` (to the supplier, after deadline + MOQ met) or `claimRefund()` (back to buyers, if MOQ not met).
-- **Early-committer rebates**: Buyers who committed at a higher tier price are automatically eligible for a rebate when the pool settles at a cheaper tier. The `claimRebate()` function calculates the difference between what each buyer paid and the final tier price, and refunds the excess. This removes the disincentive to commit early.
-- **Pools stay open past MOQ**: Even after the minimum order is hit, the pool remains open until the deadline so buyers can keep committing toward cheaper tiers. Status resolves to `Fulfilled` or `Expired` only when `block.timestamp > deadline`.
-- **Platform fee**: A configurable fee (capped at 10% on-chain via `MAX_FEE_BPS`) is deducted on withdrawal. The fee is calculated against the fair total (final tier price * total units), not the raw deposits, so rebate reserves are never taxed.
-- **Security measures**:
-  - OpenZeppelin `ReentrancyGuard` on all state-changing buyer/admin functions (`commit`, `claimRefund`, `claimRebate`, `withdrawFunds`).
-  - OpenZeppelin `SafeERC20` for all token transfers (no silent failures).
-  - OpenZeppelin `Ownable` for admin-only functions.
-  - Checks-Effects-Interactions (CEI) pattern in `commit()`: state updates happen before the external `safeTransferFrom` call.
-  - Double-refund and double-rebate prevention via `refunded` and `rebateClaimed` flags.
-  - `setDeadline()` restricted to Open pools only, preventing state confusion from reverting Fulfilled pools back to Open.
-  - Sorted, validated tiers enforced at creation time.
-
-### 2. Test Suite (`contracts/test/PurchasePool.t.sol`)
-
-50 passing Foundry tests covering:
-
-- Pool creation with validation (tier sorting, mandatory tier requirement, deadline checks, owner-only access).
-- Tiered pricing across Starter, Bulk, and Wholesale tiers (including boundary crossing).
-- Fulfillment lifecycle: pools stay open after MOQ, resolve to Fulfilled only after deadline.
-- Refund flow: full refund on expiry, double-refund prevention, non-participant rejection.
-- Fee configuration: accumulation across pools, zero-fee edge case, max-fee cap.
-- **Rebate mechanism**: early committer gets correct rebate amount, zero-rebate edge case, double-claim prevention, rebate available after withdrawal, rebate reserves held in contract after owner withdrawal, multi-commit same-user rebate calculation.
-- **setDeadline restrictions**: works on Open pools, reverts on Fulfilled/Withdrawn pools, reverts for non-owner.
-
-Run them with `cd contracts && forge test -v`.
-
-### 3. Frontend + Web3 Integration (`src/`)
-
-- **Wallet handling**: Privy for authentication with MetaMask/external wallet prioritization. Automatic chain switching to Arbitrum Sepolia before every transaction.
-- **Dynamic gas estimation**: Custom `useGasOverrides` hook fetches live `baseFeePerGas` from the chain and applies buffers, working around Arbitrum Sepolia gas estimation quirks.
-- **ERC-20 approval flow**: The commit modal walks users through Approve then Commit, with real-time balance and allowance checks.
-- **On-chain reads**: All pool data, tiers, and commitments are read directly from the contract via Alchemy RPC.
-
-### 4. Try It Live
-
-1. Visit [canhav.io](https://www.canhav.io)
-2. Connect a MetaMask wallet on Arbitrum Sepolia
-3. Mint test mUSDC from the faucet
-4. Browse pools, commit to one, and watch the tiered pricing update
+Follow [@wazarat on X](https://x.com/wazarat) for product updates.
 
 ---
 
-## How It Works
+## What this repo contains
 
-1. **Browse Pools**: Find a product pool your business needs (coffee beans, cups, packaging, etc.).
-2. **Commit Funds**: Approve and deposit mUSDC for the quantity you want. Tokens are held in escrow by the smart contract.
-3. **Tiers Unlock**: As more businesses commit, the pool crosses pricing thresholds and everyone gets a cheaper rate.
-4. **Deadline Resolves**: The pool stays open until its deadline. If the MOQ is met, the order is locked in and fulfilled. If not, every buyer can claim a full refund.
+- **`src/app/(marketing)/`** — the public landing page at `canhav.co` / `canhav.io`. Waitlist-first, targeted at web3 researchers, traders, and AI builders.
+- **`src/app/api/submissions/`** — lead-capture API that pushes new waitlist signups to HubSpot + Instantly and mirrors them to Upstash Redis.
+- **`src/middleware.ts`** — locks the production domains down to just the landing page + `/api/submissions`. Everything else 302s to the waitlist.
+- **`src/app/(platform)/`** — legacy app pages from a previous direction (Arbitrum Sepolia hackathon, group-purchasing prototype). Reachable in local dev for reference, blocked on the public domains by middleware.
+- **`contracts/`** — Solidity contracts from the same hackathon era, kept as portfolio artifacts. Not powering the current website.
 
-## Smart Contract
+## Who it's for
 
-The core of the platform is `PurchasePool.sol`, a single Solidity contract deployed on Arbitrum Sepolia. It handles all the financial logic on-chain.
+- **Researchers** mapping ecosystems, stress-testing narratives, and shipping thesis-grade work.
+- **Traders & investors** spotting regime shifts, monitoring flows, and sizing positions with off-chain context dashboards miss.
+- **AI builders** training agents that reason over unified web3 intelligence — not fragmented APIs and scraped tweets.
 
-### Pool Lifecycle
+## What's shipping next
 
-```
-Open ──── deadline passes ──┬── MOQ met ────► Fulfilled ──► Withdrawn (supplier paid)
-                            └── MOQ not met ► Expired (buyers claim refunds)
-```
-
-- **Open**: The pool accepts commitments. Even after the MOQ threshold is reached, the pool stays open so buyers can keep committing toward higher tiers with better pricing.
-- **Fulfilled**: The deadline has passed and enough units were committed. The admin can withdraw funds to pay the supplier. A platform fee (configurable, max 10%) is deducted.
-- **Expired**: The deadline passed without meeting the MOQ. Every buyer can call `claimRefund()` to get their full deposit back.
-- **Withdrawn**: Funds have been sent to the supplier. The order is being fulfilled.
-
-### On-Chain Tiered Pricing
-
-Each pool stores up to 10 price tiers directly in the contract. Tiers have:
-
-| Field | Description |
-|---|---|
-| `minUnits` | Unit threshold to enter this tier |
-| `pricePerUnit` | Cost per unit at this tier (in token smallest units) |
-| `mandatory` | If `true`, reaching this tier locks in fulfillment |
-
-When a buyer commits, the contract looks up the active tier based on the pool's total units after the commit and charges accordingly. Lower tiers are optional (the pool may not execute), while higher tiers lock in fulfillment.
-
-### Key Functions
-
-| Function | Who | What it does |
-|---|---|---|
-| `createPool(...)` | Owner | Creates a new pool with product name, tiers, deadline, and token |
-| `commit(poolId, units)` | Buyer | Commits units to a pool, transferring the calculated cost from the buyer |
-| `claimRefund(poolId)` | Buyer | Claims a full refund from an expired pool |
-| `claimRebate(poolId)` | Buyer | Claims the difference between what was paid and the final tier price |
-| `withdrawFunds(poolId)` | Owner | Withdraws supplier funds from a fulfilled pool (minus fee), keeping rebate reserves |
-| `setDeadline(poolId, newDeadline)` | Owner | Extends an open pool's deadline (cannot revert fulfilled pools) |
-| `setFeeBps(bps)` | Owner | Updates the platform fee (capped at 10%) |
-| `getRebate(poolId, buyer)` | View | Returns the rebate amount and claimed status for a buyer |
-
-### Early-Committer Rebates
-
-When a pool settles at a cheaper tier than what some buyers originally paid, the contract calculates the fair cost for each buyer (`units * finalTierPrice`) and makes the difference claimable:
-
-```
-Alice commits 60 units at $10/unit (Starter)  = $600 deposited
-Bob commits 50 units at $8/unit (Bulk)         = $400 deposited
-Pool total: 110 units -> final tier: Bulk ($8)
-Alice's fair cost: 60 * $8 = $480 -> rebate: $120
-Bob's fair cost: 50 * $8 = $400 -> rebate: $0
-```
-
-On `withdrawFunds()`, only the fair total (110 * $8 = $880) is sent to the supplier (minus platform fee). The rebate reserve ($120) stays in the contract for buyers to claim via `claimRebate()`.
-
-### Escrow and Safety
-
-- All buyer funds are held by the contract itself. No intermediary wallet.
-- Commitments are tracked per buyer per pool (`units`, `deposited`, `refunded`, `rebateClaimed`).
-- Refunds are guaranteed for expired pools. The contract holds the tokens until claimed.
-- OpenZeppelin `ReentrancyGuard` protects all state-changing functions against reentrancy from exotic token callbacks.
-- OpenZeppelin `SafeERC20` for all token transfers and `Ownable` for admin access.
-- The `commit()` function follows the Checks-Effects-Interactions pattern: state is updated before external calls.
-
-### Token
-
-The platform uses `MockUSDC` (mUSDC), an ERC-20 test stablecoin with 6 decimals. Anyone can mint tokens to themselves using the faucet on the site for testing purposes.
-
-## Why Arbitrum
-
-Arbitrum is an Ethereum Layer 2 rollup. Transactions settle on Ethereum for security but execute on Arbitrum for speed and low cost. This means:
-
-- **Low gas fees**: Committing to a pool costs a fraction of a cent, making it practical for smaller transactions.
-- **Fast confirmations**: Transactions confirm in seconds, not minutes.
-- **Ethereum security**: All state is anchored to Ethereum L1. The escrow is as secure as Ethereum itself.
-- **EVM compatible**: Standard Solidity, standard tools (Foundry, Wagmi, Viem).
-
-The testnet deployment uses **Arbitrum Sepolia** (chain ID 421614).
+1. **Now** — Waitlist & research. Founding cohort shapes the data model.
+2. **Up next** — Unified on-chain + off-chain intelligence in a single queryable workspace.
+3. **Up next** — Custom alerts and workflows on the signals that matter to each thesis.
+4. **Later** — First-class agent integrations: structured exports and APIs for autonomous research and execution.
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Smart contracts | Solidity 0.8.24, OpenZeppelin, Foundry (Forge) |
 | Frontend | Next.js 16, React 19, TypeScript, Tailwind CSS, Shadcn UI |
-| Web3 | Wagmi, Viem, Privy (auth + embedded wallets) |
-| Data | On-chain reads via Alchemy RPC, Upstash Redis (Vercel KV) for off-chain form data |
-| Hosting | Vercel |
-
-## Environment Variables
-
-```env
-NEXT_PUBLIC_PRIVY_APP_ID=           # Privy app ID for authentication
-NEXT_PUBLIC_ALCHEMY_URL=            # Alchemy RPC URL for Arbitrum Sepolia
-NEXT_PUBLIC_PURCHASE_POOL_ADDRESS=  # Deployed PurchasePool contract address
-NEXT_PUBLIC_MOCK_USDC_ADDRESS=      # Deployed MockUSDC contract address
-KV_REST_API_URL=                    # Upstash Redis URL
-KV_REST_API_TOKEN=                  # Upstash Redis token
-```
+| Lead capture | HubSpot CRM + Instantly.ai, mirrored to Upstash Redis (Vercel KV) |
+| Hosting | Vercel (`canhav.co`, `canhav.io`) |
+| Legacy on-chain | Solidity 0.8.24, OpenZeppelin, Foundry — Arbitrum Sepolia (see below) |
 
 ## Local Development
 
@@ -174,7 +47,38 @@ pnpm install
 pnpm dev
 ```
 
-### Contract Development
+The marketing landing renders at `/`. The legacy platform pages (`/pools`, `/my-commitments`, `/request-pool`, `/admin`) are reachable in local dev but blocked on the production domains by `src/middleware.ts`.
+
+## Environment Variables
+
+```env
+# Lead capture
+HUBSPOT_TOKEN=                      # HubSpot private app token (contacts + notes scopes)
+INSTANTLY_API_KEY=                  # Instantly.ai API key
+INSTANTLY_CAMPAIGN_ID=              # Campaign ID for the waitlist sequence
+KV_REST_API_URL=                    # Upstash Redis URL (optional, mirror log)
+KV_REST_API_TOKEN=                  # Upstash Redis token
+ADMIN_API_SECRET=                   # Secret for /api/submissions GET (admin export)
+
+# Legacy on-chain prototype (only needed to run the (platform) pages locally)
+NEXT_PUBLIC_PRIVY_APP_ID=
+NEXT_PUBLIC_ALCHEMY_URL=
+NEXT_PUBLIC_PURCHASE_POOL_ADDRESS=
+NEXT_PUBLIC_MOCK_USDC_ADDRESS=
+```
+
+---
+
+## Legacy: Arbitrum Sepolia group-purchasing prototype
+
+The `contracts/` directory and `src/app/(platform)/` pages are artifacts from an earlier direction — a group-purchasing platform built for an Arbitrum hackathon. They are kept here for portfolio reasons and are **not** part of the current product.
+
+- **Contract on Arbitrum Sepolia:** [`0x3b0cb807778cb900caec181c1ce1b0133dcf8cb8`](https://sepolia.arbiscan.io/address/0x3b0cb807778cb900caec181c1ce1b0133dcf8cb8)
+- **Core contract:** `contracts/src/PurchasePool.sol` — on-chain escrow, up to 10 price tiers, early-committer rebates, deadline-based fulfillment/refund lifecycle, OpenZeppelin `ReentrancyGuard` + `SafeERC20` + `Ownable`, CEI ordering in `commit()`.
+- **Test suite:** `contracts/test/PurchasePool.t.sol` — 50 Foundry tests covering pool creation, tiered pricing, fulfillment lifecycle, refunds, fee accounting, rebates, and `setDeadline` restrictions.
+- **Frontend integration:** Privy for wallet auth with auto chain-switching to Arbitrum Sepolia, Wagmi/Viem for reads, custom `useGasOverrides` hook for Sepolia gas quirks, ERC-20 approve-then-commit flow.
+
+### Contract development
 
 ```bash
 cd contracts
@@ -182,19 +86,10 @@ forge build
 forge test
 ```
 
-### Deploy Contracts
+### Deploy contracts
 
 ```bash
 cd contracts
 DEPLOYER_KEY=0x... forge script script/Deploy.s.sol \
-  --rpc-url $NEXT_PUBLIC_ALCHEMY_URL --broadcast --slow
-```
-
-### Seed Pools
-
-```bash
-cd contracts
-DEPLOYER_KEY=0x... POOL_ADDRESS=0x... TOKEN_ADDRESS=0x... \
-  forge script script/SeedCoffeeShopPools.s.sol \
   --rpc-url $NEXT_PUBLIC_ALCHEMY_URL --broadcast --slow
 ```

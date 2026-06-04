@@ -710,46 +710,6 @@
   }
 }
 
-/* ─── INDUSTRIES SLIDER ─── */
-.marketing-root .industries-slider-wrap {
-  position: relative;
-  display: flex;
-  align-items: stretch;
-  gap: var(--space-4);
-}
-
-.marketing-root .industries-track {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-6);
-  flex: 1;
-  min-width: 0;
-  cursor: grab;
-  user-select: none;
-}
-
-.marketing-root .industries-track:active {
-  cursor: grabbing;
-}
-
-@media (max-width: 767px) {
-  .marketing-root .industries-track {
-    grid-template-columns: 1fr;
-  }
-  .marketing-root .industries-track .slider-card:not(:first-child) {
-    display: none;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 959px) {
-  .marketing-root .industries-track {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .marketing-root .industries-track .slider-card:last-child {
-    display: none;
-  }
-}
-
 /* Arrow buttons */
 .marketing-root .slider-arrow {
   flex-shrink: 0;
@@ -800,96 +760,6 @@
   width: 24px;
   border-radius: 4px;
   background: var(--color-primary);
-}
-
-.marketing-root .industry-card {
-  padding: var(--space-6);
-  background: var(--color-surface);
-  border-radius: var(--mkt-radius-lg);
-  border: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  transition: box-shadow var(--transition-interactive),
-              transform var(--transition-interactive),
-              border-color var(--transition-interactive);
-}
-
-.marketing-root .industry-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-  border-color: var(--color-primary);
-}
-
-.marketing-root .industry-icon-wrap {
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(37, 99, 235, 0.08);
-  border-radius: var(--mkt-radius-md);
-  margin-bottom: var(--space-4);
-}
-
-.marketing-root[data-theme="dark"] .industry-icon-wrap {
-  background: rgba(96, 165, 250, 0.12);
-}
-
-.marketing-root .industry-name {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: 700;
-  margin-bottom: var(--space-1);
-}
-
-.marketing-root .industry-spend {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--color-accent);
-  margin-bottom: var(--space-3);
-  letter-spacing: 0.01em;
-}
-
-.marketing-root .industry-pain {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  line-height: 1.6;
-  margin-bottom: var(--space-3);
-}
-
-.marketing-root .industry-solution {
-  font-size: var(--text-sm);
-  color: var(--color-text);
-  line-height: 1.6;
-  margin-bottom: var(--space-4);
-}
-
-.marketing-root .industry-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-
-.marketing-root .supply-tag {
-  display: inline-block;
-  font-size: var(--text-xs);
-  font-weight: 500;
-  color: var(--color-primary);
-  background: rgba(37, 99, 235, 0.06);
-  border: 1px solid rgba(37, 99, 235, 0.15);
-  padding: 2px var(--space-3);
-  border-radius: var(--mkt-radius-xl);
-}
-
-.marketing-root[data-theme="dark"] .supply-tag {
-  background: rgba(96, 165, 250, 0.08);
-  border-color: rgba(96, 165, 250, 0.2);
-}
-
-.marketing-root .industry-cta {
-  align-self: flex-start;
-  margin-top: auto;
 }
 
 /* ─── BENEFITS ─── */
@@ -1674,13 +1544,30 @@
 }
 
 .marketing-root .roadmap-step {
+  position: relative;
   padding: var(--space-5);
   border-radius: var(--mkt-radius-lg);
   border: 1px solid var(--color-border);
   background: rgba(22, 26, 38, 0.35);
+  transition: border-color var(--transition-interactive), transform var(--transition-interactive), background var(--transition-interactive);
+}
+
+.marketing-root .roadmap-step:hover {
+  border-color: rgba(92, 146, 255, 0.35);
+  background: rgba(22, 26, 38, 0.55);
+  transform: translateY(-2px);
+}
+
+.marketing-root .roadmap-step:first-child {
+  border-color: rgba(34, 211, 238, 0.35);
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.08) 0%, rgba(22, 26, 38, 0.35) 60%);
+  box-shadow: 0 10px 30px -16px rgba(34, 211, 238, 0.35);
 }
 
 .marketing-root .roadmap-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: ui-monospace, monospace;
   font-size: 0.65rem;
   letter-spacing: 0.1em;
@@ -1689,8 +1576,33 @@
   margin-bottom: var(--space-3);
 }
 
+.marketing-root .roadmap-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.12);
+}
+
 .marketing-root .roadmap-status--next {
   color: var(--color-primary-light);
+}
+
+.marketing-root .roadmap-status--next::before {
+  box-shadow: 0 0 0 4px rgba(92, 146, 255, 0.10);
+}
+
+.marketing-root .use-case-card,
+.marketing-root .faq-item {
+  transition: border-color var(--transition-interactive), transform var(--transition-interactive), background var(--transition-interactive);
+}
+
+.marketing-root .use-case-card:hover,
+.marketing-root .faq-item:hover {
+  border-color: rgba(92, 146, 255, 0.28);
+  background: rgba(22, 26, 38, 0.55);
+  transform: translateY(-2px);
 }
 
 .marketing-root .role-chips {

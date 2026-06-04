@@ -16,15 +16,15 @@ type RoleId = (typeof ROLES)[number]["id"];
 const VALUE_PROPS = [
   {
     title: "See the full picture",
-    body: "On-chain metrics plus off-chain signals — governance, funding, team moves, and narrative shifts — in one research workspace.",
+    body: "On-chain metrics fused with off-chain signals — governance, funding, team moves, narrative — in one research workspace.",
   },
   {
     title: "Act on conviction",
-    body: "Turn thesis into trades and allocations with context that goes beyond price and TVL dashboards.",
+    body: "Turn thesis into trades and allocations with context price and TVL dashboards don’t surface.",
   },
   {
     title: "Feed your agents",
-    body: "Export structured datasets and signals so your AI agents train and execute with the same intelligence you use.",
+    body: "Structured exports and signals so your AI agents train and execute on the same intelligence you use.",
   },
 ];
 
@@ -43,7 +43,7 @@ const FEATURES = [
   {
     eyebrow: "Off-chain",
     title: "Intelligence beyond the chain",
-    body: "Funding rounds, governance proposals, hiring, partnerships, and sentiment — the off-chain layer that on-chain data alone misses.",
+    body: "Funding rounds, governance, hiring, partnerships, narrative — the off-chain layer dashboards miss until price already moved.",
     bullets: [
       "Team and governance event tracking",
       "Narrative and sentiment overlays",
@@ -54,11 +54,11 @@ const FEATURES = [
   },
   {
     eyebrow: "Agent-ready",
-    title: "Built for humans and the agents they train",
-    body: "Whether you trade manually or orchestrate autonomous agents, CanHav gives you consistent, structured intelligence.",
+    title: "Built for humans — and the agents they train",
+    body: "Whether you trade manually or orchestrate autonomous agents, CanHav delivers consistent, structured intelligence both can act on.",
     bullets: [
       "API-friendly exports for agent pipelines",
-      "Eval-friendly datasets for model training",
+      "Eval-ready datasets for model training",
       "Actionable summaries, not raw dumps",
     ],
     visual: "agents" as const,
@@ -68,12 +68,12 @@ const FEATURES = [
 const USE_CASES = [
   {
     title: "Researchers",
-    body: "Map ecosystems, stress-test narratives, and publish thesis-grade work with on-chain and off-chain evidence in one place.",
-    tags: ["Thesis building", "Due diligence", "Weekly drops"],
+    body: "Map ecosystems, stress-test narratives, and ship thesis-grade work with on-chain and off-chain evidence in one place.",
+    tags: ["Thesis building", "Due diligence", "Ecosystem maps"],
   },
   {
     title: "Traders & investors",
-    body: "Spot regime shifts, monitor flows, and size positions with context that typical dashboards do not surface.",
+    body: "Spot regime shifts, monitor flows, and size positions with context typical dashboards don’t surface.",
     tags: ["Flow analysis", "Risk monitoring", "Portfolio context"],
   },
   {
@@ -84,7 +84,7 @@ const USE_CASES = [
 ];
 
 const ROADMAP = [
-  { step: "01", status: "Building", title: "Waitlist & research", desc: "Early access for researchers. Founding cohort shapes the data model." },
+  { step: "01", status: "Now", title: "Waitlist & research", desc: "Early access for researchers. The founding cohort shapes the data model." },
   { step: "02", status: "Up next", title: "Unified intelligence", desc: "On-chain and off-chain layers in a single queryable workspace." },
   { step: "03", status: "Up next", title: "Alerts & workflows", desc: "Custom monitors for the signals that matter to your thesis." },
   { step: "04", status: "Later", title: "Agent integrations", desc: "First-class exports and APIs for autonomous research and execution." },
@@ -97,15 +97,15 @@ const FAQ = [
   },
   {
     q: "How is this different from analytics tools?",
-    a: "We combine on-chain metrics with off-chain intelligence — governance, funding, teams, narrative — so you can understand why markets move, not just that they moved.",
+    a: "We fuse on-chain metrics with off-chain intelligence — governance, funding, teams, narrative — so you can understand why markets move, not just that they moved.",
   },
   {
     q: "Can I use this to train AI agents?",
-    a: "Yes. The platform is designed so your research can flow into agent training, backtesting, and automated workflows with structured exports.",
+    a: "Yes. The platform is designed so your research flows into agent training, backtesting, and automated workflows with structured exports.",
   },
   {
     q: "What does joining the waitlist get me?",
-    a: "Early access invites, product updates, and priority onboarding as we open the intelligence workspace to the founding cohort.",
+    a: "Early access invites, product updates, and priority onboarding as we open the workspace to the founding cohort. Follow @wazarat on X for live updates between drops.",
   },
 ];
 
@@ -435,12 +435,11 @@ export default function MarketingPage() {
                 <span style={{ color: "var(--color-text-muted)" }}>Waitlist open</span>
               </div>
               <h1 className="hero-title">
-                On-chain and off-chain intelligence for{" "}
-                <span className="text-gradient-brand">web3 research</span> that moves markets.
+                <span className="text-gradient-brand">Web3 research</span> that moves markets — on-chain and off-chain, in one workspace.
               </h1>
               <p className="hero-sub">
-                Go beyond dashboards. Combine ecosystem data with off-chain signals so you can trade,
-                invest, or train AI agents on a unified thesis — not fragmented tabs.
+                Built for researchers, traders, and AI builders. Combine ecosystem data with off-chain signals so you can
+                trade, invest, or train agents on a unified thesis — not fragmented tabs.
               </p>
               <div className="hero-ctas">
                 <a
@@ -482,7 +481,7 @@ export default function MarketingPage() {
           </div>
           <div className="social-proof-strip container">
             <p>
-              <strong>Built for researchers shipping at the intersection of crypto data and decisions.</strong>{" "}
+              <strong>Built for the people shipping at the intersection of crypto data and decisions.</strong>{" "}
               Join the founding waitlist for early access.
             </p>
           </div>
@@ -494,7 +493,7 @@ export default function MarketingPage() {
               <span className="section-label">Why CanHav</span>
               <h2 className="section-title">One workspace for research, conviction, and agents</h2>
               <p className="section-sub" style={{ margin: "0 auto" }}>
-                Built for practitioners who need more than price charts — and want their research to compound.
+                For practitioners who need more than price charts — and want their research to compound.
               </p>
             </div>
             <div className="value-grid" style={{ marginTop: "var(--space-12)" }}>
@@ -545,9 +544,9 @@ export default function MarketingPage() {
           <div className="container">
             <div className="section-header section-header--center reveal">
               <span className="section-label">Use Cases</span>
-              <h2 className="section-title">From thesis to trade to trained agents</h2>
+              <h2 className="section-title">From thesis to trade to trained agent</h2>
               <p className="section-sub" style={{ margin: "0 auto" }}>
-                Whether you publish research, manage capital, or build autonomous systems — the same intelligence layer powers your work.
+                Whether you publish research, manage capital, or build autonomous systems — the same intelligence layer powers the work.
               </p>
             </div>
             <div className="use-cases-grid" style={{ marginTop: "var(--space-12)" }}>
@@ -596,7 +595,7 @@ export default function MarketingPage() {
             <div className="form-wrapper reveal">
               <div className="form-header section-header--center">
                 <span className="section-label">Waitlist</span>
-                <h2 className="section-title">Get early access to the intelligence platform</h2>
+                <h2 className="section-title">Get early access to the intelligence workspace</h2>
                 <p className="form-sub">
                   Join the founding cohort. We&apos;ll email you when onboarding opens — and share product updates along the way.
                 </p>
@@ -695,7 +694,7 @@ export default function MarketingPage() {
               <Logo height={28} />
               <span className="logo-text">CanHav</span>
             </a>
-            <p className="footer-tagline">On-chain and off-chain intelligence for web3 research.</p>
+            <p className="footer-tagline">On-chain &amp; off-chain intelligence for web3 research.</p>
           </div>
           <div className="footer-links">
             <h4>Product</h4>
@@ -727,7 +726,7 @@ export default function MarketingPage() {
           </div>
         </div>
         <div className="footer-bottom container">
-          <p>&copy; {new Date().getFullYear()} CanHav. Intelligence for web3 researchers.</p>
+          <p>&copy; {new Date().getFullYear()} CanHav. Intelligence for web3 researchers &amp; practitioners.</p>
         </div>
       </footer>
     </div>
