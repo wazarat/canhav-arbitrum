@@ -2,92 +2,112 @@
 
 import { useState, useEffect, useRef, useCallback, type FormEvent } from "react";
 
-const INDUSTRIES = [
-  {
-    name: "Coffee Shops",
-    pain: "You are paying retail for beans, cups, and lids while the chain next door gets distributor pricing.",
-    solution: "We group your orders with other independent cafes so you all buy at the volume that unlocks wholesale rates.",
-    tags: ["Beans", "Cups & Lids", "Syrups", "Milk"],
-    monthlySpend: "$1,200 - $3,500/mo on supplies",
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/>
-      </svg>
-    ),
-  },
-  {
-    name: "Barbershops",
-    pain: "Clippers, capes, and disinfectants add up fast when you are buying one chair at a time.",
-    solution: "Pool with other shops in the GTA and access the same bulk pricing that franchise chains get.",
-    tags: ["Clippers", "Capes", "Disinfectants", "Styling Products"],
-    monthlySpend: "$600 - $1,800/mo on supplies",
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="6" cy="6" r="3"/><path d="M6 9v12"/><path d="M13 6l-7 12"/><circle cx="18" cy="18" r="3"/><path d="M18 15V3"/>
-      </svg>
-    ),
-  },
-  {
-    name: "Auto Detailing",
-    pain: "Ceramic coatings and polishing compounds are expensive at small-shop quantities.",
-    solution: "Combine orders with other detailers to reach the minimums that unlock distributor pricing.",
-    tags: ["Ceramic Coatings", "Microfibers", "Polishing Compounds"],
-    monthlySpend: "$800 - $2,500/mo on supplies",
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/>
-      </svg>
-    ),
-  },
-  {
-    name: "Small Law Firms",
-    pain: "Software subscriptions, office supplies, and client tools eat into your margins every month.",
-    solution: "Group licenses and bulk office orders with other small firms to cut your overhead.",
-    tags: ["Legal Software", "Office Supplies", "Client Tools"],
-    monthlySpend: "$1,500 - $4,000/mo on overhead",
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-      </svg>
-    ),
-  },
-  {
-    name: "Marketing Agencies",
-    pain: "Design tools, analytics platforms, and ad credits cost the same whether you have 3 clients or 300.",
-    solution: "Pool subscriptions and ad spend credits with other agencies to unlock volume discounts.",
-    tags: ["Ad Credits", "Design Tools", "Analytics"],
-    monthlySpend: "$2,000 - $6,000/mo on tools & ads",
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-      </svg>
-    ),
-  },
-  {
-    name: "Real Estate",
-    pain: "Staging materials, signage, and photography packages drain your commission before you cash it.",
-    solution: "Share the cost with other agents and brokerages so everyone gets group rates.",
-    tags: ["Staging Materials", "Signage", "Photography"],
-    monthlySpend: "$1,000 - $3,000/mo on marketing materials",
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-    ),
-  },
-  {
-    name: "Yoga Studios",
-    pain: "Mats, blocks, and cleaning supplies are a recurring cost that never seems to shrink.",
-    solution: "Pool orders with studios across the GTA and buy at the same volume as large fitness chains.",
-    tags: ["Mats", "Blocks", "Cleaning Supplies", "Wellness Products"],
-    monthlySpend: "$500 - $1,500/mo on studio supplies",
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
-      </svg>
-    ),
-  },
+const X_UPDATES_URL = "https://x.com/wazarat";
+
+const ROLES = [
+  { id: "researcher", label: "Researcher" },
+  { id: "trader", label: "Trader / Investor" },
+  { id: "ai-builder", label: "AI Builder" },
+  { id: "all", label: "All of the above" },
 ] as const;
+
+type RoleId = (typeof ROLES)[number]["id"];
+
+const VALUE_PROPS = [
+  {
+    title: "See the full picture",
+    body: "On-chain metrics plus off-chain signals — governance, funding, team moves, and narrative shifts — in one research workspace.",
+  },
+  {
+    title: "Act on conviction",
+    body: "Turn thesis into trades and allocations with context that goes beyond price and TVL dashboards.",
+  },
+  {
+    title: "Feed your agents",
+    body: "Export structured datasets and signals so your AI agents train and execute with the same intelligence you use.",
+  },
+];
+
+const FEATURES = [
+  {
+    eyebrow: "On-chain",
+    title: "Ecosystem data that actually moves markets",
+    body: "Flows, liquidity, holder behavior, and protocol health across chains — curated for researchers who need signal, not noise.",
+    bullets: [
+      "Cross-chain activity and capital rotation",
+      "Protocol-level risk and growth indicators",
+      "Historical context for regime changes",
+    ],
+    visual: "onchain" as const,
+  },
+  {
+    eyebrow: "Off-chain",
+    title: "Intelligence beyond the chain",
+    body: "Funding rounds, governance proposals, hiring, partnerships, and sentiment — the off-chain layer that on-chain data alone misses.",
+    bullets: [
+      "Team and governance event tracking",
+      "Narrative and sentiment overlays",
+      "Early signals before they hit price",
+    ],
+    visual: "offchain" as const,
+    reverse: true,
+  },
+  {
+    eyebrow: "Agent-ready",
+    title: "Built for humans and the agents they train",
+    body: "Whether you trade manually or orchestrate autonomous agents, CanHav gives you consistent, structured intelligence.",
+    bullets: [
+      "API-friendly exports for agent pipelines",
+      "Eval-friendly datasets for model training",
+      "Actionable summaries, not raw dumps",
+    ],
+    visual: "agents" as const,
+  },
+];
+
+const USE_CASES = [
+  {
+    title: "Researchers",
+    body: "Map ecosystems, stress-test narratives, and publish thesis-grade work with on-chain and off-chain evidence in one place.",
+    tags: ["Thesis building", "Due diligence", "Weekly drops"],
+  },
+  {
+    title: "Traders & investors",
+    body: "Spot regime shifts, monitor flows, and size positions with context that typical dashboards do not surface.",
+    tags: ["Flow analysis", "Risk monitoring", "Portfolio context"],
+  },
+  {
+    title: "AI builders",
+    body: "Train and deploy agents that reason over unified web3 intelligence — not fragmented APIs and scraped tweets.",
+    tags: ["Agent training", "Structured exports", "Evals"],
+  },
+];
+
+const ROADMAP = [
+  { step: "01", status: "Building", title: "Waitlist & research", desc: "Early access for researchers. Founding cohort shapes the data model." },
+  { step: "02", status: "Up next", title: "Unified intelligence", desc: "On-chain and off-chain layers in a single queryable workspace." },
+  { step: "03", status: "Up next", title: "Alerts & workflows", desc: "Custom monitors for the signals that matter to your thesis." },
+  { step: "04", status: "Later", title: "Agent integrations", desc: "First-class exports and APIs for autonomous research and execution." },
+];
+
+const FAQ = [
+  {
+    q: "Who is CanHav for?",
+    a: "Researchers, traders, investors, and builders working at the intersection of crypto data and decision-making — anyone who needs more than a dashboard.",
+  },
+  {
+    q: "How is this different from analytics tools?",
+    a: "We combine on-chain metrics with off-chain intelligence — governance, funding, teams, narrative — so you can understand why markets move, not just that they moved.",
+  },
+  {
+    q: "Can I use this to train AI agents?",
+    a: "Yes. The platform is designed so your research can flow into agent training, backtesting, and automated workflows with structured exports.",
+  },
+  {
+    q: "What does joining the waitlist get me?",
+    a: "Early access invites, product updates, and priority onboarding as we open the intelligence workspace to the founding cohort.",
+  },
+];
 
 function Logo({ height = 40 }: { height?: number }) {
   return (
@@ -101,167 +121,126 @@ function Logo({ height = 40 }: { height?: number }) {
   );
 }
 
-function SunIcon() {
+function DataNetworkVisual() {
   return (
-    <svg className="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <circle cx="12" cy="12" r="5" />
-      <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg className="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-  );
-}
-
-function IndustriesSlider({ selectIndustry }: { selectIndustry: (name: string) => void }) {
-  const VISIBLE = 3;
-  const total = INDUSTRIES.length;
-  const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const dragStart = useRef<number | null>(null);
-
-  const goTo = useCallback((idx: number) => {
-    setCurrent(((idx % total) + total) % total);
-  }, [total]);
-
-  const prev = useCallback(() => goTo(current - 1), [current, goTo]);
-  const next = useCallback(() => goTo(current + 1), [current, goTo]);
-
-  useEffect(() => {
-    if (paused) return;
-    const id = setInterval(() => goTo(current + 1), 4000);
-    return () => clearInterval(id);
-  }, [current, paused, goTo]);
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    dragStart.current = e.clientX;
-    setPaused(true);
-  };
-  const onPointerUp = (e: React.PointerEvent) => {
-    if (dragStart.current === null) return;
-    const delta = e.clientX - dragStart.current;
-    if (Math.abs(delta) > 40) delta < 0 ? next() : prev();
-    dragStart.current = null;
-    setPaused(false);
-  };
-
-  const visibleCards = Array.from({ length: VISIBLE }, (_, i) =>
-    INDUSTRIES[(current + i) % total]
-  );
-
-  return (
-    <section className="mkt-section industries" id="industries">
-      <div className="container">
-        <div className="section-header">
-          <span className="section-label">Industries We Serve</span>
-          <h2 className="section-title">Built for the businesses that keep the GTA running</h2>
-          <p className="section-sub">Every industry has supplies that cost too much at small quantities. We fix that.</p>
-        </div>
-
-        <div className="industries-slider-wrap">
-          {/* Prev arrow */}
-          <button
-            className="slider-arrow slider-arrow--prev"
-            aria-label="Previous industry"
-            onClick={prev}
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-
-          {/* Track */}
-          <div
-            className="industries-track"
-            ref={trackRef}
-            onPointerDown={onPointerDown}
-            onPointerUp={onPointerUp}
-            onPointerLeave={onPointerUp}
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
-          >
-            {visibleCards.map((ind, i) => (
-              <div
-                key={`${ind.name}-${i}`}
-                className="industry-card slider-card"
-                data-industry={ind.name}
-              >
-                <div className="industry-icon-wrap">{ind.icon}</div>
-                <h3 className="industry-name">{ind.name}</h3>
-                <div className="industry-spend">{ind.monthlySpend}</div>
-                <p className="industry-pain">{ind.pain}</p>
-                <p className="industry-solution">{ind.solution}</p>
-                <div className="industry-tags">
-                  {ind.tags.map((tag) => (
-                    <span key={tag} className="supply-tag">{tag}</span>
-                  ))}
-                </div>
-                <button
-                  className="mkt-btn mkt-btn--outline mkt-btn--sm industry-cta"
-                  onClick={() => selectIndustry(ind.name)}
-                >
-                  Get My Estimate
-                </button>
-              </div>
+    <div className="data-network-wrap">
+      <div className="data-network-glow" aria-hidden="true" />
+      <div className="data-network-card mkt-glass">
+        <div className="data-network-inner">
+          <p className="mono-label">live intelligence</p>
+          <svg viewBox="0 0 100 100" width="100%" style={{ marginTop: 12 }}>
+            <defs>
+              <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.95" />
+                <stop offset="60%" stopColor="#3D7BFF" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="#3D7BFF" stopOpacity="0" />
+              </radialGradient>
+              <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#3D7BFF" stopOpacity="0" />
+                <stop offset="50%" stopColor="#22D3EE" stopOpacity="0.7" />
+                <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(148,163,184,0.15)" strokeWidth="0.2" />
+            <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(148,163,184,0.18)" strokeWidth="0.2" />
+            <circle cx="50" cy="50" r="18" fill="url(#coreGrad)">
+              <animate attributeName="r" values="18;22;18" dur="3s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="18" cy="22" r="8" fill="rgba(92,146,255,0.35)" opacity="0.8" />
+            <circle cx="82" cy="18" r="9" fill="rgba(92,146,255,0.35)" opacity="0.8" />
+            <circle cx="14" cy="76" r="9" fill="rgba(92,146,255,0.35)" opacity="0.8" />
+            <circle cx="84" cy="78" r="8" fill="rgba(92,146,255,0.35)" opacity="0.8" />
+            {[[50, 50, 18, 22], [50, 50, 82, 18], [50, 50, 14, 76], [50, 50, 84, 78]].map(([x1, y1, x2, y2], i) => (
+              <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#lineGrad)" strokeWidth="0.4" opacity="0.6">
+                <animate attributeName="opacity" values="0.3;0.8;0.3" dur={`${3 + i * 0.4}s`} repeatCount="indefinite" />
+              </line>
             ))}
+          </svg>
+          <div className="metric-row" style={{ marginTop: 16, marginBottom: 0 }}>
+            <span className="metric-tag">on-chain</span>
+            <span style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>flows · TVL · holders</span>
           </div>
-
-          {/* Next arrow */}
-          <button
-            className="slider-arrow slider-arrow--next"
-            aria-label="Next industry"
-            onClick={next}
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Dot indicators */}
-        <div className="slider-dots">
-          {INDUSTRIES.map((_, i) => (
-            <button
-              key={i}
-              className={`slider-dot${i === current ? " active" : ""}`}
-              aria-label={`Go to ${INDUSTRIES[i].name}`}
-              onClick={() => { goTo(i); setPaused(false); }}
-            />
-          ))}
+          <div className="metric-row" style={{ marginBottom: 0 }}>
+            <span className="metric-tag">off-chain</span>
+            <span style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>gov · funding · narrative</span>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
+  );
+}
+
+function FeatureVisual({ type }: { type: "onchain" | "offchain" | "agents" }) {
+  if (type === "onchain") {
+    return (
+      <div className="feature-visual-panel">
+        {[
+          { tag: "Flows", title: "ETH staking inflows — 7d", val: "+12.4%" },
+          { tag: "Risk", title: "Bridge utilization spike", val: "L2 aggregate" },
+          { tag: "Holders", title: "Smart money accumulation", val: "3 protocols" },
+        ].map((row) => (
+          <div key={row.title} className="metric-row">
+            <div style={{ minWidth: 0 }}>
+              <span className="metric-tag">{row.tag}</span>
+              <div style={{ fontSize: "0.875rem", marginTop: 4 }}>{row.title}</div>
+            </div>
+            <span style={{ fontFamily: "ui-monospace, monospace", fontSize: "0.75rem", color: "var(--color-primary-light)" }}>{row.val}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (type === "offchain") {
+    return (
+      <div className="feature-visual-panel">
+        {[
+          { tag: "Governance", title: "Major protocol upgrade vote opens", date: "Today" },
+          { tag: "Funding", title: "Series A — infra tooling", date: "2d ago" },
+          { tag: "Team", title: "Head of research hire — L2 team", date: "5d ago" },
+        ].map((row) => (
+          <div key={row.title} className="metric-row">
+            <div style={{ minWidth: 0 }}>
+              <span className="metric-tag">{row.tag}</span>
+              <div style={{ fontSize: "0.875rem", marginTop: 4 }}>{row.title}</div>
+            </div>
+            <span style={{ fontFamily: "ui-monospace, monospace", fontSize: "0.65rem", color: "var(--color-text-muted)" }}>{row.date}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="feature-visual-panel">
+      <div className="metric-row">
+        <div>
+          <p className="mono-label" style={{ marginBottom: 4 }}>agent.summary</p>
+          <div style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>thesis-research-bot</div>
+        </div>
+        <span className="metric-tag" style={{ background: "rgba(34,211,238,0.15)", color: "var(--color-signal)" }}>● online</span>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginTop: 8 }}>
+        {[["signals", "847"], ["p95", "380ms"], ["exports", "12k"]].map(([k, v]) => (
+          <div key={k} style={{ padding: 8, borderRadius: 8, background: "rgba(30,41,59,0.5)", fontSize: "0.7rem" }}>
+            <div className="mono-label" style={{ fontSize: "0.55rem" }}>{k}</div>
+            <div style={{ fontWeight: 600, marginTop: 2 }}>{v}</div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
 export default function MarketingPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [formStep, setFormStep] = useState(1);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [utmParams, setUtmParams] = useState<Record<string, string>>({});
-  const [savedEmail, setSavedEmail] = useState("");
-  const [savedIndustry, setSavedIndustry] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<RoleId | "">("");
+  const [focus, setFocus] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
-  const industryRef = useRef<HTMLSelectElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    if (prefersDark) setDarkMode(true);
-  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -313,54 +292,14 @@ export default function MarketingPage() {
     setMobileOpen(false);
   }, []);
 
-  const selectIndustry = useCallback((name: string) => {
-    window.location.href = `/getstarted?industry=${encodeURIComponent(name)}`;
-  }, []);
-
-  const handleStepOne = useCallback(async (e: FormEvent<HTMLFormElement>) => {
+  const handleWaitlistSubmit = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget;
-    form.querySelectorAll(".error").forEach((el) => el.classList.remove("error"));
-
-    const email = emailRef.current?.value.trim() ?? "";
-    const industry = industryRef.current?.value ?? "";
-
-    if (!email || !email.includes("@")) {
+    const trimmed = email.trim();
+    if (!trimmed || !trimmed.includes("@")) {
       emailRef.current?.classList.add("error");
       return;
     }
-
-    setSavedEmail(email);
-    setSavedIndustry(industry);
-    setSubmitting(true);
-    try {
-      await fetch("/api/submissions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "lead-capture",
-          email,
-          industry,
-          step: "partial",
-          ...utmParams,
-        }),
-      });
-      setFormStep(2);
-    } catch {
-      setFormStep(2);
-    } finally {
-      setSubmitting(false);
-    }
-  }, [utmParams]);
-
-  const handleStepTwo = useCallback(async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-
-    const businessName = (form.elements.namedItem("businessName") as HTMLInputElement).value.trim();
-    const yourName = (form.elements.namedItem("yourName") as HTMLInputElement).value.trim();
-    const email = savedEmail;
-    const industry = savedIndustry;
+    emailRef.current?.classList.remove("error");
 
     setSubmitting(true);
     try {
@@ -369,13 +308,9 @@ export default function MarketingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "lead-capture",
-          businessName,
-          yourName,
-          email,
-          phone: (form.elements.namedItem("phone") as HTMLInputElement).value.trim(),
-          industry,
-          supplies: (form.elements.namedItem("supplies") as HTMLTextAreaElement).value.trim(),
-          heardAboutUs: (form.elements.namedItem("heardAboutUs") as HTMLSelectElement).value,
+          email: trimmed,
+          role: role || undefined,
+          focus: focus.trim() || undefined,
           step: "complete",
           ...utmParams,
         }),
@@ -390,23 +325,19 @@ export default function MarketingPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [savedEmail, savedIndustry, utmParams]);
+  }, [email, role, focus, utmParams]);
 
   const navLinks = [
-    { id: "how-it-works", label: "How It Works" },
-    { id: "industries", label: "Industries" },
-    { id: "why-it-works", label: "Why It Works" },
+    { id: "platform", label: "Platform" },
+    { id: "use-cases", label: "Use Cases" },
+    { id: "roadmap", label: "Roadmap" },
+    { id: "faq", label: "FAQ" },
   ];
 
   return (
-    <div
-      ref={rootRef}
-      className="marketing-root"
-      data-theme={darkMode ? "dark" : undefined}
-    >
+    <div ref={rootRef} className="marketing-root">
       <a href="#main-content" className="skip-link">Skip to main content</a>
 
-      {/* HEADER */}
       <header className={`site-header${scrolled ? " scrolled" : ""}`}>
         <div className="header-inner container">
           <a
@@ -423,32 +354,36 @@ export default function MarketingPage() {
             <ul className="nav-links">
               {navLinks.map((l) => (
                 <li key={l.id}>
-                  <a href={`#${l.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(l.id); }}>
+                  <a
+                    href={`#${l.id}`}
+                    className="header-nav-pill"
+                    onClick={(e) => { e.preventDefault(); scrollToSection(l.id); }}
+                  >
                     {l.label}
                   </a>
                 </li>
               ))}
-              <li>
-                <a
-                  href="/getstarted"
-                  className="nav-cta mkt-btn mkt-btn--sm"
-                >
-                  Get My Savings Estimate
-                </a>
-              </li>
             </ul>
           </nav>
 
           <div className="header-actions">
-            <button
-              className="theme-toggle"
-              aria-label="Toggle dark mode"
-              type="button"
-              onClick={() => setDarkMode((d) => !d)}
-            >
-              <SunIcon />
-              <MoonIcon />
-            </button>
+            <div className="header-actions-group main-nav">
+              <a
+                href={X_UPDATES_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mkt-btn mkt-btn--ghost mkt-btn--sm"
+              >
+                Updates
+              </a>
+              <a
+                href="#waitlist"
+                className="nav-cta mkt-btn mkt-btn--sm"
+                onClick={(e) => { e.preventDefault(); scrollToSection("waitlist"); }}
+              >
+                Waitlist
+              </a>
+            </div>
             <button
               className={`hamburger${mobileOpen ? " active" : ""}`}
               aria-label="Open menu"
@@ -462,7 +397,6 @@ export default function MarketingPage() {
         </div>
       </header>
 
-      {/* Mobile nav overlay */}
       <div className={`mobile-nav-overlay${mobileOpen ? " open" : ""}`}>
         <nav aria-label="Mobile navigation">
           <ul className="mobile-nav-links">
@@ -474,11 +408,17 @@ export default function MarketingPage() {
               </li>
             ))}
             <li>
+              <a href={X_UPDATES_URL} target="_blank" rel="noopener noreferrer" className="mkt-btn mkt-btn--outline">
+                Updates
+              </a>
+            </li>
+            <li>
               <a
-                href="/getstarted"
+                href="#waitlist"
                 className="mkt-btn mkt-btn--primary"
+                onClick={(e) => { e.preventDefault(); scrollToSection("waitlist"); }}
               >
-                Get My Savings Estimate
+                Waitlist
               </a>
             </li>
           </ul>
@@ -486,388 +426,263 @@ export default function MarketingPage() {
       </div>
 
       <main id="main-content">
-        {/* HERO */}
         <section className="hero" id="hero">
           <div className="container hero-inner">
             <div className="hero-content">
-              <p className="hero-eyebrow">Helping businesses in the Greater Toronto Area save on everyday supplies</p>
-              <h1 className="hero-title">Stop overpaying for supplies</h1>
+              <div className="hero-badge mkt-glass">
+                <span>For web3 researchers &amp; practitioners</span>
+                <span className="hero-badge-dot" aria-hidden="true" />
+                <span style={{ color: "var(--color-text-muted)" }}>Waitlist open</span>
+              </div>
+              <h1 className="hero-title">
+                On-chain and off-chain intelligence for{" "}
+                <span className="text-gradient-brand">web3 research</span> that moves markets.
+              </h1>
               <p className="hero-sub">
-                Join forces with other small businesses. Pay what big chains pay.
+                Go beyond dashboards. Combine ecosystem data with off-chain signals so you can trade,
+                invest, or train AI agents on a unified thesis — not fragmented tabs.
               </p>
-              <p className="hero-supporting">Free to try. If the group order doesn&apos;t go through, you don&apos;t pay.</p>
               <div className="hero-ctas">
-                <a href="/getstarted" className="mkt-btn mkt-btn--primary mkt-btn--lg">
-                  Get My Savings Estimate
+                <a
+                  href="#waitlist"
+                  className="mkt-btn mkt-btn--primary mkt-btn--lg"
+                  onClick={(e) => { e.preventDefault(); scrollToSection("waitlist"); }}
+                >
+                  Join the waitlist
                 </a>
-                <a href="#how-it-works" className="mkt-btn mkt-btn--outline mkt-btn--lg" onClick={(e) => { e.preventDefault(); scrollToSection("how-it-works"); }}>
-                  See How It Works
+                <a
+                  href={X_UPDATES_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mkt-btn mkt-btn--outline mkt-btn--lg"
+                >
+                  Updates
                 </a>
+              </div>
+              <div className="hero-stats">
+                <div>
+                  <span className="hero-stat-value">On-chain</span>
+                  <span>flows &amp; protocol health</span>
+                </div>
+                <span className="hero-stat-divider" aria-hidden="true" />
+                <div>
+                  <span className="hero-stat-value">Off-chain</span>
+                  <span>gov, funding, narrative</span>
+                </div>
+                <span className="hero-stat-divider" aria-hidden="true" />
+                <div>
+                  <span className="hero-stat-value">Agent-ready</span>
+                  <span>structured exports</span>
+                </div>
               </div>
             </div>
-            <div className="hero-visual" aria-hidden="true">
-              <div className="hero-graphic">
-                <svg width="420" height="380" viewBox="0 0 420 380" fill="none">
-                  {/* Central pool circle - pulsing */}
-                  <circle cx="210" cy="190" r="50" fill="var(--color-accent)" opacity="0.08">
-                    <animate attributeName="r" values="50;62;50" dur="3s" repeatCount="indefinite" />
-                  </circle>
-                  <circle cx="210" cy="190" r="35" fill="var(--color-accent)" opacity="0.12">
-                    <animate attributeName="r" values="35;44;35" dur="3s" repeatCount="indefinite" />
-                  </circle>
-                  <circle cx="210" cy="190" r="18" fill="var(--color-accent)" opacity="0.25">
-                    <animate attributeName="r" values="18;24;18" dur="3s" repeatCount="indefinite" />
-                  </circle>
-                  {/* Dollar sign in center */}
-                  <text x="210" y="196" textAnchor="middle" fontFamily="var(--font-display)" fontWeight="700" fontSize="18" fill="var(--color-accent)" opacity="0.7">$</text>
-
-                  {/* Business owner outlines + fund lines */}
-                  {/* Top-left: Coffee shop owner */}
-                  <g opacity="0.7">
-                    <circle cx="70" cy="60" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
-                    <path d="M70 72 v8 M62 84 h16 M62 84 v12 M78 84 v12 M66 80 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                    <line x1="70" y1="100" x2="185" y2="178" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
-                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2s" repeatCount="indefinite" />
-                    </line>
-                    <circle cx="70" cy="100" r="3" fill="var(--color-primary)" opacity="0.4" />
-                  </g>
-
-                  {/* Top-right: Barber */}
-                  <g opacity="0.7">
-                    <circle cx="350" cy="55" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
-                    <path d="M350 67 v8 M342 79 h16 M342 79 v12 M358 79 v12 M346 75 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                    <line x1="350" y1="95" x2="235" y2="178" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
-                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2.3s" repeatCount="indefinite" />
-                    </line>
-                    <circle cx="350" cy="95" r="3" fill="var(--color-primary)" opacity="0.4" />
-                  </g>
-
-                  {/* Left: Detailer */}
-                  <g opacity="0.7">
-                    <circle cx="30" cy="200" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
-                    <path d="M30 212 v8 M22 224 h16 M22 224 v12 M38 224 v12 M26 220 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                    <line x1="48" y1="215" x2="175" y2="192" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
-                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2.6s" repeatCount="indefinite" />
-                    </line>
-                    <circle cx="48" cy="215" r="3" fill="var(--color-primary)" opacity="0.4" />
-                  </g>
-
-                  {/* Right: Yoga owner */}
-                  <g opacity="0.7">
-                    <circle cx="390" cy="210" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
-                    <path d="M390 222 v8 M382 234 h16 M382 234 v12 M398 234 v12 M386 230 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                    <line x1="372" y1="225" x2="245" y2="195" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
-                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2.1s" repeatCount="indefinite" />
-                    </line>
-                    <circle cx="372" cy="225" r="3" fill="var(--color-primary)" opacity="0.4" />
-                  </g>
-
-                  {/* Bottom-left: Lawyer */}
-                  <g opacity="0.7">
-                    <circle cx="90" cy="320" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
-                    <path d="M90 332 v8 M82 344 h16 M82 344 v12 M98 344 v12 M86 340 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                    <line x1="100" y1="325" x2="195" y2="215" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
-                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2.4s" repeatCount="indefinite" />
-                    </line>
-                    <circle cx="100" cy="325" r="3" fill="var(--color-primary)" opacity="0.4" />
-                  </g>
-
-                  {/* Bottom-right: Real estate */}
-                  <g opacity="0.7">
-                    <circle cx="340" cy="330" r="12" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
-                    <path d="M340 342 v8 M332 354 h16 M332 354 v12 M348 354 v12 M336 350 l4 4 4-4" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                    <line x1="328" y1="330" x2="228" y2="210" stroke="var(--color-primary)" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5">
-                      <animate attributeName="stroke-dashoffset" values="0;-14" dur="2.7s" repeatCount="indefinite" />
-                    </line>
-                    <circle cx="328" cy="330" r="3" fill="var(--color-primary)" opacity="0.4" />
-                  </g>
-
-                  {/* Building icon in center (shop front outline) */}
-                  <g transform="translate(193, 150)" opacity="0.5">
-                    <rect x="0" y="14" width="34" height="26" rx="2" stroke="var(--color-accent)" strokeWidth="1.5" fill="none" />
-                    <polyline points="-3,14 17,2 37,14" stroke="var(--color-accent)" strokeWidth="1.5" fill="none" strokeLinejoin="round" />
-                    <rect x="12" y="26" width="10" height="14" rx="1" stroke="var(--color-accent)" strokeWidth="1.2" fill="none" />
-                  </g>
-                </svg>
-              </div>
+            <div className="hero-visual">
+              <DataNetworkVisual />
             </div>
           </div>
-          <div className="trust-strip container">
-            <p className="trust-strip-text"><strong>$0 to find out what you could save.</strong> We research pricing, build the pool, and send you the numbers. No commitment until you see the deal.</p>
+          <div className="social-proof-strip container">
+            <p>
+              <strong>Built for researchers shipping at the intersection of crypto data and decisions.</strong>{" "}
+              Join the founding waitlist for early access.
+            </p>
           </div>
         </section>
 
-        {/* HOW IT WORKS */}
-        <section className="mkt-section how-it-works" id="how-it-works">
+        <section className="mkt-section" id="platform">
           <div className="container">
-            <div className="section-header section-header--center">
-              <span className="section-label">How It Works</span>
-              <h2 className="section-title">Go from signup to savings in 3 simple steps</h2>
+            <div className="section-header section-header--center reveal">
+              <span className="section-label">Why CanHav</span>
+              <h2 className="section-title">One workspace for research, conviction, and agents</h2>
+              <p className="section-sub" style={{ margin: "0 auto" }}>
+                Built for practitioners who need more than price charts — and want their research to compound.
+              </p>
             </div>
-
-            <div className="steps-flow">
-              {/* Step 1 */}
-              <div className="step-card reveal">
-                <div className="step-number">01</div>
-                <div className="step-icon-wrap">
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="var(--color-primary)" opacity="0.15" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round">
-                    <rect x="3" y="3" width="18" height="18" rx="3" fill="var(--color-primary)" opacity="0.1" stroke="none" />
-                    <path d="M9 11l2 2 4-4" /><rect x="3" y="3" width="18" height="18" rx="3" fill="none" />
-                  </svg>
-                </div>
-                <h3 className="step-heading">Tell us what you buy</h3>
-                <p className="step-desc">Share what you spend the most on.</p>
-                <span className="step-meta">30 seconds</span>
-              </div>
-
-              {/* Arrow 1 */}
-              <div className="step-arrow" aria-hidden="true">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                </svg>
-              </div>
-
-              {/* Step 2 (featured) */}
-              <div className="step-card step-card--featured reveal">
-                <div className="step-number">02</div>
-                <div className="step-icon-wrap step-icon-wrap--featured">
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round">
-                    <rect x="2" y="2" width="20" height="20" rx="3" fill="var(--color-primary)" opacity="0.1" stroke="none" />
-                    <line x1="12" y1="2" x2="12" y2="22" stroke="var(--color-primary)" opacity="0.15" /><path d="M16 8h-2a2 2 0 0 0 0 4h1a2 2 0 0 1 0 4h-3" /><line x1="12" y1="6" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="18" />
-                  </svg>
-                </div>
-                <h3 className="step-heading">See your savings</h3>
-                <p className="step-desc">We find better pricing and show you exactly how much you can save.</p>
-              </div>
-
-              {/* Arrow 2 */}
-              <div className="step-arrow" aria-hidden="true">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                </svg>
-              </div>
-
-              {/* Step 3 */}
-              <div className="step-card reveal">
-                <div className="step-number">03</div>
-                <div className="step-icon-wrap">
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round">
-                    <rect x="2" y="2" width="20" height="20" rx="3" fill="var(--color-primary)" opacity="0.1" stroke="none" />
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="10" cy="7" r="3" /><path d="M22 21v-2a3 3 0 0 0-2.1-2.86" /><path d="M17 3.14a3 3 0 0 1 0 5.72" />
-                  </svg>
-                </div>
-                <h3 className="step-heading">Join the order</h3>
-                <p className="step-desc">Like the deal? Join the group order.<br />If it doesn&apos;t go through, you don&apos;t pay.</p>
-              </div>
-            </div>
-
-            {/* Trust cue + CTA */}
-            <div className="steps-footer reveal">
-              <p className="steps-trust">No commitment. No upfront payment.</p>
-              <a
-                href="/getstarted"
-                className="mkt-btn mkt-btn--primary mkt-btn--lg"
-              >
-                Get My Savings Estimate
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* INDUSTRIES */}
-        <IndustriesSlider selectIndustry={selectIndustry} />
-
-        {/* WHY IT WORKS (logic-based proof) */}
-        <section className="mkt-section benefits" id="why-it-works">
-          <div className="container">
-            <div className="section-header">
-              <span className="section-label">Why It Works</span>
-              <h2 className="section-title">The math behind group purchasing</h2>
-            </div>
-            <div className="benefits-grid">
-              {[
-                {
-                  stat: "50x",
-                  title: "Combined Buying Power",
-                  desc: "One shop ordering alone has no leverage. Fifty shops ordering together hit the same volume thresholds as franchise chains and big-box retailers.",
-                  icon: (
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round">
-                      <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+            <div className="value-grid" style={{ marginTop: "var(--space-12)" }}>
+              {VALUE_PROPS.map((v) => (
+                <div key={v.title} className="value-card reveal">
+                  <div className="value-icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                     </svg>
-                  ),
-                },
-                {
-                  stat: "$0",
-                  title: "Cost to Find Out",
-                  desc: "We do the supplier research and price negotiation before you spend a dollar. You only commit when you have seen the actual savings numbers.",
-                  icon: (
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round">
-                      <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                  ),
-                },
-                {
-                  stat: "100%",
-                  title: "Refund if Pool Does Not Fill",
-                  desc: "Your funds are held in escrow. If a buying pool does not reach the supplier minimum, every dollar is returned. No exceptions, no fine print.",
-                  icon: (
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" />
-                    </svg>
-                  ),
-                },
-                {
-                  stat: "7",
-                  title: "Industries Organizing Now",
-                  desc: "From coffee shops to law firms, we are building buying pools across seven industries in the Greater Toronto Area right now.",
-                  icon: (
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
-                    </svg>
-                  ),
-                },
-              ].map((b) => (
-                <div key={b.title} className="benefit-card reveal">
-                  <div className="benefit-icon">{b.icon}</div>
-                  <div className="benefit-stat">{b.stat}</div>
-                  <h3 className="benefit-heading">{b.title}</h3>
-                  <p className="benefit-desc">{b.desc}</p>
+                  </div>
+                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", fontWeight: 600, marginBottom: "var(--space-3)" }}>
+                    {v.title}
+                  </h3>
+                  <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)", lineHeight: 1.6 }}>{v.body}</p>
                 </div>
               ))}
             </div>
 
-            {/* Trust badges */}
-            <div className="trust-badges" style={{ marginTop: "var(--space-12)" }}>
-              {[
-                {
-                  label: "Funds Held in Escrow",
-                  icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>,
-                },
-                {
-                  label: "100% Refund Guarantee",
-                  icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>,
-                },
-                {
-                  label: "No Hidden Fees",
-                  icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>,
-                },
-                {
-                  label: "GTA Local",
-                  icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>,
-                },
-              ].map((b) => (
-                <div key={b.label} className="trust-badge reveal">
-                  <div className="trust-badge-icon">{b.icon}</div>
-                  <span>{b.label}</span>
+            <div style={{ marginTop: "clamp(var(--space-16), 8vw, var(--space-24))" }}>
+              {FEATURES.map((f) => (
+                <div
+                  key={f.title}
+                  className={`feature-block reveal${f.reverse ? " feature-block--reverse" : ""}`}
+                >
+                  <div className="feature-copy">
+                    <span className="mono-label">{f.eyebrow}</span>
+                    <h3 className="section-title" style={{ marginTop: "var(--space-4)", fontSize: "var(--text-xl)" }}>
+                      {f.title}
+                    </h3>
+                    <p className="section-sub">{f.body}</p>
+                    <ul className="feature-list">
+                      {f.bullets.map((b) => (
+                        <li key={b}>
+                          <span className="feature-check" aria-hidden="true">✓</span>
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <FeatureVisual type={f.visual} />
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* 2-STEP INTEREST FORM */}
-        <section className="mkt-section form-section" id="interest-form">
+        <section className="mkt-section" id="use-cases">
           <div className="container">
-            <div className="form-wrapper">
-              <div className="form-header">
-                <span className="section-label">Get Started</span>
-                <h2 className="section-title">Find out what you could save</h2>
-                <p className="form-sub">Takes 30 seconds. We will research supplier pricing for your industry and send you a personalized savings estimate. No commitment, no credit card.</p>
+            <div className="section-header section-header--center reveal">
+              <span className="section-label">Use Cases</span>
+              <h2 className="section-title">From thesis to trade to trained agents</h2>
+              <p className="section-sub" style={{ margin: "0 auto" }}>
+                Whether you publish research, manage capital, or build autonomous systems — the same intelligence layer powers your work.
+              </p>
+            </div>
+            <div className="use-cases-grid" style={{ marginTop: "var(--space-12)" }}>
+              {USE_CASES.map((uc) => (
+                <div key={uc.title} className="use-case-card reveal">
+                  <h3>{uc.title}</h3>
+                  <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)", lineHeight: 1.6 }}>{uc.body}</p>
+                  <div className="use-case-tags">
+                    {uc.tags.map((tag) => (
+                      <span key={tag} className="use-case-tag">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mkt-section" id="roadmap">
+          <div className="container">
+            <div className="section-header section-header--center reveal">
+              <span className="section-label">Roadmap</span>
+              <h2 className="section-title">Where we&apos;re headed</h2>
+              <p className="section-sub" style={{ margin: "0 auto" }}>
+                Shipping in milestones. Waitlist members shape what ships first.
+              </p>
+            </div>
+            <div className="roadmap-steps" style={{ marginTop: "var(--space-12)" }}>
+              {ROADMAP.map((step, i) => (
+                <div key={step.title} className="roadmap-step reveal">
+                  <div className={i === 0 ? "roadmap-status" : "roadmap-status roadmap-status--next"}>
+                    Step {step.step} · {step.status}
+                  </div>
+                  <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 600, marginBottom: "var(--space-2)" }}>
+                    {step.title}
+                  </h3>
+                  <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)" }}>{step.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mkt-section form-section" id="waitlist">
+          <div className="container">
+            <div className="form-wrapper reveal">
+              <div className="form-header section-header--center">
+                <span className="section-label">Waitlist</span>
+                <h2 className="section-title">Get early access to the intelligence platform</h2>
+                <p className="form-sub">
+                  Join the founding cohort. We&apos;ll email you when onboarding opens — and share product updates along the way.
+                </p>
               </div>
 
               {!formSubmitted ? (
-                <>
-                  {/* Step indicator */}
-                  <div className="form-steps-indicator">
-                    <div className={`form-step-dot${formStep >= 1 ? " active" : ""}`}>1</div>
-                    <div className="form-step-line" />
-                    <div className={`form-step-dot${formStep >= 2 ? " active" : ""}`}>2</div>
+                <form className="signup-form" noValidate onSubmit={handleWaitlistSubmit} style={{ maxWidth: 560, margin: "0 auto" }}>
+                  <div className="waitlist-form-row">
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      ref={emailRef}
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        e.target.classList.remove("error");
+                      }}
+                      placeholder="you@fund.xyz"
+                      autoComplete="email"
+                    />
+                    <button type="submit" className="mkt-btn mkt-btn--primary mkt-btn--lg form-submit" disabled={submitting}>
+                      {submitting ? "Joining…" : "Join the waitlist"}
+                    </button>
                   </div>
 
-                  {formStep === 1 ? (
-                    <form className="signup-form" noValidate onSubmit={handleStepOne}>
-                      <div className="form-group">
-                        <label htmlFor="email">Work Email <span className="req">*</span></label>
-                        <input
-                          type="email" id="email" name="email" required ref={emailRef}
-                          placeholder="you@business.com" autoComplete="email"
-                          onInput={(e) => (e.target as HTMLElement).classList.remove("error")}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="industry">What industry is your business in?</label>
-                        <select id="industry" name="industry" ref={industryRef} defaultValue={savedIndustry}>
-                          <option value="">Select your industry</option>
-                          {INDUSTRIES.map((ind) => (
-                            <option key={ind.name} value={ind.name}>{ind.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <button type="submit" className="mkt-btn mkt-btn--primary mkt-btn--lg form-submit" disabled={submitting}>
-                        {submitting ? "Saving..." : "Get My Savings Estimate"}
+                  <div className="role-chips">
+                    <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                      I am a
+                    </span>
+                    {ROLES.map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        className={`role-chip${role === r.id ? " active" : ""}`}
+                        onClick={() => setRole(role === r.id ? "" : r.id)}
+                      >
+                        {r.label}
                       </button>
-                      <p className="form-note">Free. No credit card. No spam.</p>
-                    </form>
-                  ) : (
-                    <form className="signup-form" noValidate onSubmit={handleStepTwo}>
-                      <p className="form-step-label">Almost done. A few more details help us build a better estimate for you.</p>
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="businessName">Business Name</label>
-                          <input
-                            type="text" id="businessName" name="businessName"
-                            placeholder="Your Business Name" autoComplete="organization"
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="yourName">Your Name</label>
-                          <input
-                            type="text" id="yourName" name="yourName"
-                            placeholder="Full Name" autoComplete="name"
-                          />
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="phone">Phone <span className="optional">(optional)</span></label>
-                        <input type="tel" id="phone" name="phone" placeholder="(416) 555-0123" autoComplete="tel" />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="supplies">What supplies are you looking to buy for a cheaper price?</label>
-                        <textarea id="supplies" name="supplies" rows={3} placeholder="e.g. coffee beans, ceramic coatings, legal software..." />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="heardAboutUs">How did you hear about us?</label>
-                        <select id="heardAboutUs" name="heardAboutUs" defaultValue="">
-                          <option value="">Select one</option>
-                          <option value="instagram">Instagram</option>
-                          <option value="facebook">Facebook</option>
-                          <option value="google">Google Search</option>
-                          <option value="friend">Friend or Colleague</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-                      <button type="submit" className="mkt-btn mkt-btn--primary mkt-btn--lg form-submit" disabled={submitting}>
-                        {submitting ? "Submitting..." : "Send My Savings Estimate"}
-                      </button>
-                      <button type="button" className="form-skip" onClick={() => setFormSubmitted(true)}>
-                        Skip for now
-                      </button>
-                    </form>
-                  )}
-                </>
+                    ))}
+                  </div>
+
+                  <div className="form-group" style={{ marginTop: "var(--space-4)" }}>
+                    <label htmlFor="focus">What ecosystems or topics are you focused on? <span className="optional">(optional)</span></label>
+                    <textarea
+                      id="focus"
+                      name="focus"
+                      rows={2}
+                      value={focus}
+                      onChange={(e) => setFocus(e.target.value)}
+                      placeholder="e.g. L2 infra, DeFi flows, agent payments on Arbitrum"
+                    />
+                  </div>
+
+                  <p className="form-note">No spam. Unsubscribe anytime. Follow <a href={X_UPDATES_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-primary-light)" }}>@wazarat</a> for live updates.</p>
+                </form>
               ) : (
                 <div className="form-success">
                   <div className="success-icon">&#10003;</div>
-                  <h3>You are in!</h3>
-                  <p>We will research supplier pricing for your industry and send you a personalized savings estimate within 48 hours.</p>
+                  <h3>You&apos;re on the list</h3>
+                  <p>We&apos;ll reach out with early access invites. Follow <a href={X_UPDATES_URL} target="_blank" rel="noopener noreferrer">@wazarat on X</a> for product updates in the meantime.</p>
                 </div>
               )}
             </div>
           </div>
         </section>
+
+        <section className="mkt-section" id="faq">
+          <div className="container">
+            <div className="section-header section-header--center reveal">
+              <span className="section-label">FAQ</span>
+              <h2 className="section-title">Questions, answered</h2>
+            </div>
+            <div className="faq-list" style={{ marginTop: "var(--space-12)" }}>
+              {FAQ.map((item) => (
+                <div key={item.q} className="faq-item reveal">
+                  <h3>{item.q}</h3>
+                  <p>{item.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
 
-      {/* FOOTER */}
       <footer className="site-footer">
         <div className="container footer-inner">
           <div className="footer-brand">
@@ -880,10 +695,10 @@ export default function MarketingPage() {
               <Logo height={28} />
               <span className="logo-text">CanHav</span>
             </a>
-            <p className="footer-tagline">Group purchasing power for small businesses in the GTA.</p>
+            <p className="footer-tagline">On-chain and off-chain intelligence for web3 research.</p>
           </div>
           <div className="footer-links">
-            <h4>Quick Links</h4>
+            <h4>Product</h4>
             <ul>
               {navLinks.map((l) => (
                 <li key={l.id}>
@@ -893,8 +708,8 @@ export default function MarketingPage() {
                 </li>
               ))}
               <li>
-                <a href="/getstarted">
-                  Get Started
+                <a href="#waitlist" onClick={(e) => { e.preventDefault(); scrollToSection("waitlist"); }}>
+                  Waitlist
                 </a>
               </li>
             </ul>
@@ -902,13 +717,17 @@ export default function MarketingPage() {
           <div className="footer-links">
             <h4>Connect</h4>
             <ul>
-              <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+              <li>
+                <a href={X_UPDATES_URL} target="_blank" rel="noopener noreferrer">
+                  Updates on X
+                </a>
+              </li>
               <li><a href="mailto:hello@canhav.io">hello@canhav.io</a></li>
             </ul>
           </div>
         </div>
         <div className="footer-bottom container">
-          <p>&copy; 2026 CanHav. Built in Toronto for Toronto.</p>
+          <p>&copy; {new Date().getFullYear()} CanHav. Intelligence for web3 researchers.</p>
         </div>
       </footer>
     </div>

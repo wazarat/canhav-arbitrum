@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CanHav | Group Purchasing for Small Businesses",
+  title: "CanHav | On-chain & off-chain intelligence for web3 research",
   description:
-    "Pool purchasing power with other small businesses. Save 15-40% on essential supplies through group buying.",
+    "Research blockchain ecosystems with on-chain and off-chain data beyond typical dashboards. Join the waitlist for early access.",
 };
 
 export default function RootLayout({

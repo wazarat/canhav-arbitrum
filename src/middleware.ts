@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const LANDING_DOMAIN_HOSTS = ["canhav.co", "www.canhav.co"];
+const LANDING_DOMAIN_HOSTS = [
+  "canhav.co",
+  "www.canhav.co",
+  "canhav.io",
+  "www.canhav.io",
+];
 
-const ALLOWED_PATHS_ON_LANDING = ["/getstarted", "/api/submissions"];
+const ALLOWED_PATHS_ON_LANDING = ["/", "/getstarted", "/api/submissions"];
 
 function isAllowedOnLandingDomain(pathname: string): boolean {
   if (ALLOWED_PATHS_ON_LANDING.includes(pathname)) return true;
