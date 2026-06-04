@@ -370,9 +370,8 @@ export default function MarketingPage() {
           <div className="container hero-inner">
             <div className="hero-content">
               <div className="hero-badge mkt-glass">
-                <span>For web3 researchers &amp; practitioners</span>
                 <span className="hero-badge-dot" aria-hidden="true" />
-                <span style={{ color: "var(--color-text-muted)" }}>Waitlist open</span>
+                <span>Waitlist open</span>
               </div>
               <h1 className="hero-title">
                 <span className="text-gradient-brand">Web3 research</span> that moves markets. On-chain and off-chain, in one workspace.
@@ -397,22 +396,6 @@ export default function MarketingPage() {
                 >
                   Updates
                 </a>
-              </div>
-              <div className="hero-stats">
-                <div>
-                  <span className="hero-stat-value">On-chain</span>
-                  <span>flows &amp; protocol health</span>
-                </div>
-                <span className="hero-stat-divider" aria-hidden="true" />
-                <div>
-                  <span className="hero-stat-value">Off-chain</span>
-                  <span>gov, funding, narrative</span>
-                </div>
-                <span className="hero-stat-divider" aria-hidden="true" />
-                <div>
-                  <span className="hero-stat-value">Agent-ready</span>
-                  <span>structured exports</span>
-                </div>
               </div>
             </div>
             <div className="hero-visual">
