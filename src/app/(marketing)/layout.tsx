@@ -2,22 +2,22 @@ import type { Metadata } from "next";
 import "./marketing.css";
 
 export const metadata: Metadata = {
-  title: "CanHav | Group Purchasing for Small Businesses in the GTA",
+  title: "CanHav | On-chain & off-chain intelligence for web3 research",
   description:
-    "Stop overpaying for supplies. CanHav groups small businesses across the GTA into buying pools so you get wholesale pricing normally reserved for large chains. Free to join.",
+    "Research blockchain ecosystems with on-chain and off-chain data that goes beyond dashboards. Trade, invest, or train AI agents on a unified intelligence platform. Join the waitlist.",
   openGraph: {
-    title: "CanHav | Group Purchasing for Small Businesses",
+    title: "CanHav | Web3 research intelligence",
     description:
-      "Get the wholesale pricing normally reserved for chains. CanHav groups GTA small businesses into buying pools. Free to join, 100% refund if the pool does not fill.",
+      "On-chain and off-chain data for researchers and practitioners. Join the waitlist for early access.",
     type: "website",
-    locale: "en_CA",
+    locale: "en_US",
     siteName: "CanHav",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CanHav | Group Purchasing for Small Businesses",
+    title: "CanHav | Web3 research intelligence",
     description:
-      "Get wholesale pricing by buying together with other GTA small businesses. Free to join, 100% refund if the pool does not fill.",
+      "On-chain and off-chain data for researchers and practitioners. Join the waitlist for early access.",
   },
   icons: {
     icon: "/ch-logo.svg",
@@ -27,28 +27,21 @@ export const metadata: Metadata = {
   },
 };
 
-function LocalBusinessJsonLd() {
+function ProductJsonLd() {
   const schema = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    "@type": "SoftwareApplication",
     name: "CanHav",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
     description:
-      "Group purchasing platform for small businesses in the Greater Toronto Area. Pool buying power to get wholesale pricing on essential supplies.",
+      "Intelligence platform for web3 researchers and practitioners combining on-chain and off-chain data for trading, investing, and AI agent training.",
     url: "https://canhav.co",
-    areaServed: {
-      "@type": "GeoCircle",
-      geoMidpoint: {
-        "@type": "GeoCoordinates",
-        latitude: 43.6532,
-        longitude: -79.3832,
-      },
-      geoRadius: "80000",
-    },
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Toronto",
-      addressRegion: "ON",
-      addressCountry: "CA",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/PreOrder",
     },
   };
 
@@ -67,7 +60,7 @@ export default function MarketingLayout({
 }) {
   return (
     <>
-      <LocalBusinessJsonLd />
+      <ProductJsonLd />
       {children}
     </>
   );

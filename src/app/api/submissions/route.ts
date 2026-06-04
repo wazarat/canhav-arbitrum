@@ -90,7 +90,9 @@ function buildNoteBody(data: Record<string, unknown>): string {
 
   lines.push(`<strong>CanHav Lead (${step})</strong>`);
 
+  if (data.role) lines.push(`<b>Role:</b> ${String(data.role)}`);
   if (data.industry) lines.push(`<b>Industry:</b> ${String(data.industry)}`);
+  if (data.focus) lines.push(`<b>Focus:</b> ${String(data.focus)}`);
   if (data.supplies) lines.push(`<b>Supplies:</b> ${String(data.supplies)}`);
   if (data.heardAboutUs) lines.push(`<b>Heard about us:</b> ${String(data.heardAboutUs)}`);
   if (data.source) lines.push(`<b>Domain:</b> ${String(data.source)}`);
@@ -103,8 +105,8 @@ function buildNoteBody(data: Record<string, unknown>): string {
 }
 
 async function attachNote(contactId: string, data: Record<string, unknown>) {
-  const hasData = data.industry || data.supplies || data.heardAboutUs || data.source ||
-    data.utm_source || data.utm_medium || data.utm_campaign;
+  const hasData = data.role || data.focus || data.industry || data.supplies || data.heardAboutUs ||
+    data.source || data.utm_source || data.utm_medium || data.utm_campaign;
   if (!hasData) return;
 
   try {
@@ -142,8 +144,10 @@ async function pushToInstantly(data: Record<string, unknown>) {
   const lastName = data.yourName ? String(data.yourName).split(" ").slice(1).join(" ") : "";
 
   const customVariables: Record<string, string> = {};
+  if (data.role) customVariables.role = String(data.role);
   if (data.industry) customVariables.industry = String(data.industry);
   if (data.phone) customVariables.phone = String(data.phone);
+  if (data.focus) customVariables.focus = String(data.focus);
   if (data.supplies) customVariables.supplies = String(data.supplies);
   if (data.source) customVariables.source = String(data.source);
 
